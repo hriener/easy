@@ -1,0 +1,234 @@
+/* ESOP
+ * Copyright (C) 2018  EPFL
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION)
+
+#include <esop/helliwell.hpp>
+#include <sat/sat_solver.hpp>
+#include <unordered_map>
+#include <cassert>
+
+namespace esop
+{
+
+/******************************************************************************
+ * Types                                                                      *
+ ******************************************************************************/
+
+/******************************************************************************
+ * Private functions                                                          *
+ ******************************************************************************/
+
+struct vars
+{
+  inline int operator[]( const kitty::cube& c )
+  {
+    return get_or_create_var( c );
+  }
+
+  int get_or_create_var( const kitty::cube& c )
+  {
+    auto it = cube_to_var.find( c );
+    int variable;
+    if ( it == cube_to_var.end() )
+    {
+      variable = sid++;
+      cube_to_var.insert( std::make_pair( c, variable ) );
+      var_to_cube.insert( std::make_pair( variable, c ) );
+    }
+    else
+    {
+      variable = it->second;
+    }
+    return variable;
+  }  
+
+  int lookup_var( const kitty::cube& c ) const
+  {
+    return cube_to_var.at( c );
+  }
+
+  const kitty::cube& lookup_cube( int variable ) const
+  {
+    return var_to_cube.at( variable );
+  }
+
+  int sid = 1;
+  std::unordered_map<kitty::cube, int, kitty::hash<kitty::cube>> cube_to_var;
+  std::unordered_map<int, kitty::cube> var_to_cube;
+}; /* vars */
+
+std::vector<unsigned> compute_flips( unsigned n )
+{
+  const auto total_flips = ( 1u << n ) - 1;
+  std::vector<unsigned> flip_array( total_flips );
+
+  auto graynumber = 0u;
+  auto temp = 0u;
+  for ( auto i = 1u; i <= total_flips; ++i )
+  {
+    graynumber = i ^ (i >> 1);
+    flip_array[total_flips - i] = ffs( temp ^ graynumber ) - 1u;
+    temp = graynumber;
+  }
+
+  return flip_array;
+}
+
+bool get_bit( const kitty::cube& c, uint8_t index )
+{
+  return ( c._bits & ( 1 << index ) ) == ( 1 << index );
+}
+
+bool get_mask( const kitty::cube& c, uint8_t index )
+{
+  return ( c._mask & ( 1 << index ) ) == ( 1 << index );
+}
+
+void set_bit( kitty::cube &c, uint8_t index )
+{
+  c._bits |= (1 << index);
+}
+
+void set_mask( kitty::cube &c, uint8_t index )
+{
+  c._mask |= (1 << index);
+}
+
+void clear_bit( kitty::cube &c, uint8_t index )
+{
+  c._bits &= ~(1 << index);
+}
+
+void clear_mask( kitty::cube &c, uint8_t index )
+{
+  c._mask &= ~(1 << index);
+}
+
+std::vector<kitty::cube> derive_product_group( const kitty::cube& c, unsigned num_vars )
+{
+  const auto flips = compute_flips( num_vars );
+
+  std::vector<kitty::cube> group = { c };
+  auto copy = c;
+  for ( auto i = 0u; i < flips.size(); ++i )
+  {
+    if ( get_mask( copy, flips[i] ) )
+    {
+      clear_bit( copy, flips[i] );
+      clear_mask( copy, flips[i] );
+    }
+    else
+    {
+      set_mask( copy, flips[i] );
+      if ( get_bit( c, flips[i] ) )
+      {
+	set_bit( copy, flips[i] );
+      }
+      else
+      {
+	clear_bit( copy, flips[i] );
+      }
+    }
+    group.push_back( copy );
+  }
+
+  return group;
+}
+
+/******************************************************************************
+ * Public functions                                                           *
+ ******************************************************************************/
+
+esops_t synthesis_from_binary_string( const std::string& binary )
+{
+  const int num_vars = log2( binary.size() );
+  assert( binary.size() == (1ull << num_vars) && "bit-width is not a power of 2" );
+
+  esops_t esops;
+
+  sat::sat_solver solver;
+  vars g;
+  assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
+  kitty::cube minterm;
+  for ( auto i = 0; i < num_vars; ++i )
+  {
+    set_mask( minterm, i );
+  }
+
+  do
+  {
+    if ( binary[minterm._bits] == '0' || binary[minterm._bits] == '1' )
+    {
+      std::vector<int> clause;
+      for ( const auto& t : derive_product_group( minterm, num_vars ) )
+      {
+	clause.push_back( g[ t ] );
+      }
+      solver.add_xor_clause( clause, binary[minterm._bits] == '1' );
+    }
+
+    ++minterm._bits;
+  } while( minterm._bits < (1 << num_vars) );
+
+  sat::sat_solver::result result;
+  while ( ( result = solver.solve() ) )
+  {
+    esop_t esop;
+    std::vector<int> blocking_clause;
+    for ( auto i = 0u; i != solver._solver.nVars(); ++i )
+    {
+      const auto var = i+1;
+      if ( result.model[i] == CMSat::l_True )
+      {
+	blocking_clause.push_back( -var );
+	esop.push_back( g.lookup_cube( var ) );
+      }
+      if ( result.model[i] == CMSat::l_False )
+      {
+	blocking_clause.push_back( var );
+      }
+    }
+    solver.add_clause( blocking_clause );
+    esops.push_back( esop );
+
+    if ( esops.size() >= 100 )
+    {
+      std::cout << "[w] terminated " << binary << ": 100 ESOPs have been enumerated" << std::endl;
+      break;
+    }
+  }
+  return esops;
+}
+
+} /* esop */
+
+#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION */
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:
