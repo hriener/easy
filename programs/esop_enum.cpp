@@ -28,8 +28,9 @@
 #include <esop/helliwell.hpp>
 #include <kitty/kitty.hpp>
 #include <args.hxx>
-#include <iostream>
+#include <algorithm>
 #include <fstream>
+#include <iostream>
 
 /******************************************************************************
  * Private functions                                                          *
@@ -89,6 +90,7 @@ int main(int argc, char **argv)
   args::ArgumentParser parser( "Enumerate ESOP expressions", "" );
 
   args::HelpFlag                   help(      parser, "help",        "Display this help message",      { 'h', "help" } );
+  args::Flag                       reverse(   parser, "reverse",     "reverse truth tables",           { 'r', "reverse" } );
   args::ValueFlagList<std::string> functions( parser, "truth_table", "truth table (as binary string)", { 'b' } );
   args::ValueFlag<std::string>     output(    parser, "filename",    "output file (default: stdout)",  { 'o' } );
 
@@ -114,7 +116,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  /* if output is set, redirect std::cout to file */
+  /* if output file is set, redirect std::cout to file */
   std::streambuf *cout_buf = std::cout.rdbuf();
   std::ofstream ofs;
   if ( output )
@@ -131,7 +133,7 @@ int main(int argc, char **argv)
   
   if ( functions )
   {
-    for ( const auto& binary : args::get( functions ) )
+    for ( auto binary : args::get( functions ) )
     {
       const auto num_vars = int( log2( binary.size() ) );
 
@@ -140,6 +142,12 @@ int main(int argc, char **argv)
       {
 	std::cout << "[w] skipped " << binary << ": bit-width is not a power of 2" << std::endl;
 	continue;
+      }
+
+      /* if reverse flag is set, reverse the binary string */
+      if ( reverse )
+      {
+	std::reverse( binary.begin(), binary.end() );
       }
       
       std::cout << "[i] compute ESOPs for " << binary << std::endl;
