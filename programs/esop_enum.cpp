@@ -26,6 +26,7 @@
 #if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION) && defined(ARGS_EXTENSION)
 
 #include <esop/helliwell.hpp>
+#include <esop/exact_synthesis.hpp>
 #include <kitty/kitty.hpp>
 #include <args.hxx>
 #include <algorithm>
@@ -93,6 +94,8 @@ int main(int argc, char **argv)
   args::Flag                       reverse(   parser, "reverse",     "reverse truth tables",           { 'r', "reverse" } );
   args::ValueFlagList<std::string> functions( parser, "truth_table", "truth table (as binary string)", { 'b' } );
   args::ValueFlag<std::string>     output(    parser, "filename",    "output file (default: stdout)",  { 'o' } );
+  args::ValueFlag<int>             method(    parser, "method",      "0 ... helliwell decision problem\n"
+					                             "1 ... exact synthesis",          { 'm' } );
 
   try
   {
@@ -151,7 +154,25 @@ int main(int argc, char **argv)
       }
       
       std::cout << "[i] compute ESOPs for " << binary << std::endl;
-      auto esops = esop::synthesis_from_binary_string( binary );
+      esop::esops_t esops;
+
+      const auto m = method ? args::get( method ) : /* default */0;
+      if ( m == 0 )
+      {
+	std::cout << "[i] method: SAT-based synthesis (Helliwell decision problem)" << std::endl;
+	esops = esop::synthesis_from_binary_string( binary );
+      }
+      else if ( m == 1 )
+      {
+	std::cout << "[i] method: SAT-based exact synthesis" << std::endl;
+	esops = esop::exact_synthesis_from_binary_string( binary, 10 );
+      }
+      else
+      {
+	std::cout << "[e] unknown method" << std::endl;
+	return 1;
+      }
+
       sort_by_number_of_product_terms( esops );
       for ( const auto& e : esops )
       {

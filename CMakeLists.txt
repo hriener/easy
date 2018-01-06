@@ -32,7 +32,8 @@ endif()
 
 set(SOURCES
   src/sat/sat_solver.cpp
-  src/esop/helliwell.cpp)
+  src/esop/helliwell.cpp
+  src/esop/exact_synthesis.cpp)
 
 add_library(esop_synthesis ${SOURCES})
 target_link_libraries(esop_synthesis ${EXT_LIBS})

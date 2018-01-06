@@ -97,32 +97,32 @@ std::vector<unsigned> compute_flips( unsigned n )
   return flip_array;
 }
 
-bool get_bit( const kitty::cube& c, uint8_t index )
+inline bool get_bit( const kitty::cube& c, uint8_t index )
 {
   return ( c._bits & ( 1 << index ) ) == ( 1 << index );
 }
 
-bool get_mask( const kitty::cube& c, uint8_t index )
+inline bool get_mask( const kitty::cube& c, uint8_t index )
 {
   return ( c._mask & ( 1 << index ) ) == ( 1 << index );
 }
 
-void set_bit( kitty::cube &c, uint8_t index )
+inline void set_bit( kitty::cube &c, uint8_t index )
 {
   c._bits |= (1 << index);
 }
 
-void set_mask( kitty::cube &c, uint8_t index )
+inline void set_mask( kitty::cube &c, uint8_t index )
 {
   c._mask |= (1 << index);
 }
 
-void clear_bit( kitty::cube &c, uint8_t index )
+inline void clear_bit( kitty::cube &c, uint8_t index )
 {
   c._bits &= ~(1 << index);
 }
 
-void clear_mask( kitty::cube &c, uint8_t index )
+inline void clear_mask( kitty::cube &c, uint8_t index )
 {
   c._mask &= ~(1 << index);
 }
