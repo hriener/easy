@@ -20,3 +20,20 @@ Add the external extensions cryptominisat, kitty and args to the `ext` directory
 * [cryptominisat](https://github.com/msoos/cryptominisat)
 * [kitty](https://github.com/msoeken/kitty)
 * [args](https://github.com/Taywee/args)
+
+## Usage
+
+    ./esop_enum -b 1001 -m 1
+    
+ Output:
+    
+    [i] compute ESOPs for 1001
+    [i] method: SAT-based exact synthesis
+    [i] bounded synthesis for k = 1
+    [i] bounded synthesis for k = 2
+    2 (~x0*~x1)⊕(x0*x1)
+    2 (x1)⊕(~x0)
+    2 (~x0)⊕(x1)
+    2 (x0*x1)⊕(~x0*~x1)
+    2 (~x1)⊕(x0)
+    2 (x0)⊕(~x1)
