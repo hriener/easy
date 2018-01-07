@@ -60,12 +60,6 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 
   assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
 
-  auto num_samples = 0;
-  for ( auto i = 0u; i < binary.size(); ++i )
-  {
-    ++num_samples;
-  }
-
   esop::esops_t esops;
   for ( auto k = 1u; k <= max_number_of_cubes; ++k )
   {
