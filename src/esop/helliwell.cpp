@@ -97,36 +97,6 @@ std::vector<unsigned> compute_flips( unsigned n )
   return flip_array;
 }
 
-inline bool get_bit( const kitty::cube& c, uint8_t index )
-{
-  return ( c._bits & ( 1 << index ) ) == ( 1 << index );
-}
-
-inline bool get_mask( const kitty::cube& c, uint8_t index )
-{
-  return ( c._mask & ( 1 << index ) ) == ( 1 << index );
-}
-
-inline void set_bit( kitty::cube &c, uint8_t index )
-{
-  c._bits |= (1 << index);
-}
-
-inline void set_mask( kitty::cube &c, uint8_t index )
-{
-  c._mask |= (1 << index);
-}
-
-inline void clear_bit( kitty::cube &c, uint8_t index )
-{
-  c._bits &= ~(1 << index);
-}
-
-inline void clear_mask( kitty::cube &c, uint8_t index )
-{
-  c._mask &= ~(1 << index);
-}
-
 std::vector<kitty::cube> derive_product_group( const kitty::cube& c, unsigned num_vars )
 {
   const auto flips = compute_flips( num_vars );
@@ -135,21 +105,21 @@ std::vector<kitty::cube> derive_product_group( const kitty::cube& c, unsigned nu
   auto copy = c;
   for ( auto i = 0u; i < flips.size(); ++i )
   {
-    if ( get_mask( copy, flips[i] ) )
+    if ( copy.get_mask( flips[i] ) )
     {
-      clear_bit( copy, flips[i] );
-      clear_mask( copy, flips[i] );
+      copy.clear_bit( flips[i] );
+      copy.clear_mask( flips[i] );
     }
     else
     {
-      set_mask( copy, flips[i] );
-      if ( get_bit( c, flips[i] ) )
+      copy.set_mask( flips[i] );
+      if ( c.get_bit( flips[i] ) )
       {
-	set_bit( copy, flips[i] );
+	copy.set_bit( flips[i] );
       }
       else
       {
-	clear_bit( copy, flips[i] );
+	copy.clear_bit( flips[i] );
       }
     }
     group.push_back( copy );
@@ -175,7 +145,7 @@ esops_t synthesis_from_binary_string( const std::string& binary )
   kitty::cube minterm;
   for ( auto i = 0; i < num_vars; ++i )
   {
-    set_mask( minterm, i );
+    minterm.set_mask( i );
   }
 
   do

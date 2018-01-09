@@ -39,16 +39,6 @@ namespace esop
  * Private functions                                                          *
  ******************************************************************************/
 
-inline bool get_bit( const kitty::cube& c, uint8_t index )
-{
-  return ( c._bits & ( 1 << index ) ) == ( 1 << index );
-}
-
-inline void set_mask( kitty::cube &c, uint8_t index )
-{
-  c._mask |= (1 << index);
-}
-
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
@@ -90,7 +80,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 	// positive
 	for ( auto l = 0; l < num_vars; ++l )
 	{
-	  if ( get_bit( minterm, l ) )
+	  if ( minterm.get_bit( l ) )
 	  {
 	    std::vector<int> clause;
 	    clause.push_back( -z ); // - z_j
@@ -117,7 +107,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 	std::vector<int> clause = { z };
 	for ( auto l = 0; l < num_vars; ++l )
 	{
-	  if ( get_bit( minterm, l ) )
+	  if ( minterm.get_bit( l ) )
 	  {
 	    clause.push_back( 1 + num_vars*k + num_vars*j + l ); // q_j,l
 	  }
