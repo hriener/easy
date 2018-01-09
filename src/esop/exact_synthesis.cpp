@@ -68,8 +68,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
     sat::sat_solver solver;
 
     /* add constraints */
-    kitty::cube minterm;
-    for ( auto i = 0; i < num_vars; ++i ) set_mask( minterm, i );
+    kitty::cube minterm = kitty::cube::neg_cube( num_vars );
 
     auto sample_counter = 0u;
     do
@@ -113,6 +112,8 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       for ( auto j = 0u; j < k; ++j )
       {
 	const int z = 1 + 2*num_vars*k + sample_counter*k + j;
+
+	// negative
 	std::vector<int> clause = { z };
 	for ( auto l = 0; l < num_vars; ++l )
 	{
