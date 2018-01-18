@@ -190,6 +190,15 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       esop::esop_t esop;
 
       std::vector<int> blocking_clause;
+
+      std::vector<unsigned> vs;
+      vs.resize( k );
+      for ( auto i = 0u; i < k; ++i )
+      {
+	vs[i] = i;
+      }
+
+      /* extract the esop from the satisfying assignments */
       for ( auto j = 0u; j < k; ++j )
       {
 	kitty::cube c;
@@ -198,9 +207,6 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 	{
 	  const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
 	  const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
-
-	  blocking_clause.push_back( p_value ? -(1 + j*num_vars + l) : (1 + j*num_vars + l) );
-	  blocking_clause.push_back( q_value ? -(1 + num_vars*k + j*num_vars + l) : (1 + num_vars*k + j*num_vars + l) );
 
 	  if ( p_value && q_value )
 	  {
@@ -233,7 +239,24 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       std::sort( esop.begin(), esop.end(), cube_weight_compare( num_vars ) );
       esops.push_back( esop );
 
-      solver.add_clause( blocking_clause );
+      /* add one blocking clause for each possible permutation of the cubes */
+      do
+      {
+	std::vector<int> blocking_clause;
+	for ( auto j = 0; j < vs.size(); ++j )
+	{
+	  for ( auto l = 0; l < num_vars; ++l )
+	  {
+	    const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
+	    const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
+
+	    blocking_clause.push_back( p_value ? -(1 + vs[j]*num_vars + l) : (1 + vs[j]*num_vars + l) );
+	    blocking_clause.push_back( q_value ? -(1 + num_vars*k + vs[j]*num_vars + l) : (1 + num_vars*k + vs[j]*num_vars + l) );
+	  }
+	}
+
+	solver.add_clause( blocking_clause );
+      } while ( std::next_permutation( vs.begin(), vs.end() ) );
     }
 
     if ( esops.size() > 0 )
