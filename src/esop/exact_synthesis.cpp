@@ -53,7 +53,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
   esop::esops_t esops;
   for ( auto k = 1u; k <= max_number_of_cubes; ++k )
   {
-    std::cout << "[i] bounded synthesis for k = " << k << std::endl;
+    // std::cout << "[i] bounded synthesis for k = " << k << std::endl;
 
     sat::sat_solver solver;
 
