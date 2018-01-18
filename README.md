@@ -32,7 +32,4 @@ build the ESOP synthesis tool as follows:
     [i] synthesize ESOPs for 1001
     1001 2 (~x0*~x1)⊕(x0*x1)
     1001 2 (~x1)⊕(x0)
-    1001 2 (~x0)⊕(x1)
     1001 2 (x1)⊕(~x0)
-    1001 2 (x0)⊕(~x1)
-    1001 2 (x0*x1)⊕(~x0*~x1)
