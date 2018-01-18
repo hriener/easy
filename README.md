@@ -25,17 +25,16 @@ build the ESOP synthesis tool as follows:
 
 ## Usage
 
-    ./esop_enum -b 1001 -m 1
+    ./esop_enum -e --repr=expr <<< "1001"
     
  Output:
     
-    [i] compute ESOPs for 1001
-    [i] method: SAT-based exact synthesis
+    [i] synthesize ESOPs for 1001
     [i] bounded synthesis for k = 1
     [i] bounded synthesis for k = 2
-    2 (~x0*~x1)⊕(x0*x1)
-    2 (x1)⊕(~x0)
-    2 (~x0)⊕(x1)
-    2 (x0*x1)⊕(~x0*~x1)
-    2 (~x1)⊕(x0)
-    2 (x0)⊕(~x1)
+    1001 2 (~x0*~x1)⊕(x0*x1)
+    1001 2 (~x1)⊕(x0)
+    1001 2 (~x0)⊕(x1)
+    1001 2 (x1)⊕(~x0)
+    1001 2 (x0)⊕(~x1)
+    1001 2 (x0*x1)⊕(~x0*~x1)
