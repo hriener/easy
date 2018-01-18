@@ -31,6 +31,7 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/ext/args)
 endif()
 
 set(SOURCES
+  src/utils/string_utils.cpp
   src/sat/sat_solver.cpp
   src/esop/print.cpp
   src/esop/helliwell.cpp
