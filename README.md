@@ -30,8 +30,6 @@ build the ESOP synthesis tool as follows:
  Output:
     
     [i] synthesize ESOPs for 1001
-    [i] bounded synthesis for k = 1
-    [i] bounded synthesis for k = 2
     1001 2 (~x0*~x1)⊕(x0*x1)
     1001 2 (~x1)⊕(x0)
     1001 2 (~x0)⊕(x1)
