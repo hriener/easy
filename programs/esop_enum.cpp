@@ -25,6 +25,7 @@
 
 #if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION) && defined(ARGS_EXTENSION)
 
+#include <esop/print.hpp>
 #include <esop/helliwell.hpp>
 #include <esop/exact_synthesis.hpp>
 #include <kitty/kitty.hpp>
@@ -36,44 +37,6 @@
 /******************************************************************************
  * Private functions                                                          *
  ******************************************************************************/
-
-void print_esop( const esop::esop_t& esop, unsigned num_vars, std::ostream& os = std::cout )
-{
-  assert( num_vars < 32 );
-  static const auto SYMBOL_XOR = "\u2295";
-  os << esop.size() << ' ';
-  for ( auto i = 0u; i < esop.size(); ++i )
-  {
-    const auto& c = esop[i];
-    auto lit_count = c.num_literals();
-    if ( lit_count == 0 )
-    {
-      os << "(1)";
-    }
-    else
-    {
-      os << "(";
-      for ( auto j = 0u; j < num_vars; ++j )
-      {
-	if ( ( c._mask >> j ) & 1 )
-	{
-	  os << ( ( ( c._bits >> j ) & 1 ) ? "x" : "~x" ) << j;
-	  --lit_count;
-	  if ( lit_count != 0 )
-	  {
-	    os << "*";
-	  }
-	}
-      }
-      os << ")";
-    }
-    if ( i+1 < esop.size() )
-    {
-      os<< SYMBOL_XOR;
-    }
-  }
-  os << std::endl;
-}
 
 void sort_by_number_of_product_terms( esop::esops_t& esops )
 {
@@ -176,7 +139,7 @@ int main(int argc, char **argv)
       sort_by_number_of_product_terms( esops );
       for ( const auto& e : esops )
       {
-	print_esop( e, num_vars, std::cout );
+	esop::print_esop_expression( e, num_vars, std::cout );
       }
     }
   }

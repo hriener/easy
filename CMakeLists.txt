@@ -32,6 +32,7 @@ endif()
 
 set(SOURCES
   src/sat/sat_solver.cpp
+  src/esop/print.cpp
   src/esop/helliwell.cpp
   src/esop/exact_synthesis.cpp)
 
