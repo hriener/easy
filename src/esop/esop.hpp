@@ -25,20 +25,20 @@
 
 #pragma once
 
-#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION)
+#if defined(KITTY_EXTENSION)
 
 #include <kitty/kitty.hpp>
-#include <esop/esop.hpp>
 #include <vector>
 
 namespace esop
 {
 
-esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned max_number_of_cubes = 10 );
+using esop_t  = std::vector<kitty::cube>;
+using esops_t = std::vector<esop_t>;
 
 } /* esop */
 
-#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION */
+#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

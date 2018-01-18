@@ -37,13 +37,11 @@
 #if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION)
 
 #include <kitty/kitty.hpp>
+#include <esop/esop.hpp>
 #include <vector>
 
 namespace esop
 {
-
-using esop_t  = std::vector<kitty::cube>;
-using esops_t = std::vector<esop_t>;
 
 esops_t synthesis_from_binary_string( const std::string& binary );
 
