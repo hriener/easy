@@ -1,0 +1,6 @@
+[submodule "ext/kitty"]
+	path = ext/kitty
+	url = https://github.com/msoeken/kitty.git
+[submodule "ext/args"]
+	path = ext/args
+	url = https://github.com/Taywee/args.git
