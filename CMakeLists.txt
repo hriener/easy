@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5.1)
-project(esop)
+project(esop LANGUAGES CXX)
+
 
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++14")
@@ -43,3 +44,6 @@ target_link_libraries(esop_synthesis ${EXT_LIBS})
 
 add_executable(enum_esops programs/enum_esops.cpp)
 target_link_libraries(enum_esops esop_synthesis)
+
+add_executable(verify_esops programs/verify_esops.cpp)
+target_link_libraries(verify_esops esop_synthesis)
