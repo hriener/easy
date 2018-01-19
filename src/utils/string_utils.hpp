@@ -48,6 +48,10 @@ std::string rtrim_copy(std::string s);
 // trim from both ends (copying)
 std::string trim_copy(std::string s);
 
+std::string binary_string_from_hex_string( const std::string& hex );
+
+std::string hex_string_from_binary_string( const std::string& binary );
+
 } /* utils */
 
 // Local Variables:
