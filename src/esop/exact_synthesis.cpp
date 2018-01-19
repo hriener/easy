@@ -114,6 +114,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
   {
     // std::cout << "[i] bounded synthesis for k = " << k << std::endl;
 
+    sat::constraints constraints;
     sat::sat_solver solver;
 
     /* add constraints */
@@ -145,7 +146,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 	    clause.push_back( -z ); // - z_j
 	    clause.push_back( -( 1 + num_vars*k + num_vars*j + l ) ); // -q_j,l
 
-	    solver.add_clause( clause );
+	    constraints.add_clause( clause );
 	  }
 	  else
 	  {
@@ -153,7 +154,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 	    clause.push_back( -z ); // -z_j
 	    clause.push_back( -( 1 + num_vars*j + l ) ); // -p_j,l
 
-	    solver.add_clause( clause );
+	    constraints.add_clause( clause );
 	  }
 	}
       }
@@ -176,16 +177,16 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 	  }
 	}
 
-	solver.add_clause( clause );
+	constraints.add_clause( clause );
       }
 
-      solver.add_xor_clause( xor_clause, binary[ minterm._bits ] == '1' );
+      constraints.add_xor_clause( xor_clause, binary[ minterm._bits ] == '1' );
 
       ++sample_counter;
       ++minterm._bits;
     } while( minterm._bits < (1 << num_vars) );
 
-    while ( auto result = solver.solve() )
+    while ( auto result = solver.solve( constraints ) )
     {
       esop::esop_t esop;
 
@@ -243,7 +244,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       do
       {
 	std::vector<int> blocking_clause;
-	for ( auto j = 0; j < vs.size(); ++j )
+	for ( auto j = 0u; j < vs.size(); ++j )
 	{
 	  for ( auto l = 0; l < num_vars; ++l )
 	  {
@@ -255,7 +256,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
 	  }
 	}
 
-	solver.add_clause( blocking_clause );
+	constraints.add_clause( blocking_clause );
       } while ( std::next_permutation( vs.begin(), vs.end() ) );
     }
 

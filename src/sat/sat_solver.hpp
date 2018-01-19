@@ -28,14 +28,29 @@
 #ifdef CRYPTOMINISAT_EXTENSION
 
 #include <cryptominisat5/cryptominisat.h>
+#include <cassert>
 #include <vector>
 
 namespace sat
 {
 
-struct sat_solver
+struct constraints
 {
   using clause_t = std::vector<int>;
+  using xor_clause_t = std::pair<clause_t,bool>;
+
+  void add_clause( const clause_t& clause );
+  void add_xor_clause( const clause_t& clause, bool value = true);
+
+  std::vector<clause_t> _clauses;
+  std::vector<xor_clause_t> _xor_clauses;
+
+  unsigned _num_variables = 0;
+}; /* constraints */
+
+struct sat_solver
+{
+  using assumptions_t = std::vector<int>;
   using state_t = CMSat::lbool;
   using model_t = std::vector<CMSat::lbool>;
 
@@ -60,14 +75,11 @@ struct sat_solver
   }; /* result */
 
   sat_solver();
-  result solve( const std::vector<int>& assumptions = {} );
-
-  void add_clause( const clause_t& c );
-  void add_xor_clause( const clause_t& c, bool value = true );
+  result solve( constraints& constraints, const assumptions_t& assumptions = {} );
 
   unsigned _num_vars = 0;
   CMSat::SATSolver _solver;
-}; /* sat_solver */
+};
 
 } /* sat */
 

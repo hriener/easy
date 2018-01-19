@@ -31,6 +31,32 @@
 namespace sat
 {
 
+void constraints::add_clause( const clause_t& clause )
+{
+  for ( const auto& c : clause )
+  {
+    unsigned v = abs(c);
+    if ( v > _num_variables )
+    {
+      _num_variables = v;
+    }
+  }
+  _clauses.push_back( clause );
+}
+
+void constraints::add_xor_clause( const clause_t& clause, bool value )
+{
+  for ( const auto& c : clause )
+  {
+    unsigned v = abs(c);
+    if ( v > _num_variables )
+    {
+      _num_variables = v;
+    }
+  }
+  _xor_clauses.push_back( { clause, value } );
+}
+
 sat_solver::sat_solver()
 {
   /* default solver settings */
@@ -38,8 +64,45 @@ sat_solver::sat_solver()
   _solver.set_allow_otf_gauss();
 }
 
-sat_solver::result sat_solver::solve( const std::vector<int>& assumptions )
+sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
 {
+  /* add clauses to solver & remove them from constraints */
+  for ( const auto& c : constraints._clauses )
+  {
+    std::vector<CMSat::Lit> clause;
+    for ( const auto& l : c )
+    {
+      const unsigned var = abs(l)-1;
+      while ( _num_vars <= var )
+      {
+	_solver.new_var();
+	++_num_vars;
+      }
+      clause.push_back( CMSat::Lit( var, l < 0 ) );
+    }
+    _solver.add_clause( clause );
+  }
+  constraints._clauses.clear();
+
+  /* add xor clauses to solver & remove them from constraints */
+  for ( const auto& c : constraints._xor_clauses )
+  {
+    std::vector<unsigned> clause;
+    for ( const auto& l : c.first )
+    {
+      assert( l > 0 );
+      const unsigned var = l-1;
+      while ( _num_vars <= var )
+      {
+	_solver.new_var();
+	++_num_vars;
+      }
+      clause.push_back( var );
+    }
+    _solver.add_xor_clause( clause, c.second );
+  }
+  constraints._xor_clauses.clear();
+
   CMSat::lbool sat;
 
   if ( assumptions.size() > 0 )
@@ -70,39 +133,6 @@ sat_solver::result sat_solver::solve( const std::vector<int>& assumptions )
   {
     return result( sat );
   }
-}
-
-void sat_solver::add_clause( const clause_t& c )
-{
-  std::vector<CMSat::Lit> clause;
-  for ( const auto& v : c )
-  {
-    const unsigned var = abs(v)-1;
-    while ( _num_vars <= var )
-    {
-      _solver.new_var();
-      ++_num_vars;
-    }
-    clause.push_back( CMSat::Lit( var, v < 0 ) );
-  }
-  _solver.add_clause( clause );
-}
-
-void sat_solver::add_xor_clause( const clause_t& c, bool value )
-{
-  std::vector<unsigned> clause;
-  for ( const auto& v : c )
-  {
-    assert( v > 0 );
-    const unsigned var = v-1;
-    while ( _num_vars <= var )
-    {
-      _solver.new_var();
-      ++_num_vars;
-    }
-    clause.push_back( var );
-  }
-  _solver.add_xor_clause( clause, value );
 }
 
 } /* sat */

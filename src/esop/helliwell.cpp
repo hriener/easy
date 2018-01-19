@@ -139,6 +139,7 @@ esops_t synthesis_from_binary_string( const std::string& binary )
 
   esops_t esops;
 
+  sat::constraints constraints;
   sat::sat_solver solver;
   vars g;
   assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
@@ -157,14 +158,14 @@ esops_t synthesis_from_binary_string( const std::string& binary )
       {
 	clause.push_back( g[ t ] );
       }
-      solver.add_xor_clause( clause, binary[minterm._bits] == '1' );
+      constraints.add_xor_clause( clause, binary[minterm._bits] == '1' );
     }
 
     ++minterm._bits;
   } while( minterm._bits < (1 << num_vars) );
 
   sat::sat_solver::result result;
-  while ( ( result = solver.solve() ) )
+  while ( ( result = solver.solve( constraints ) ) )
   {
     esop_t esop;
     std::vector<int> blocking_clause;
@@ -181,7 +182,7 @@ esops_t synthesis_from_binary_string( const std::string& binary )
 	blocking_clause.push_back( var );
       }
     }
-    solver.add_clause( blocking_clause );
+    constraints.add_clause( blocking_clause );
     esops.push_back( esop );
 
     if ( esops.size() >= 100 )
