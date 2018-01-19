@@ -33,6 +33,7 @@ endif()
 set(SOURCES
   src/utils/string_utils.cpp
   src/sat/sat_solver.cpp
+  src/sat/cnf_writer.cpp
   src/esop/print.cpp
   src/esop/helliwell.cpp
   src/esop/exact_synthesis.cpp)
