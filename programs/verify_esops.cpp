@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 
   if ( summary )
   {
-    std::cout << "Total number of errors: " << errors << std::endl;
+    std::cout << "[i] total number of errors: " << errors << std::endl;
   }
 
   if ( errors == 0 )
