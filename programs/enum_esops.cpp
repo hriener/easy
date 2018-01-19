@@ -26,7 +26,6 @@
 #if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION) && defined(ARGS_EXTENSION)
 
 #include <esop/print.hpp>
-#include <esop/helliwell.hpp>
 #include <esop/exact_synthesis.hpp>
 #include <utils/string_utils.hpp>
 #include <kitty/kitty.hpp>
@@ -34,6 +33,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <regex>
 
 /******************************************************************************
  * Types                                                                      *
@@ -56,32 +56,28 @@ void sort_by_number_of_product_terms( esop::esops_t& esops )
   std::sort( esops.begin(), esops.end(), compare );
 }
 
-std::string binary_string_from_hex_string( const std::string& hex )
+std::string parse_function( std::string s )
 {
-  std::string result = "";
-  for ( auto i = 0u; i < hex.length(); ++i )
+  std::transform( s.begin(), s.end(), s.begin(), ::tolower );
+
+  std::regex binary_number( "(0b)?([01]*)" );
+  std::regex hex_number( "(0x)?([0123456789abcdef]*)" );
+
+  std::smatch match;
+  if ( std::regex_match( s, match, binary_number ) )
   {
-    switch ( hex[i] )
-    {
-    case '0': result.append ("0000"); break;
-    case '1': result.append ("0001"); break;
-    case '2': result.append ("0010"); break;
-    case '3': result.append ("0011"); break;
-    case '4': result.append ("0100"); break;
-    case '5': result.append ("0101"); break;
-    case '6': result.append ("0110"); break;
-    case '7': result.append ("0111"); break;
-    case '8': result.append ("1000"); break;
-    case '9': result.append ("1001"); break;
-    case 'a': result.append ("1010"); break;
-    case 'b': result.append ("1011"); break;
-    case 'c': result.append ("1100"); break;
-    case 'd': result.append ("1101"); break;
-    case 'e': result.append ("1110"); break;
-    case 'f': result.append ("1111"); break;
-    }
+    assert( match.size() == 3 );
+    return match[2];
   }
-  return result;
+  else if ( std::regex_match( s, match, hex_number ) )
+  {
+    assert( match.size() == 3 );
+    return utils::binary_string_from_hex_string( match[2] );
+  }
+  else
+  {
+    assert( false );
+  }
 }
 
 /******************************************************************************
@@ -152,37 +148,27 @@ int main(int argc, char **argv)
       std::cout << "[i] synthesize ESOPs for " << line << std::endl;
     }
 
-    const auto prefix = line.substr( 0, 2 );
-    if ( prefix == "0x" )
-    {
-      /* remove prefix */
-      line = line.substr( 2, line.size() - 2 );
-      line = binary_string_from_hex_string( line );
-    }
-    else if ( prefix == "0b" )
-    {
-      /* remove prefix */
-      line = line.substr( 2, line.size() - 3 );
-    }
-
+    auto binary = parse_function( line );
     if ( reverse )
     {
-      std::reverse( line.begin(), line.end() );
+      std::reverse( binary.begin(), binary.end() );
     }
 
     /* solve */
-    esop::esops_t esops = esop::exact_synthesis_from_binary_string( line );
+    std::reverse( binary.begin(), binary.end() );
+    esop::esops_t esops = esop::exact_synthesis_from_binary_string( binary );
+    std::reverse( binary.begin(), binary.end() );
     sort_by_number_of_product_terms( esops );
 
     /* print result */
-    const auto number_of_variables = int( log2( line.size() ) );
+    const auto number_of_variables = int( log2( binary.size() ) );
     for ( const auto& e : esops )
     {
-      std::cout << line << ' ';
+      std::cout << binary << ' ';
       print_function( e, number_of_variables, std::cout );
     }
   }
-  
+
   return 0;
 }
 

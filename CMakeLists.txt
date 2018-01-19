@@ -40,5 +40,5 @@ set(SOURCES
 add_library(esop_synthesis ${SOURCES})
 target_link_libraries(esop_synthesis ${EXT_LIBS})
 
-add_executable(esop_enum programs/esop_enum.cpp)
-target_link_libraries(esop_enum esop_synthesis)
+add_executable(enum_esops programs/enum_esops.cpp)
+target_link_libraries(enum_esops esop_synthesis)
