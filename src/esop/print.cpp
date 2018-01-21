@@ -44,7 +44,7 @@ namespace esop
 
 void print_esop_expression( const esop_t& esop, unsigned num_vars, std::ostream& os )
 {
-  assert( num_vars < 32 );
+  assert( num_vars <= 32 );
   static const auto SYMBOL_XOR = "\u2295";
   os << esop.size() << ' ';
   for ( auto i = 0u; i < esop.size(); ++i )
@@ -82,7 +82,7 @@ void print_esop_expression( const esop_t& esop, unsigned num_vars, std::ostream&
 
 void print_esop_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostream& os )
 {
-  assert( num_vars < 32 );
+  assert( num_vars <= 32 );
   for ( const auto& c : esop )
   {
     c.print( num_vars, os );
