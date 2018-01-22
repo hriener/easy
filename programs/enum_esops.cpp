@@ -34,6 +34,7 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <stdexcept>
 
 /******************************************************************************
  * Types                                                                      *
@@ -76,7 +77,8 @@ std::string parse_function( std::string s )
   }
   else
   {
-    assert( false );
+    assert( false && "unreachable" );
+    throw std::invalid_argument( "function must be a binary or hexadecimal number" );
   }
 }
 
