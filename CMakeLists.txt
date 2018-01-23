@@ -35,8 +35,11 @@ set(SOURCES
   src/utils/string_utils.cpp
   src/sat/sat_solver.cpp
   src/sat/cnf_writer.cpp
+  src/sat/gauss.cpp
   src/esop/print.cpp
   src/esop/helliwell.cpp
+  src/esop/combine.cpp
+  src/esop/cube_utils.cpp
   src/esop/exact_synthesis.cpp)
 
 add_library(esop_synthesis ${SOURCES})
