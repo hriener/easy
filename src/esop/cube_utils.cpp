@@ -96,6 +96,83 @@ bool cube_weight_compare::operator()( const kitty::cube& a, const kitty::cube& b
   return cube_weight( a, _num_vars ) < cube_weight( b, _num_vars );
 }
 
+std::vector<std::vector<kitty::cube>> combinations( const std::vector<kitty::cube>& e, std::size_t t )
+{
+  const auto n = e.size();
+  if ( n == t ) return { e };
+
+  assert( n > t );
+
+  std::vector<std::vector<kitty::cube>> result;
+
+  // T1 [initialize.]
+  int j, x;
+  std::vector<int> c( t + 2 );
+  for ( auto j = 0u; j < t; ++j )
+  {
+    c[ j ] = j;
+  }
+  c[ t ] = n;
+  c[ t+1 ] = 0;
+
+  j = t;
+
+  while ( true )
+  {
+    // T2 [visit.]
+    std::vector<kitty::cube> v;
+    for ( auto i = 0u; i < t; ++i )
+    {
+      v.push_back( e[i] );
+    }
+    result.push_back( v );
+
+    if ( j > 0 )
+    {
+      x = j;
+
+      // T6 [increase c_j.]
+      c[ j-1 ] = x;
+      j = j-1;
+      continue;
+    }
+
+    // T3 [easy case.]
+    if ( c[ 0 ] + 1 < c[ 1 ] )
+    {
+      c[ 0 ] = c[ 0 ] + 1;
+      continue;
+    }
+    else
+    {
+      j = 2;
+    }
+
+    // T4 [find j.]
+    while ( true )
+    {
+      c[ j-2 ] = j - 2;
+      x = c[ j-1 ] + 1;
+      if ( x != c[ j ] )
+      {
+	break;
+      }
+      j = j + 1;
+    }
+
+    // T5 [done?]
+    if ( j > int(t) )
+    {
+      break;
+    }
+
+    c[ j-1 ] = x;
+    j = j - 1;
+  }
+
+  return result;
+}
+
 } /* esop */
 
 #endif /* KITTY_EXTENSION */
