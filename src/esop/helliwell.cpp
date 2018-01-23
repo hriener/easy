@@ -29,6 +29,7 @@
 #include <sat/sat_solver.hpp>
 #include <unordered_map>
 #include <cassert>
+#include <cstring>
 
 namespace esop
 {

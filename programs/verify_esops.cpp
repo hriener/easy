@@ -30,6 +30,7 @@
 #include <kitty/kitty.hpp>
 #include <args.hxx>
 #include <boost/algorithm/string.hpp>
+#include <bitset>
 #include <iostream>
 
 /******************************************************************************
