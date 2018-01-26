@@ -172,8 +172,8 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
         bool cancel_cube = false;
         for ( auto l = 0; l < num_vars; ++l )
         {
-          const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
-          const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
+          const auto p_value = result.model[ j*num_vars + l ] == l_True;
+          const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == l_True;
 
           if ( p_value && q_value )
           {
@@ -214,8 +214,8 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
         {
           for ( auto l = 0; l < num_vars; ++l )
           {
-            const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
-            const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
+            const auto p_value = result.model[ j*num_vars + l ] == l_True;
+            const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == l_True;
 
             blocking_clause.push_back( p_value ? -(1 + vs[j]*num_vars + l) : (1 + vs[j]*num_vars + l) );
             blocking_clause.push_back( q_value ? -(1 + num_vars*k + vs[j]*num_vars + l) : (1 + num_vars*k + vs[j]*num_vars + l) );

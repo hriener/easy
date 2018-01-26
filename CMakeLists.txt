@@ -19,6 +19,15 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/ext/cryptominisat)
   list(APPEND EXT_LIBS "cryptominisat5.5.0")
 endif()
 
+if (EXISTS ${CMAKE_SOURCE_DIR}/ext/glucose-syrup-4.1)
+  message("Found GLUCOSE extension")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLUCOSE_EXTENSION")
+  add_subdirectory(ext/glucose-syrup-4.1)
+  target_compile_options(glucose-lib-static PUBLIC "-w")
+  include_directories(ext/glucose-syrup-4.1/glucose/)
+  list(APPEND EXT_LIBS glucose-lib-static)
+endif()
+
 if (EXISTS ${CMAKE_SOURCE_DIR}/ext/kitty)
   message("Found KITTY extension")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DKITTY_EXTENSION")
@@ -42,6 +51,7 @@ set(SOURCES
   src/sat/sat_solver.cpp
   src/sat/cnf_writer.cpp
   src/sat/gauss.cpp
+  src/sat/xor_clauses_to_cnf.cpp
   src/esop/print.cpp
   src/esop/helliwell.cpp
   src/esop/combine.cpp

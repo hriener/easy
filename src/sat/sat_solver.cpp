@@ -26,7 +26,7 @@
 #include <sat/sat_solver.hpp>
 #include <cassert>
 
-#ifdef CRYPTOMINISAT_EXTENSION
+#ifdef GLUCOSE_EXTENSION
 
 namespace sat
 {
@@ -59,9 +59,6 @@ void constraints::add_xor_clause( const clause_t& clause, bool value )
 
 sat_solver::sat_solver()
 {
-  /* default solver settings */
-  _solver.set_default_polarity( false );
-  _solver.set_allow_otf_gauss();
 }
 
 sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
@@ -69,69 +66,58 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
   /* add clauses to solver & remove them from constraints */
   for ( const auto& c : constraints._clauses )
   {
-    std::vector<CMSat::Lit> clause;
+    Glucose::vec<Glucose::Lit> clause;
     for ( const auto& l : c )
     {
       const unsigned var = abs(l)-1;
       while ( _num_vars <= var )
       {
-	_solver.new_var();
+	_solver.newVar();
 	++_num_vars;
       }
-      clause.push_back( CMSat::Lit( var, l < 0 ) );
+      clause.push( Glucose::mkLit( var, l < 0 ) );
     }
-    _solver.add_clause( clause );
+    _solver.addClause( clause );
   }
   constraints._clauses.clear();
 
   /* add xor clauses to solver & remove them from constraints */
-  for ( const auto& c : constraints._xor_clauses )
-  {
-    std::vector<unsigned> clause;
-    for ( const auto& l : c.first )
-    {
-      assert( l > 0 );
-      const unsigned var = l-1;
-      while ( _num_vars <= var )
-      {
-	_solver.new_var();
-	++_num_vars;
-      }
-      clause.push_back( var );
-    }
-    _solver.add_xor_clause( clause, c.second );
-  }
-  constraints._xor_clauses.clear();
+  assert( constraints._xor_clauses.size() == 0u );
 
-  CMSat::lbool sat;
+  bool sat;
 
   if ( assumptions.size() > 0 )
   {
-    std::vector<CMSat::Lit> assume;
+    Glucose::vec<Glucose::Lit> assume;
     for ( const auto& v : assumptions )
     {
       const unsigned var = abs(v)-1;
       while ( _num_vars <= var )
       {
-	_solver.new_var();
+	_solver.newVar();
 	++_num_vars;
       }
-      assume.push_back( CMSat::Lit( var, v < 0 ) );
+      assume.push( Glucose::mkLit( var, v < 0 ) );
     }
-    sat = _solver.solve( &assume );
+    sat = _solver.solve( assume );
   }
   else
   {
     sat = _solver.solve();
   }
 
-  if ( sat == CMSat::l_True )
+  if ( sat )
   {
-    return result( _solver.get_model() );
+    std::vector<Glucose::lbool> model( _num_vars );
+    for ( auto i = 0; i < _num_vars; ++i )
+    {
+      model[i] = _solver.modelValue( i );
+    }
+    return result( model );
   }
   else
   {
-    return result( sat );
+    return result( sat ? l_True : l_False );
   }
 }
 

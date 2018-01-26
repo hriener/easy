@@ -25,9 +25,10 @@
 
 #pragma once
 
-#ifdef CRYPTOMINISAT_EXTENSION
+#ifdef GLUCOSE_EXTENSION
 
-#include <cryptominisat5/cryptominisat.h>
+#include <core/SolverTypes.h>
+#include <core/Solver.h>
 #include <cassert>
 #include <vector>
 
@@ -51,23 +52,23 @@ struct constraints
 struct sat_solver
 {
   using assumptions_t = std::vector<int>;
-  using state_t = CMSat::lbool;
-  using model_t = std::vector<CMSat::lbool>;
+  using state_t = Glucose::lbool;
+  using model_t = std::vector<Glucose::lbool>;
 
   struct result
   {
-    result( state_t state = CMSat::l_Undef )
+    result( state_t state = l_Undef )
       : state( state )
     {}
 
     result( const model_t& m )
-      : state( CMSat::l_True )
+      : state( l_True )
       , model( m )
     {}
 
     operator bool() const
     {
-      return ( state == CMSat::l_True );
+      return ( state == l_True );
     }
 
     state_t state;
@@ -78,7 +79,7 @@ struct sat_solver
   result solve( constraints& constraints, const assumptions_t& assumptions = {} );
 
   unsigned _num_vars = 0;
-  CMSat::SATSolver _solver;
+  Glucose::Solver _solver;
 };
 
 } /* sat */

@@ -26,6 +26,7 @@
 #pragma once
 
 #include <sat/sat_solver.hpp>
+#include <iostream>
 
 namespace sat
 {

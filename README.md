@@ -8,20 +8,20 @@ Use git to clone the repository
 
     git clone --recursive https://github.com/hriener/esop_synthesis.git
 
-Add the external dependency `cryptominisat` to the `ext` directory and
-proceed with the build instructions of cryptominisat.  Afterwards
-build the ESOP synthesis tool as follows:
+Afterwards build the ESOP synthesis tool as follows:
 
     mkdir build
     cd build
     cmake ..
     make
 
-## External Dependencies
+## External dependencies
 
 * [cryptominisat](https://github.com/msoos/cryptominisat)
+* [glucose](http://www.labri.fr/perso/lsimon/glucose)
 * [kitty](https://github.com/msoeken/kitty)
 * [args](https://github.com/Taywee/args)
+* [json](https://github.com/nlohmann/json)
 
 ## Usage
 

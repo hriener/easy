@@ -173,12 +173,12 @@ esops_t synthesis_from_binary_string( const std::string& binary )
     for ( auto i = 0u; i != solver._solver.nVars(); ++i )
     {
       const auto var = i+1;
-      if ( result.model[i] == CMSat::l_True )
+      if ( result.model[i] == l_True )
       {
 	blocking_clause.push_back( -var );
 	esop.push_back( g.lookup_cube( var ) );
       }
-      if ( result.model[i] == CMSat::l_False )
+      if ( result.model[i] == l_False )
       {
 	blocking_clause.push_back( var );
       }

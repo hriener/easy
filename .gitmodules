@@ -4,3 +4,6 @@
 [submodule "ext/args"]
 	path = ext/args
 	url = https://github.com/Taywee/args.git
+[submodule "ext/glucose-syrup-4.1"]
+	path = ext/glucose-syrup-4.1
+	url = https://github.com/hriener/glucose-syrup-4.1.git
