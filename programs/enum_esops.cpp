@@ -89,10 +89,10 @@ std::string parse_function( std::string s )
 int main(int argc, char **argv)
 {
   args::ArgumentParser parser( "Enumerate ESOP expressions", "" );
-
-  args::HelpFlag                   help(      parser, "help",        "Display this help message",      { 'h', "help" } );
-  args::Flag                       reverse(   parser, "reverse",     "reverse input functions",        { 'r', "reverse" } );
-  args::Flag                       echo(      parser, "echo",        "echo input function",            { 'e', "echo" } );
+  args::HelpFlag       help(      parser, "help",        "display this help message",      { 'h', "help" } );
+  args::Flag           reverse(   parser, "reverse",     "reverse input functions",        { 'r', "reverse" } );
+  args::Flag           echo(      parser, "echo",        "echo input function",            { 'e', "echo" } );
+  args::Flag           dump(      parser, "cnf",         "dump intermediate CNF files",    { "cnf" } );
 
   std::unordered_map<std::string, esop_representation_enum> map{
     {"expr", esop_representation_enum::xor_expression},
@@ -137,6 +137,11 @@ int main(int argc, char **argv)
     assert( false && "unsupported output representation" );
   }
 
+  /* configure algorithm */
+  nlohmann::json config;
+  config["maximum_cubes"] = 10;
+  config["dump_cnf"] = bool(dump);
+
   std::string line;
   while ( std::getline( std::cin, line ) )
   {
@@ -158,7 +163,7 @@ int main(int argc, char **argv)
 
     /* solve */
     std::reverse( binary.begin(), binary.end() );
-    esop::esops_t esops = esop::exact_synthesis_from_binary_string( binary );
+    esop::esops_t esops = esop::exact_synthesis_from_binary_string( binary, config );
     std::reverse( binary.begin(), binary.end() );
     sort_by_number_of_product_terms( esops );
 

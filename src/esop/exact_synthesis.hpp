@@ -25,20 +25,21 @@
 
 #pragma once
 
-#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION)
+#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION) && defined(JSON_EXTENSION)
 
 #include <kitty/kitty.hpp>
 #include <esop/esop.hpp>
+#include <json/json.hpp>
 #include <vector>
 
 namespace esop
 {
 
-esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned max_number_of_cubes = 10 );
+esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlohmann::json& config );
 
 } /* esop */
 
-#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION */
+#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION && JSON_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

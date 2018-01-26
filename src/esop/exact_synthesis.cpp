@@ -50,8 +50,11 @@ namespace esop
  * Public functions                                                           *
  ******************************************************************************/
 
-esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned max_number_of_cubes )
+esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlohmann::json& config  )
 {
+  unsigned max_number_of_cubes = config[ "maximum_cubes" ];
+  bool dump = config[ "dump_cnf" ];
+
   const int num_vars = log2( binary.size() );
   assert( binary.size() == (1ull << num_vars) && "bit-width is not a power of 2" );
 
