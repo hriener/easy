@@ -35,7 +35,7 @@ cnf_writer::cnf_writer( std::ostream& os )
 
 void cnf_writer::apply( constraints& constraints )
 {
-  _os << "cnf " << constraints._num_variables << " " << ( constraints._clauses.size()+constraints._xor_clauses.size() ) << std::endl;
+  _os << "p cnf " << (constraints._num_variables-1) << " " << ( constraints._clauses.size()+constraints._xor_clauses.size() ) << std::endl;
   for ( const auto& clause : constraints._clauses )
   {
     for ( const auto& l : clause )
@@ -47,7 +47,10 @@ void cnf_writer::apply( constraints& constraints )
 
   for ( const auto& clause : constraints._xor_clauses )
   {
-    _os << "x";
+    if ( clause.first.size() > 1 )
+    {
+      _os << "x";
+    }
     for ( auto i = 0u; i < clause.first.size(); ++i )
     {
       if ( !clause.second && i == clause.first.size()-1 )
@@ -56,7 +59,7 @@ void cnf_writer::apply( constraints& constraints )
       }
       _os << clause.first[i] << ' ';
     }
-      _os << "0" << std::endl;
+    _os << "0" << std::endl;
   }
 }
 
