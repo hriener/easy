@@ -28,6 +28,12 @@
 #include <esop/exact_synthesis.hpp>
 #include <esop/cube_utils.hpp>
 #include <sat/sat_solver.hpp>
+#include <sat/cnf_writer.hpp>
+#include <sat/gauss.hpp>
+#include <sat/xor_clauses_to_cnf.hpp>
+#include <utils/string_utils.hpp>
+#include <boost/format.hpp>
+#include <fstream>
 
 namespace esop
 {
@@ -127,6 +133,21 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       ++sample_counter;
       ++minterm._bits;
     } while( minterm._bits < (1 << num_vars) );
+
+    sat::gauss_elimination().apply( constraints );
+    sat::xor_clauses_to_cnf().apply( constraints );
+
+    if ( dump )
+    {
+      const std::string filename = boost::str( boost::format( "0x%s-%d.cnf" ) % utils::hex_string_from_binary_string( binary ) % k );
+      std::cout << "[i] write CNF file " << filename << std::endl;
+      std::ofstream os( filename );
+      {
+        sat::cnf_writer writer( os );
+        writer.apply( constraints );
+        os.close();
+      }
+    }
 
     while ( auto result = solver.solve( constraints ) )
     {
