@@ -31,6 +31,12 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/ext/args)
   include_directories(ext/args/)
 endif()
 
+if (EXISTS ${CMAKE_SOURCE_DIR}/ext/json)
+  message("Found JSON extension")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_EXTENSION")
+  include_directories(ext/json/include/)
+endif()
+
 set(SOURCES
   src/utils/string_utils.cpp
   src/sat/sat_solver.cpp
