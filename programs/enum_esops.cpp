@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     {"expr", esop_representation_enum::xor_expression},
     {"cube", esop_representation_enum::cube_vector}};
 
-  args::MapFlag<std::string,esop_representation_enum> repr( parser, "expr|cube", "Representation of the computed ESOP (default:expr)",
+  args::MapFlag<std::string,esop_representation_enum> repr( parser, "expr|cube", "representation of the computed ESOP (default:expr)",
 							    { "repr" }, map, esop_representation_enum::xor_expression );
 
   try
