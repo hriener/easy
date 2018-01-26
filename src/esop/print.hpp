@@ -25,7 +25,7 @@
 
 #pragma once
 
-#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION)
+#if defined(KITTY_EXTENSION)
 
 #include <esop/esop.hpp>
 #include <iostream>
@@ -38,7 +38,7 @@ void print_esop_cubes( const esop_t& esop, unsigned num_vars, std::ostream& os =
 
 } /* esop */
 
-#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION */
+#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2
