@@ -68,58 +68,58 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       /* skip don't cares */
       if ( binary[ minterm._bits ] != '0' && binary[ minterm._bits ] != '1' )
       {
-	++minterm._bits;
-	continue;
+        ++minterm._bits;
+        continue;
       }
 
       std::vector<int> xor_clause;
 
       for ( auto j = 0u; j < k; ++j )
       {
-	const int z = 1 + 2*num_vars*k + sample_counter*k + j;
-	xor_clause.push_back( z );
+        const int z = 1 + 2*num_vars*k + sample_counter*k + j;
+        xor_clause.push_back( z );
 
-	// positive
-	for ( auto l = 0; l < num_vars; ++l )
-	{
-	  if ( minterm.get_bit( l ) )
-	  {
-	    std::vector<int> clause;
-	    clause.push_back( -z ); // - z_j
-	    clause.push_back( -( 1 + num_vars*k + num_vars*j + l ) ); // -q_j,l
+        // positive
+        for ( auto l = 0; l < num_vars; ++l )
+        {
+          if ( minterm.get_bit( l ) )
+          {
+            std::vector<int> clause;
+            clause.push_back( -z ); // - z_j
+            clause.push_back( -( 1 + num_vars*k + num_vars*j + l ) ); // -q_j,l
 
-	    constraints.add_clause( clause );
-	  }
-	  else
-	  {
-	    std::vector<int> clause;
-	    clause.push_back( -z ); // -z_j
-	    clause.push_back( -( 1 + num_vars*j + l ) ); // -p_j,l
+            constraints.add_clause( clause );
+          }
+          else
+          {
+            std::vector<int> clause;
+            clause.push_back( -z ); // -z_j
+            clause.push_back( -( 1 + num_vars*j + l ) ); // -p_j,l
 
-	    constraints.add_clause( clause );
-	  }
-	}
+            constraints.add_clause( clause );
+          }
+        }
       }
 
       for ( auto j = 0u; j < k; ++j )
       {
-	const int z = 1 + 2*num_vars*k + sample_counter*k + j;
+        const int z = 1 + 2*num_vars*k + sample_counter*k + j;
 
-	// negative
-	std::vector<int> clause = { z };
-	for ( auto l = 0; l < num_vars; ++l )
-	{
-	  if ( minterm.get_bit( l ) )
-	  {
-	    clause.push_back( 1 + num_vars*k + num_vars*j + l ); // q_j,l
-	  }
-	  else
-	  {
-	    clause.push_back( 1 + num_vars*j + l ); // p_j,l
-	  }
-	}
+        // negative
+        std::vector<int> clause = { z };
+        for ( auto l = 0; l < num_vars; ++l )
+        {
+          if ( minterm.get_bit( l ) )
+          {
+            clause.push_back( 1 + num_vars*k + num_vars*j + l ); // q_j,l
+          }
+          else
+          {
+            clause.push_back( 1 + num_vars*j + l ); // p_j,l
+          }
+        }
 
-	constraints.add_clause( clause );
+        constraints.add_clause( clause );
       }
 
       constraints.add_xor_clause( xor_clause, binary[ minterm._bits ] == '1' );
@@ -138,45 +138,45 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       vs.resize( k );
       for ( auto i = 0u; i < k; ++i )
       {
-	vs[i] = i;
+        vs[i] = i;
       }
 
       /* extract the esop from the satisfying assignments */
       for ( auto j = 0u; j < k; ++j )
       {
-	kitty::cube c;
-	bool cancel_cube = false;
-	for ( auto l = 0; l < num_vars; ++l )
-	{
-	  const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
-	  const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
+        kitty::cube c;
+        bool cancel_cube = false;
+        for ( auto l = 0; l < num_vars; ++l )
+        {
+          const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
+          const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
 
-	  if ( p_value && q_value )
-	  {
-	    cancel_cube = true;
-	  }
-	  else if ( p_value )
-	  {
-	    c.add_literal( l, true );
-	  }
-	  else if ( q_value )
-	  {
-	    c.add_literal( l, false );
-	  }
-	}
+          if ( p_value && q_value )
+          {
+            cancel_cube = true;
+          }
+          else if ( p_value )
+          {
+            c.add_literal( l, true );
+          }
+          else if ( q_value )
+          {
+            c.add_literal( l, false );
+          }
+        }
 
-	if ( cancel_cube )
-	{
-	  continue;
-	}
+        if ( cancel_cube )
+        {
+          continue;
+        }
 
-	esop.push_back( c );
+        esop.push_back( c );
       }
 
       /* special case: if the empty ESOP, i.e., false, is a possible solution, the immediately return */
       if ( esop.empty() )
       {
-	return { esop };
+        return { esop };
       }
 
       std::sort( esop.begin(), esop.end(), cube_weight_compare( num_vars ) );
@@ -185,20 +185,20 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, unsigned 
       /* add one blocking clause for each possible permutation of the cubes */
       do
       {
-	std::vector<int> blocking_clause;
-	for ( auto j = 0u; j < vs.size(); ++j )
-	{
-	  for ( auto l = 0; l < num_vars; ++l )
-	  {
-	    const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
-	    const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
+        std::vector<int> blocking_clause;
+        for ( auto j = 0u; j < vs.size(); ++j )
+        {
+          for ( auto l = 0; l < num_vars; ++l )
+          {
+            const auto p_value = result.model[ j*num_vars + l ] == CMSat::l_True;
+            const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == CMSat::l_True;
 
-	    blocking_clause.push_back( p_value ? -(1 + vs[j]*num_vars + l) : (1 + vs[j]*num_vars + l) );
-	    blocking_clause.push_back( q_value ? -(1 + num_vars*k + vs[j]*num_vars + l) : (1 + num_vars*k + vs[j]*num_vars + l) );
-	  }
-	}
+            blocking_clause.push_back( p_value ? -(1 + vs[j]*num_vars + l) : (1 + vs[j]*num_vars + l) );
+            blocking_clause.push_back( q_value ? -(1 + num_vars*k + vs[j]*num_vars + l) : (1 + num_vars*k + vs[j]*num_vars + l) );
+          }
+        }
 
-	constraints.add_clause( blocking_clause );
+        constraints.add_clause( blocking_clause );
       } while ( std::next_permutation( vs.begin(), vs.end() ) );
     }
 
