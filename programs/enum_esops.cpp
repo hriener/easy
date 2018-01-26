@@ -23,12 +23,13 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION) && defined(ARGS_EXTENSION)
+#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION) && defined(ARGS_EXTENSION)
 
 #include <esop/print.hpp>
 #include <esop/exact_synthesis.hpp>
 #include <utils/string_utils.hpp>
 #include <kitty/kitty.hpp>
+#include <json/json.hpp>
 #include <args.hxx>
 #include <algorithm>
 #include <fstream>
@@ -181,7 +182,7 @@ int main(int argc, char **argv)
 
 #else
 
-#warning "missing compile-time dependencies: cryptominisat, kitty and args are required"
+#warning "missing compile-time dependencies: glucose, kitty and args are required"
 
 #include <iostream>
 
@@ -189,11 +190,11 @@ int main( int argc, char *argv[] )
 {
   (void)(argc);
   std::cerr << "[e] missing compile-time dependencies for " << argv[0] << std::endl;
-  std::cout << "[e] cryptominisat, kitty and args are required" << std::endl;
+  std::cout << "[e] glucose, kitty and args are required" << std::endl;
   return 1;
 }
 
-#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION && ARGS_EXTENSION */
+#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION && ARGS_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

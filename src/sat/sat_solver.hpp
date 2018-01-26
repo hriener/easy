@@ -84,7 +84,7 @@ struct sat_solver
 
 } /* sat */
 
-#endif /* CRYPTOMINISAT_EXTENSION */
+#endif /* GLUCOSE_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2
