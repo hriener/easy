@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION)
+#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION)
 
 #include <esop/exact_synthesis.hpp>
 #include <esop/cube_utils.hpp>
@@ -237,7 +237,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
 
 } /* esop */
 
-#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION */
+#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

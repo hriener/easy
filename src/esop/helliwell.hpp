@@ -34,7 +34,7 @@
  * and Systems, 1990.
  */
 
-#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION)
+#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION)
 
 #include <kitty/kitty.hpp>
 #include <esop/esop.hpp>
@@ -47,7 +47,7 @@ esops_t synthesis_from_binary_string( const std::string& binary );
 
 } /* esop */
 
-#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION */
+#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

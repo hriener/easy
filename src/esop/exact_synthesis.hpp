@@ -25,7 +25,7 @@
 
 #pragma once
 
-#if defined(CRYPTOMINISAT_EXTENSION) && defined(KITTY_EXTENSION) && defined(JSON_EXTENSION)
+#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION) && defined(JSON_EXTENSION)
 
 #include <kitty/kitty.hpp>
 #include <esop/esop.hpp>
@@ -39,7 +39,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
 
 } /* esop */
 
-#endif /* CRYPTOMINISAT_EXTENSION && KITTY_EXTENSION && JSON_EXTENSION */
+#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION && JSON_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

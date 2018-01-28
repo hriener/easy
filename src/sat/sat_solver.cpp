@@ -123,7 +123,7 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
 
 } /* sat */
 
-#endif /* CRYPTOMINISAT_EXTENSION */
+#endif /* GLUCOSE_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2
