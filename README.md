@@ -12,7 +12,7 @@ Afterwards build the ESOP synthesis tool as follows:
 
     mkdir build
     cd build
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=RELEASE ..
     make
 
 ## External dependencies
