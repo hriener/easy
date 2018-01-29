@@ -85,7 +85,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
       std::vector<int> z_vars( k, 0u );
       for ( auto j = 0; j < k; ++j )
       {
-        assert( sid === 1 + 2*num_vars*k + sample_counter*k + j );
+        assert( sid == 1 + 2*num_vars*k + sample_counter*k + j );
         z_vars[ j ] = sid++;
       }
 
