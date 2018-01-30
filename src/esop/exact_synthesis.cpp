@@ -31,6 +31,7 @@
 #include <sat/cnf_writer.hpp>
 #include <sat/gauss.hpp>
 #include <sat/xor_clauses_to_cnf.hpp>
+#include <sat/cnf_symmetry_breaking.hpp>
 #include <utils/string_utils.hpp>
 #include <boost/format.hpp>
 #include <fstream>
@@ -144,6 +145,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
 
     sat::gauss_elimination().apply( constraints );
     sat::xor_clauses_to_cnf().apply( constraints );
+    sat::cnf_symmetry_breaking().apply( constraints );
 
     if ( dump )
     {

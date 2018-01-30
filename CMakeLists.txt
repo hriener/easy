@@ -64,6 +64,7 @@ set(SOURCES
   src/sat/cnf_writer.cpp
   src/sat/gauss.cpp
   src/sat/xor_clauses_to_cnf.cpp
+  src/sat/cnf_symmetry_breaking.cpp
   src/esop/print.cpp
   src/esop/helliwell.cpp
   src/esop/combine.cpp
