@@ -25,8 +25,19 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/ext/glucose-syrup-4.1)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLUCOSE_EXTENSION")
   add_subdirectory(ext/glucose-syrup-4.1)
   target_compile_options(glucose-lib-static PUBLIC "-w")
+  target_compile_options(glucose-lib-shared PUBLIC "-w")
   include_directories(ext/glucose-syrup-4.1/glucose/)
   list(APPEND EXT_LIBS glucose-lib-static)
+endif()
+
+if (EXISTS ${CMAKE_SOURCE_DIR}/ext/breakid-2.3)
+  message("Found BREAKID extension")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBREAKID_EXTENSION")
+  add_subdirectory(ext/breakid-2.3)
+  target_compile_options(breakid-lib-static PUBLIC "-w")
+  target_compile_options(breakid-lib-shared PUBLIC "-w")
+  include_directories(ext/breakid-2.3/breakid/src/)
+  list(APPEND EXT_LIBS breakid-lib-static)
 endif()
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/ext/kitty)
@@ -53,6 +64,7 @@ set(SOURCES
   src/sat/cnf_writer.cpp
   src/sat/gauss.cpp
   src/sat/xor_clauses_to_cnf.cpp
+  src/sat/cnf_symmetry_breaking.cpp
   src/esop/print.cpp
   src/esop/helliwell.cpp
   src/esop/combine.cpp

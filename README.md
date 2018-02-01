@@ -12,7 +12,7 @@ Afterwards build the ESOP synthesis tool as follows:
 
     mkdir build
     cd build
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=RELEASE ..
     make
 
 ## External dependencies
@@ -22,6 +22,7 @@ Afterwards build the ESOP synthesis tool as follows:
 * [kitty](https://github.com/msoeken/kitty)
 * [args](https://github.com/Taywee/args)
 * [json](https://github.com/nlohmann/json)
+* [BreakIt](https://bitbucket.org/krr/breakid)
 
 ## Usage
 

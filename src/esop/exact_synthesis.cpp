@@ -31,6 +31,7 @@
 #include <sat/cnf_writer.hpp>
 #include <sat/gauss.hpp>
 #include <sat/xor_clauses_to_cnf.hpp>
+#include <sat/cnf_symmetry_breaking.hpp>
 #include <utils/string_utils.hpp>
 #include <boost/format.hpp>
 #include <fstream>
@@ -64,6 +65,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
   for ( auto k = 1u; k <= max_number_of_cubes; ++k )
   {
     // std::cout << "[i] bounded synthesis for k = " << k << std::endl;
+    auto sid = 1 + 2*num_vars*k;
 
     sat::constraints constraints;
     sat::sat_solver solver;
@@ -81,12 +83,16 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
         continue;
       }
 
-      std::vector<int> xor_clause;
+      std::vector<int> z_vars( k, 0u );
+      for ( auto j = 0; j < k; ++j )
+      {
+        assert( sid == 1 + 2*num_vars*k + sample_counter*k + j );
+        z_vars[ j ] = sid++;
+      }
 
       for ( auto j = 0u; j < k; ++j )
       {
-        const int z = 1 + 2*num_vars*k + sample_counter*k + j;
-        xor_clause.push_back( z );
+        const int z = z_vars[ j ];
 
         // positive
         for ( auto l = 0; l < num_vars; ++l )
@@ -112,7 +118,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
 
       for ( auto j = 0u; j < k; ++j )
       {
-        const int z = 1 + 2*num_vars*k + sample_counter*k + j;
+        const int z = z_vars[ j ];
 
         // negative
         std::vector<int> clause = { z };
@@ -131,7 +137,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
         constraints.add_clause( clause );
       }
 
-      constraints.add_xor_clause( xor_clause, binary[ minterm._bits ] == '1' );
+      constraints.add_xor_clause( z_vars, binary[ minterm._bits ] == '1' );
 
       ++sample_counter;
       ++minterm._bits;
@@ -139,6 +145,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
 
     sat::gauss_elimination().apply( constraints );
     sat::xor_clauses_to_cnf().apply( constraints );
+    sat::cnf_symmetry_breaking().apply( constraints );
 
     if ( dump )
     {
