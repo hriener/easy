@@ -53,9 +53,9 @@ namespace esop
 
 esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlohmann::json& config  )
 {
-  unsigned max_number_of_cubes = config[ "maximum_cubes" ];
-  bool dump = config[ "dump_cnf" ];
-
+  const auto max_number_of_cubes = ( config.count( "maximum_cubes" ) > 0u ? unsigned(config[ "maximum_cubes" ]) : 10 );
+  const auto dump = ( config.count( "dump_cnf" ) > 0u ? bool(config[ "dump_cnf" ]) : false );
+  const auto one_esop = ( config.count( "one_esop" ) > 0u ? bool(config[ "one_esop" ]) : true );
   const int num_vars = log2( binary.size() );
   assert( binary.size() == (1ull << num_vars) && "bit-width is not a power of 2" );
 
@@ -208,6 +208,12 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
       if ( esop.empty() )
       {
         return { esop };
+      }
+
+      /* if only one ESOP should be computed then terminate */
+      if ( one_esop )
+      {
+	return { esop };
       }
 
       std::sort( esop.begin(), esop.end(), cube_weight_compare( num_vars ) );

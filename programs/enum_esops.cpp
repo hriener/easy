@@ -94,6 +94,7 @@ int main(int argc, char **argv)
   args::Flag           reverse(   parser, "reverse",     "reverse input functions",        { 'r', "reverse" } );
   args::Flag           echo(      parser, "echo",        "echo input function",            { 'e', "echo" } );
   args::Flag           dump(      parser, "cnf",         "dump intermediate CNF files",    { "cnf" } );
+  args::Flag           all(       parser, "all",         "enumerate all exact ESOPs",      { "all" } );
 
   std::unordered_map<std::string, esop_representation_enum> map{
     {"expr", esop_representation_enum::xor_expression},
@@ -142,6 +143,11 @@ int main(int argc, char **argv)
   nlohmann::json config;
   config["maximum_cubes"] = 10;
   config["dump_cnf"] = bool(dump);
+
+  if ( all )
+  {
+    config["one_esop"] = false;
+  }
 
   std::string line;
   while ( std::getline( std::cin, line ) )
