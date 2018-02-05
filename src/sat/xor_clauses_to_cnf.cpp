@@ -29,6 +29,10 @@
 namespace sat
 {
 
+xor_clauses_to_cnf::xor_clauses_to_cnf( int& sid )
+  : _sid( sid )
+{}
+
 void xor_clauses_to_cnf::add_xor_clause( constraints& constraints, const std::vector<int>& xor_clause, bool value )
 {
   std::queue<int> lits;
@@ -44,7 +48,7 @@ void xor_clauses_to_cnf::add_xor_clause( constraints& constraints, const std::ve
     auto b = lits.front();
     lits.pop();
 
-    int c = ++constraints._num_variables;
+    int c = _sid++;
     constraints.add_clause( { -a, -b, -c } );
     constraints.add_clause( {  a,  b, -c } );
     constraints.add_clause( {  a, -b,  c } );

@@ -65,7 +65,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
   for ( auto k = 1u; k <= max_number_of_cubes; ++k )
   {
     // std::cout << "[i] bounded synthesis for k = " << k << std::endl;
-    auto sid = 1 + 2*num_vars*k;
+    int sid = 1 + 2*num_vars*k;
 
     sat::constraints constraints;
     sat::sat_solver solver;
@@ -144,7 +144,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
     } while( minterm._bits < (1 << num_vars) );
 
     sat::gauss_elimination().apply( constraints );
-    sat::xor_clauses_to_cnf().apply( constraints );
+    sat::xor_clauses_to_cnf( sid ).apply( constraints );
     sat::cnf_symmetry_breaking().apply( constraints );
 
     if ( dump )

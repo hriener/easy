@@ -33,9 +33,13 @@ namespace sat
 class xor_clauses_to_cnf
 {
 public:
+  xor_clauses_to_cnf( int& sid );
+
   void apply( constraints& constraints );
 
   void add_xor_clause( constraints& constraints, const std::vector<int>& xor_clause, bool value );
+
+  int& _sid;
 }; /* xor_clauses_to_cnf */
 
 } /* sat */
