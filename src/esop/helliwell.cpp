@@ -170,7 +170,7 @@ esops_t synthesis_from_binary_string( const std::string& binary )
   {
     esop_t esop;
     std::vector<int> blocking_clause;
-    for ( auto i = 0u; i != solver._solver.nVars(); ++i )
+    for ( auto i = 0u; i != solver._solver->nVars(); ++i )
     {
       const auto var = i+1;
       if ( result.model[i] == l_True )

@@ -59,6 +59,13 @@ void constraints::add_xor_clause( const clause_t& clause, bool value )
 
 sat_solver::sat_solver()
 {
+  _solver = std::make_unique<Glucose::Solver>();
+}
+
+void sat_solver::reset()
+{
+  _solver = std::make_unique<Glucose::Solver>();
+  _num_vars = 0;
 }
 
 sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
@@ -72,12 +79,12 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
       const unsigned var = abs(l)-1;
       while ( _num_vars <= var )
       {
-	_solver.newVar();
+	_solver->newVar();
 	++_num_vars;
       }
       clause.push( Glucose::mkLit( var, l < 0 ) );
     }
-    _solver.addClause( clause );
+    _solver->addClause( clause );
   }
   constraints._clauses.clear();
 
@@ -94,16 +101,16 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
       const unsigned var = abs(v)-1;
       while ( _num_vars <= var )
       {
-	_solver.newVar();
+	_solver->newVar();
 	++_num_vars;
       }
       assume.push( Glucose::mkLit( var, v < 0 ) );
     }
-    sat = _solver.solve( assume );
+    sat = _solver->solve( assume );
   }
   else
   {
-    sat = _solver.solve();
+    sat = _solver->solve();
   }
 
   if ( sat )
@@ -111,7 +118,7 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
     std::vector<Glucose::lbool> model( _num_vars );
     for ( auto i = 0; i < _num_vars; ++i )
     {
-      model[i] = _solver.modelValue( i );
+      model[i] = _solver->modelValue( i );
     }
     return result( model );
   }

@@ -77,9 +77,10 @@ struct sat_solver
 
   sat_solver();
   result solve( constraints& constraints, const assumptions_t& assumptions = {} );
+  void reset();
 
   unsigned _num_vars = 0;
-  Glucose::Solver _solver;
+  std::unique_ptr<Glucose::Solver> _solver;
 };
 
 } /* sat */
