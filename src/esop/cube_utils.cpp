@@ -173,6 +173,30 @@ std::vector<std::vector<kitty::cube>> combinations( const std::vector<kitty::cub
   return result;
 }
 
+bool ternary_count_next( std::string& digits )
+{
+  auto lsb = digits.size();
+  for ( auto i = 0; i < digits.size(); ++i )
+  {
+    if ( digits[i] == '-' || digits[i] == '0' )
+    {
+      lsb = i;
+    }
+  }
+
+  if ( lsb != digits.size() )
+  {
+    if ( digits[lsb] == '-' ) digits[lsb] = '0';
+    else if ( digits[lsb] == '0' ) digits[lsb] = '1';
+    for ( auto i = lsb+1; i < digits.size(); ++i )
+    {
+      digits[i] = '-';
+    }
+    return true;
+  }
+  return false;
+}
+
 } /* esop */
 
 #endif /* KITTY_EXTENSION */

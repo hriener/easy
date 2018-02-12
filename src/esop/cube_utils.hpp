@@ -44,6 +44,7 @@ struct cube_weight_compare
 }; /* cube_weight_compare */
 
 std::vector<std::vector<kitty::cube>> combinations( const std::vector<kitty::cube>& e, std::size_t t );
+bool ternary_count_next( std::string& digits );
 
 } /* esop */
 
