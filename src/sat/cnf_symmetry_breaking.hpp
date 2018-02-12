@@ -33,7 +33,11 @@ namespace sat
 class cnf_symmetry_breaking
 {
 public:
+  cnf_symmetry_breaking( int& sid );
+
   void apply( constraints& constraints );
+
+  int& _sid;
 }; /* cnf_symmmetry_breaking */
 
 } /* sat */

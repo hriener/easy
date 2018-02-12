@@ -33,6 +33,10 @@
 namespace sat
 {
 
+cnf_symmetry_breaking::cnf_symmetry_breaking( int& sid )
+  : _sid( sid )
+{}
+
 void cnf_symmetry_breaking::apply( constraints& constraints )
 {
   std::unordered_set<sptr<Clause>, UVecHash, UvecEqual> clauses;
@@ -76,6 +80,7 @@ void cnf_symmetry_breaking::apply( constraints& constraints )
     constraints._clauses.push_back( c );
   }
   constraints._num_variables = brkr.getTotalNbVars();
+  _sid = brkr.getTotalNbVars();
 }
 
 } /* sat */

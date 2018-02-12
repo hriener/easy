@@ -137,7 +137,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
         constraints.add_clause( clause );
       }
 
-      constraints.add_xor_clause( z_vars, binary[ minterm._bits ] == '1' );
+      constraints.add_xor_clause( z_vars, bits[ minterm._bits ] == '1' );
 
       ++sample_counter;
       ++minterm._bits;
@@ -145,11 +145,11 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
 
     sat::gauss_elimination().apply( constraints );
     sat::xor_clauses_to_cnf( sid ).apply( constraints );
-    sat::cnf_symmetry_breaking().apply( constraints );
+    sat::cnf_symmetry_breaking( sid ).apply( constraints );
 
     if ( dump )
     {
-      const std::string filename = boost::str( boost::format( "0x%s-%d.cnf" ) % utils::hex_string_from_binary_string( binary ) % k );
+      const std::string filename = boost::str( boost::format( "0x%s-%d.cnf" ) % utils::hex_string_from_binary_string( bits ) % k );
       std::cout << "[i] write CNF file " << filename << std::endl;
       std::ofstream os( filename );
       {
