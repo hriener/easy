@@ -123,7 +123,7 @@ std::vector<std::vector<kitty::cube>> combinations( const std::vector<kitty::cub
     std::vector<kitty::cube> v;
     for ( auto i = 0u; i < t; ++i )
     {
-      v.push_back( e[i] );
+      v.push_back( e[ c[ i ] ] );
     }
     result.push_back( v );
 
