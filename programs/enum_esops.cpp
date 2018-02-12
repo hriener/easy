@@ -31,6 +31,7 @@
 #include <kitty/kitty.hpp>
 #include <json/json.hpp>
 #include <args.hxx>
+#include <boost/algorithm/string.hpp>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -95,6 +96,7 @@ int main(int argc, char **argv)
   args::Flag           echo(      parser, "echo",        "echo input function",            { 'e', "echo" } );
   args::Flag           dump(      parser, "cnf",         "dump intermediate CNF files",    { "cnf" } );
   args::Flag           all(       parser, "all",         "enumerate all exact ESOPs",      { "all" } );
+  args::Flag           dc(        parser, "dc",          "toggle care-set/dc-set",         { "dc" } );
 
   std::unordered_map<std::string, esop_representation_enum> map{
     {"expr", esop_representation_enum::xor_expression},
@@ -156,29 +158,60 @@ int main(int argc, char **argv)
     utils::trim( line );
     if ( line == "" ) continue;
 
+    std::vector<std::string> tokens;
+    boost::split( tokens, line, boost::is_any_of( " " ) );
+
+    auto bits = parse_function( tokens[0u] );
+    const auto number_of_variables = int( log2( bits.size() ) );
+    if ( tokens.size() == 1u )
+    {
+      tokens.push_back( std::string( 1 << number_of_variables, '1' ) );
+    }
+    else if ( tokens.size() > 2u )
+    {
+      std::cout << "[e] too many tokens" << std::endl;
+      continue;
+    }
+
+    auto care = parse_function( tokens[1u] );
+    if ( dc )
+    {
+      for ( auto i = 0u; i < care.size(); ++i )
+      {
+	care[i] = (care[i] == '0' ? '1' : (care[i] == '1' ? '0' : care[i]));
+      }
+    }
+
+    if ( bits.size() != care.size() )
+    {
+      std::cout << "[e] bits and care have to be of the same length" << std::endl;
+      continue;
+    }
+
     /* echo */
     if ( echo )
     {
-      std::cout << "[i] synthesize ESOPs for " << line << std::endl;
+      std::cout << "[i] synthesize ESOPs for " << bits << " (" << care << ")" << std::endl;
     }
 
-    auto binary = parse_function( line );
     if ( reverse )
     {
-      std::reverse( binary.begin(), binary.end() );
+      std::reverse( bits.begin(), bits.end() );
+      std::reverse( care.begin(), care.end() );
     }
 
     /* solve */
-    std::reverse( binary.begin(), binary.end() );
-    esop::esops_t esops = esop::exact_synthesis_from_binary_string( binary, config );
-    std::reverse( binary.begin(), binary.end() );
+    std::reverse( bits.begin(), bits.end() );
+    std::reverse( care.begin(), care.end() );
+    auto esops = esop::exact_synthesis_from_binary_string( bits, care, config );
+    std::reverse( bits.begin(), bits.end() );
+    std::reverse( care.begin(), care.end() );
     sort_by_number_of_product_terms( esops );
 
     /* print result */
-    const auto number_of_variables = int( log2( binary.size() ) );
     for ( const auto& e : esops )
     {
-      std::cout << binary << ' ';
+      std::cout << bits << ' ' << care << ' ';
       print_function( e, number_of_variables, std::cout );
     }
   }

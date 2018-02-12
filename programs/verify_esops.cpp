@@ -100,18 +100,33 @@ int main(int argc, char **argv)
     std::vector<std::string> tokens;
     boost::split( tokens, line, boost::is_any_of( " " ) );
 
-    const auto target = std::bitset<1024>( tokens[0] ).to_ulong();
+    const auto size = tokens[0].size();
+    const auto bits = std::bitset<1024>( tokens[0] );
+    const auto care = std::bitset<1024>( tokens[1] );
 
     std::vector<kitty::cube> cubes;
-    for ( auto i = 1u; i < tokens.size(); ++i )
+    for ( auto i = 2u; i < tokens.size(); ++i )
     {
       cubes.emplace_back( tokens[i] );
     }
 
-    kitty::dynamic_truth_table tt( int(log2(tokens[0].size())) );
+    kitty::dynamic_truth_table tt( int(log2(size)) );
     kitty::create_from_cubes( tt, cubes, true );
 
-    const auto eq = tt._bits[0u] == target;
+    assert( size == bits.size() );
+    assert( size == care.size() );
+
+    auto eq = true;
+    for ( auto i = 0; i < size; ++i )
+    {
+      std::cout << care[i] << ' ' << bits[i] << ' ' << get_bit( tt, i ) << std::endl;
+      if ( care[i] && bits[i] != get_bit( tt, i ) )
+      {
+	eq = false;
+	break;
+      }
+    }
+
     if ( !eq )
     {
       ++errors;

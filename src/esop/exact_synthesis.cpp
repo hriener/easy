@@ -51,14 +51,15 @@ namespace esop
  * Public functions                                                           *
  ******************************************************************************/
 
-esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlohmann::json& config  )
+esops_t exact_synthesis_from_binary_string( const std::string& bits, const std::string& care, const nlohmann::json& config  )
 {
   const auto max_number_of_cubes = ( config.count( "maximum_cubes" ) > 0u ? unsigned(config[ "maximum_cubes" ]) : 10 );
   const auto dump = ( config.count( "dump_cnf" ) > 0u ? bool(config[ "dump_cnf" ]) : false );
   const auto one_esop = ( config.count( "one_esop" ) > 0u ? bool(config[ "one_esop" ]) : true );
-  const int num_vars = log2( binary.size() );
-  assert( binary.size() == (1ull << num_vars) && "bit-width is not a power of 2" );
 
+  const int num_vars = log2( bits.size() );
+  assert( bits.size() == (1ull << num_vars) && "bit-width of bits is not a power of 2" );
+  assert( care.size() == (1ull << num_vars) && "bit-width of care is not a power of 2" );
   assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
 
   esop::esops_t esops;
@@ -77,7 +78,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlo
     do
     {
       /* skip don't cares */
-      if ( binary[ minterm._bits ] != '0' && binary[ minterm._bits ] != '1' )
+      if ( ( bits[ minterm._bits ] != '0' && bits[ minterm._bits ] != '1' ) || care[ minterm._bits ] != '1' )
       {
         ++minterm._bits;
         continue;

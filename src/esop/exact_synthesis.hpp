@@ -35,7 +35,7 @@
 namespace esop
 {
 
-esops_t exact_synthesis_from_binary_string( const std::string& binary, const nlohmann::json& config );
+esops_t exact_synthesis_from_binary_string( const std::string& bits, const std::string& care, const nlohmann::json& config );
 
 } /* esop */
 
