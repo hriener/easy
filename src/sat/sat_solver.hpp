@@ -30,6 +30,7 @@
 #include <core/SolverTypes.h>
 #include <core/Solver.h>
 #include <cassert>
+#include <memory>
 #include <vector>
 
 namespace sat
