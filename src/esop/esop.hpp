@@ -26,6 +26,7 @@
 #pragma once
 
 #include <kitty/kitty.hpp>
+#include <iostream>
 #include <vector>
 
 namespace esop
@@ -33,6 +34,10 @@ namespace esop
 
 using esop_t  = std::vector<kitty::cube>;
 using esops_t = std::vector<esop_t>;
+
+/* print esop */
+void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
+void print_esop_as_cubes( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
 
 } /* esop */
 

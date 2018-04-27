@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <esop/print.hpp>
+#include <esop/esop.hpp>
 
 namespace esop
 {
@@ -31,6 +31,7 @@ namespace esop
 /******************************************************************************
  * Types                                                                      *
  ******************************************************************************/
+static constexpr auto XOR_SYMBOL = "\u2295";
 
 /******************************************************************************
  * Private functions                                                          *
@@ -40,10 +41,9 @@ namespace esop
  * Public functions                                                           *
  ******************************************************************************/
 
-void print_esop_expression( const esop_t& esop, unsigned num_vars, std::ostream& os )
+void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ostream& os )
 {
   assert( num_vars <= 32 );
-  static const auto SYMBOL_XOR = "\u2295";
   os << esop.size() << ' ';
   for ( auto i = 0u; i < esop.size(); ++i )
   {
@@ -72,13 +72,13 @@ void print_esop_expression( const esop_t& esop, unsigned num_vars, std::ostream&
     }
     if ( i+1 < esop.size() )
     {
-      os << SYMBOL_XOR;
+      os << XOR_SYMBOL;
     }
   }
   os << '\n';
 }
 
-void print_esop_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostream& os )
+void print_esop_as_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostream& os )
 {
   assert( num_vars <= 32 );
   for ( const auto& c : esop )

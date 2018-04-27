@@ -25,7 +25,6 @@
 
 #if defined(GLUCOSE_EXTENSION)
 
-#include <esop/print.hpp>
 #include <esop/exact_synthesis.hpp>
 #include <utils/string_utils.hpp>
 #include <kitty/kitty.hpp>
@@ -132,10 +131,10 @@ int main(int argc, char **argv)
   switch( args::get( repr ) )
   {
   case esop_representation_enum::xor_expression:
-    print_function = esop::print_esop_expression;
+    print_function = esop::print_esop_as_exprs;
     break;
   case esop_representation_enum::cube_vector:
-    print_function = esop::print_esop_cubes;
+    print_function = esop::print_esop_as_cubes;
     break;
   default:
     assert( false && "unsupported output representation" );
