@@ -35,11 +35,45 @@ namespace esop
 using esop_t  = std::vector<kitty::cube>;
 using esops_t = std::vector<esop_t>;
 
-/* verify esop */
-bool verify_esop( const std::vector<kitty::cube>& esop, const std::string& bits, const std::string& care );
+/*! \brief Synthesize ESOP.
+ *
+ * Synthesize a $k$-ESOP given an incompletely-specified Boolean function as specification.
+ *
+ * \param bits a Boolean function
+ * \param care a care set as Boolean function
+ * \param number_of_terms a fixed number of product terms (= k)
+ */
+esop_t synthesize_esop( const std::string& bits, const std::string& care, const unsigned number_of_terms );
 
-/* print esop */
+/*! \brief Verify ESOP.
+ *
+ * Verify ESOP given an incompletely-specified Boolean function as specification.
+ *
+ * \param esop ESOP
+ * \param bits output as Boolean function
+ * \param care care-set as Boolean function
+ * \return true if ESOP and bits are equal within the care set, or false otherwise
+ */
+bool verify_esop( const esop_t& esop, const std::string& bits, const std::string& care );
+
+/*! \brief Printer function for ESOP.
+ *
+ * Print ESOP as an expression.
+ *
+ * \param esop ESOP
+ * \param num_vars Number of variables
+ * \param os Output stream
+ */
 void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
+
+/*! \brief Printer function for ESOP.
+ *
+ * Print ESOP as a list of cubes.
+ *
+ * \param esop ESOP
+ * \param num_vars Number of variables
+ * \param os Output stream
+ */
 void print_esop_as_cubes( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
 
 } /* esop */

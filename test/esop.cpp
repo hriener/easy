@@ -52,3 +52,21 @@ TEST_CASE( "all_esop", "[synthesis]" )
     CHECK( esop::verify_esop( e, bits, care ) );
   }
 }
+
+/**
+ * Synthesize one ESOP for a given Boolean function (new API)
+ */
+TEST_CASE( "new_api", "[synthesis]" )
+{
+  const auto number_of_variables = 5u;
+  const std::string bits = "01111111111101010111111101010011";
+  const std::string care = "11111111111111111111111111111111";
+
+  /* try to synthesize with 4 terms which is not enough */
+  auto esop = esop::synthesize_esop( bits, care, 4u );
+  CHECK( esop.empty() );
+
+  /* try again with 5 terms */
+  esop = esop::synthesize_esop( bits, care, 5u );
+  CHECK( esop::verify_esop( esop, bits, care ) );
+}

@@ -24,6 +24,8 @@
  */
 
 #include <esop/esop.hpp>
+#include <esop/exact_synthesis.hpp>
+#include <cassert>
 
 namespace esop
 {
@@ -40,6 +42,42 @@ static constexpr auto XOR_SYMBOL = "\u2295";
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
+
+esop_t synthesize_esop( const std::string& bits, const std::string& care, const unsigned number_of_terms )
+{
+  nlohmann::json config;
+  config[ "maximum_cubes" ] = number_of_terms;
+  config[ "one_esop" ] = true;
+
+  const auto esops = esop::exact_synthesis_from_binary_string( bits, care, config );
+
+  if ( esops.size() > 0 )
+  {
+    return esops[0u];
+  }
+  else
+  {
+    return {};
+  }
+}
+
+bool verify_esop( const esop::esop_t& esop, const std::string& bits, const std::string& care )
+{
+  assert( bits.size() == care.size() );
+  const auto number_of_variables = unsigned( log2( bits.size() ) );
+
+  kitty::dynamic_truth_table tt( number_of_variables );
+  kitty::create_from_cubes( tt, esop, true );
+
+  for ( auto i = 0; i < bits.size(); ++i )
+  {
+    if ( care[i] && bits[i] != '0' + get_bit( tt, i ) )
+    {
+      return false;
+    }
+  }
+  return true;
+}
 
 void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ostream& os )
 {
@@ -87,24 +125,6 @@ void print_esop_as_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostr
     os << ' ';
   }
   os << '\n';
-}
-
-bool verify_esop( const esop::esop_t& esop, const std::string& bits, const std::string& care )
-{
-  assert( bits.size() == care.size() );
-  const auto number_of_variables = unsigned( log2( bits.size() ) );
-
-  kitty::dynamic_truth_table tt( number_of_variables );
-  kitty::create_from_cubes( tt, esop, true );
-
-  for ( auto i = 0; i < bits.size(); ++i )
-  {
-    if ( care[i] && bits[i] != '0' + get_bit( tt, i ) )
-    {
-      return false;
-    }
-  }
-  return true;
 }
 
 } /* esop */
