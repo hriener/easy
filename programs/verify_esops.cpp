@@ -113,13 +113,12 @@ int main(int argc, char **argv)
     kitty::dynamic_truth_table tt( int(log2(size)) );
     kitty::create_from_cubes( tt, cubes, true );
 
-    assert( size == bits.size() );
-    assert( size == care.size() );
+    assert( size <= bits.size() );
+    assert( size <= care.size() );
 
     auto eq = true;
     for ( auto i = 0; i < size; ++i )
     {
-      std::cout << care[i] << ' ' << bits[i] << ' ' << get_bit( tt, i ) << std::endl;
       if ( care[i] && bits[i] != get_bit( tt, i ) )
       {
 	eq = false;
