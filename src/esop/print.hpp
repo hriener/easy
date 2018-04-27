@@ -25,8 +25,6 @@
 
 #pragma once
 
-#if defined(KITTY_EXTENSION)
-
 #include <esop/esop.hpp>
 #include <iostream>
 
@@ -37,8 +35,6 @@ void print_esop_expression( const esop_t& esop, unsigned num_vars, std::ostream&
 void print_esop_cubes( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
 
 } /* esop */
-
-#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

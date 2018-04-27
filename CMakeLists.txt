@@ -13,7 +13,6 @@ if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
 endif()
 
 add_subdirectory(ext)
-include_directories(src)
 
 # external libraries
 if (EXISTS ${CMAKE_SOURCE_DIR}/ext/cryptominisat)
@@ -44,23 +43,7 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/ext/breakid-2.3)
   list(APPEND EXT_LIBS breakid-lib-static)
 endif()
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/ext/kitty)
-  message("Found KITTY extension")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DKITTY_EXTENSION")
-  include_directories(ext/kitty/include/)
-endif()
-
-if (EXISTS ${CMAKE_SOURCE_DIR}/ext/args)
-  message("Found ARGS extension")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DARGS_EXTENSION")
-  include_directories(ext/args/)
-endif()
-
-if (EXISTS ${CMAKE_SOURCE_DIR}/ext/json)
-  message("Found JSON extension")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_EXTENSION")
-  include_directories(ext/json/include/)
-endif()
+include_directories(src)
 
 set(SOURCES
   src/utils/string_utils.cpp
@@ -76,13 +59,13 @@ set(SOURCES
   src/esop/exact_synthesis.cpp)
 
 add_library(esop_synthesis ${SOURCES})
-target_link_libraries(esop_synthesis ${EXT_LIBS} esop_fmt)
+target_link_libraries(esop_synthesis ${EXT_LIBS} esop_fmt esop_kitty esop_json)
 
 add_executable(enum_esops programs/enum_esops.cpp)
-target_link_libraries(enum_esops esop_synthesis)
+target_link_libraries(enum_esops esop_synthesis esop_args)
 
 add_executable(verify_esops programs/verify_esops.cpp)
-target_link_libraries(verify_esops esop_synthesis)
+target_link_libraries(verify_esops esop_synthesis esop_args)
 
 if(ESOP_TEST)
   add_subdirectory(test)

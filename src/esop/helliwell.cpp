@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION)
+#if defined(GLUCOSE_EXTENSION)
 
 #include <esop/helliwell.hpp>
 #include <sat/sat_solver.hpp>
@@ -197,7 +197,7 @@ esops_t synthesis_from_binary_string( const std::string& binary )
 
 } /* esop */
 
-#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION */
+#endif /* GLUCOSE_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

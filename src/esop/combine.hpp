@@ -25,8 +25,6 @@
 
 #pragma once
 
-#if defined(KITTY_EXTENSION)
-
 #include <esop/esop.hpp>
 #include <kitty/cube.hpp>
 
@@ -50,8 +48,6 @@ esop_t complex_combine( esop_t a, esop_t b, uint8_t var_index, uint8_t i, uint8_
 esops_t complex_combine( const esops_t& as, const esops_t& bs, uint8_t var_index, uint8_t i, uint8_t j );
 
 } /* esop */
-
-#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

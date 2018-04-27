@@ -23,8 +23,6 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(KITTY_EXTENSION)
-
 #include <esop/combine.hpp>
 #include <cassert>
 
@@ -145,8 +143,6 @@ esops_t complex_combine( const esops_t& as, const esops_t& bs, uint8_t var_index
 }
 
 } /* esop */
-
-#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

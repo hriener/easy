@@ -25,8 +25,6 @@
 
 #pragma once
 
-#if defined(KITTY_EXTENSION)
-
 #include <kitty/kitty.hpp>
 #include <vector>
 
@@ -37,8 +35,6 @@ using esop_t  = std::vector<kitty::cube>;
 using esops_t = std::vector<esop_t>;
 
 } /* esop */
-
-#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

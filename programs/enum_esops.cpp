@@ -23,14 +23,14 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION) && defined(ARGS_EXTENSION)
+#if defined(GLUCOSE_EXTENSION)
 
 #include <esop/print.hpp>
 #include <esop/exact_synthesis.hpp>
 #include <utils/string_utils.hpp>
 #include <kitty/kitty.hpp>
 #include <json/json.hpp>
-#include <args.hxx>
+#include <args/args.hxx>
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
 #include <fstream>
@@ -229,11 +229,11 @@ int main( int argc, char *argv[] )
 {
   (void)(argc);
   std::cerr << "[e] missing compile-time dependencies for " << argv[0] << std::endl;
-  std::cout << "[e] glucose, kitty and args are required" << std::endl;
+  std::cout << "[e] glucose is required" << std::endl;
   return 1;
 }
 
-#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION && ARGS_EXTENSION */
+#endif /* GLUCOSE_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

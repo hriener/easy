@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION)
+#if defined(GLUCOSE_EXTENSION)
 
 #include <esop/exact_synthesis.hpp>
 #include <esop/cube_utils.hpp>
@@ -269,7 +269,7 @@ bool verify_esop( const std::vector<kitty::cube>& esop, const std::string& bits,
 
 } /* esop */
 
-#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION */
+#endif /* GLUCOSE_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

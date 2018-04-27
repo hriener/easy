@@ -25,7 +25,7 @@
 
 #pragma once
 
-#if defined(GLUCOSE_EXTENSION) && defined(KITTY_EXTENSION) && defined(JSON_EXTENSION)
+#if defined(GLUCOSE_EXTENSION)
 
 #include <kitty/kitty.hpp>
 #include <esop/esop.hpp>
@@ -40,7 +40,7 @@ bool verify_esop( const std::vector<kitty::cube>& esop, const std::string& bits,
 
 } /* esop */
 
-#endif /* GLUCOSE_EXTENSION && KITTY_EXTENSION && JSON_EXTENSION */
+#endif /* GLUCOSE_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

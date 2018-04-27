@@ -25,8 +25,6 @@
 
 #pragma once
 
-#if defined(KITTY_EXTENSION)
-
 #include <kitty/kitty.hpp>
 
 namespace esop
@@ -47,8 +45,6 @@ std::vector<std::vector<kitty::cube>> combinations( const std::vector<kitty::cub
 bool ternary_count_next( std::string& digits );
 
 } /* esop */
-
-#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

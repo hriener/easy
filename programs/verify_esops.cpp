@@ -23,12 +23,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(KITTY_EXTENSION) && defined(ARGS_EXTENSION)
-
 #include <esop/print.hpp>
 #include <utils/string_utils.hpp>
 #include <kitty/kitty.hpp>
-#include <args.hxx>
+#include <args/args.hxx>
 #include <boost/algorithm/string.hpp>
 #include <bitset>
 #include <iostream>
@@ -151,22 +149,6 @@ int main(int argc, char **argv)
     return -1;
   }
 }
-
-#else
-
-#warning "missing compile-time dependencies: cryptominisat, kitty and args are required"
-
-#include <iostream>
-
-int main( int argc, char *argv[] )
-{
-  (void)(argc);
-  std::cerr << "[e] missing compile-time dependencies for " << argv[0] << std::endl;
-  std::cout << "[e] kitty and args are required" << std::endl;
-  return 1;
-}
-
-#endif /* KITTY_EXTENSION && ARGS_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

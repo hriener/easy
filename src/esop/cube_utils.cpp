@@ -23,8 +23,6 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(KITTY_EXTENSION)
-
 #include <esop/cube_utils.hpp>
 
 namespace esop
@@ -198,8 +196,6 @@ bool ternary_count_next( std::string& digits )
 }
 
 } /* esop */
-
-#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2

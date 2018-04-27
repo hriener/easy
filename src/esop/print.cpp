@@ -23,8 +23,6 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(KITTY_EXTENSION)
-
 #include <esop/print.hpp>
 
 namespace esop
@@ -92,8 +90,6 @@ void print_esop_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostream
 }
 
 } /* esop */
-
-#endif /* KITTY_EXTENSION */
 
 // Local Variables:
 // c-basic-offset: 2
