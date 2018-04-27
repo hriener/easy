@@ -33,7 +33,7 @@
 #include <sat/xor_clauses_to_cnf.hpp>
 #include <sat/cnf_symmetry_breaking.hpp>
 #include <utils/string_utils.hpp>
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <fstream>
 
 namespace esop
@@ -150,7 +150,7 @@ esops_t exact_synthesis_from_binary_string( const std::string& bits, const std::
 
     if ( dump )
     {
-      const std::string filename = boost::str( boost::format( "0x%s-%d.cnf" ) % utils::hex_string_from_binary_string( bits ) % k );
+      const std::string filename = fmt::format( "0x%s-%d.cnf" , utils::hex_string_from_binary_string( bits ), k );
       std::cout << "[i] write CNF file " << filename << std::endl;
       std::ofstream os( filename );
       {

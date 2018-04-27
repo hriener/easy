@@ -12,6 +12,7 @@ if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 endif()
 
+add_subdirectory(ext)
 include_directories(src)
 
 # external libraries
@@ -75,7 +76,7 @@ set(SOURCES
   src/esop/exact_synthesis.cpp)
 
 add_library(esop_synthesis ${SOURCES})
-target_link_libraries(esop_synthesis ${EXT_LIBS})
+target_link_libraries(esop_synthesis ${EXT_LIBS} esop_fmt)
 
 add_executable(enum_esops programs/enum_esops.cpp)
 target_link_libraries(enum_esops esop_synthesis)
