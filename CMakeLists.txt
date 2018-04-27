@@ -3,6 +3,9 @@ project(esop LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
+# Options
+option(ESOP_TEST "Build tests" OFF)
+
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra")
    set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3 -pg")
@@ -79,3 +82,7 @@ target_link_libraries(enum_esops esop_synthesis)
 
 add_executable(verify_esops programs/verify_esops.cpp)
 target_link_libraries(verify_esops esop_synthesis)
+
+if(ESOP_TEST)
+  add_subdirectory(test)
+endif()

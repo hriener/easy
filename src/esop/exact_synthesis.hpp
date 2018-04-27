@@ -36,6 +36,7 @@ namespace esop
 {
 
 esops_t exact_synthesis_from_binary_string( const std::string& bits, const std::string& care, const nlohmann::json& config );
+bool verify_esop( const std::vector<kitty::cube>& esop, const std::string& bits, const std::string& care );
 
 } /* esop */
 
