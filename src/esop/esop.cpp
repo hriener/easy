@@ -89,6 +89,24 @@ void print_esop_as_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostr
   os << '\n';
 }
 
+bool verify_esop( const esop::esop_t& esop, const std::string& bits, const std::string& care )
+{
+  assert( bits.size() == care.size() );
+  const auto number_of_variables = unsigned( log2( bits.size() ) );
+
+  kitty::dynamic_truth_table tt( number_of_variables );
+  kitty::create_from_cubes( tt, esop, true );
+
+  for ( auto i = 0; i < bits.size(); ++i )
+  {
+    if ( care[i] && bits[i] != '0' + get_bit( tt, i ) )
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 } /* esop */
 
 // Local Variables:

@@ -249,24 +249,6 @@ esops_t exact_synthesis_from_binary_string( const std::string& bits, const std::
   return esops;
 }
 
-bool verify_esop( const std::vector<kitty::cube>& esop, const std::string& bits, const std::string& care )
-{
-  assert( bits.size() == care.size() );
-  const auto s = int( log2( bits.size() ) );
-
-  kitty::dynamic_truth_table tt( s );
-  kitty::create_from_cubes( tt, esop, true );
-
-  for ( auto i = 0; i < bits.size(); ++i )
-  {
-    if ( care[i] && bits[i] != '0' + get_bit( tt, i ) )
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
 } /* esop */
 
 #endif /* GLUCOSE_EXTENSION */

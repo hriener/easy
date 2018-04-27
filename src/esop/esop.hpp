@@ -35,6 +35,9 @@ namespace esop
 using esop_t  = std::vector<kitty::cube>;
 using esops_t = std::vector<esop_t>;
 
+/* verify esop */
+bool verify_esop( const std::vector<kitty::cube>& esop, const std::string& bits, const std::string& care );
+
 /* print esop */
 void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
 void print_esop_as_cubes( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );

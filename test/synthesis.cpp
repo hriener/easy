@@ -10,6 +10,7 @@ TEST_CASE( "one_esop", "[synthesis]" )
   config[ "maximum_cubes" ] = 10;
   config[ "one_esop" ] = true;
 
+  // const auto number_of_variables = 5u;
   const std::string bits = "01111111111101010111111101010011";
   const std::string care = "11111111111111111111111111111111";
 
@@ -21,6 +22,7 @@ TEST_CASE( "one_esop", "[synthesis]" )
   /* number of terms of first ESOP */
   for ( const auto& e : esops )
   {
+    // esop::print_esop_as_exprs( e, number_of_variables );
     CHECK( esop::verify_esop( e, bits, care ) );
   }
 }
@@ -34,6 +36,7 @@ TEST_CASE( "all_esop", "[synthesis]" )
   config[ "maximum_cubes" ] = 10;
   config[ "one_esop" ] = false;
 
+  // const auto number_of_variables = 5u;
   const std::string bits = "01111111111101010111111101010011";
   const std::string care = "11111111111111111111111111111111";
 
@@ -45,6 +48,7 @@ TEST_CASE( "all_esop", "[synthesis]" )
   /* number of terms of first ESOP */
   for ( const auto& e : esops )
   {
+    // esop::print_esop_as_exprs( e, number_of_variables );
     CHECK( esop::verify_esop( e, bits, care ) );
   }
 }
