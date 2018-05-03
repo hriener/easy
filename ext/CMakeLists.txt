@@ -11,3 +11,6 @@ target_include_directories(esop_json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/json/
 add_library(esop_kitty INTERFACE)
 target_include_directories(esop_kitty INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/kitty/include)
 
+add_library(esop_rang INTERFACE)
+target_include_directories(esop_rang INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/rang)
+

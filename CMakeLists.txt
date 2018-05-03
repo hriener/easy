@@ -65,7 +65,7 @@ add_executable(enum_esops programs/enum_esops.cpp)
 target_link_libraries(enum_esops esop_synthesis esop_args)
 
 add_executable(verify_esops programs/verify_esops.cpp)
-target_link_libraries(verify_esops esop_synthesis esop_args)
+target_link_libraries(verify_esops esop_synthesis esop_args esop_rang)
 
 if(ESOP_TEST)
   add_subdirectory(test)
