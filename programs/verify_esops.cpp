@@ -27,6 +27,7 @@
 #include <utils/string_utils.hpp>
 #include <kitty/kitty.hpp>
 #include <args/args.hxx>
+#include <rang/rang.hpp>
 #include <boost/algorithm/string.hpp>
 #include <bitset>
 #include <iostream>
@@ -75,13 +76,13 @@ int main(int argc, char **argv)
   }
   catch (args::ParseError e)
   {
-    std::cerr << e.what() << std::endl;
+    std::cerr << rang::style::bold << rang::fg::red << e.what() << rang::style::reset << std::endl;
     std::cerr << parser;
     return 1;
   }
   catch (args::ValidationError e)
   {
-    std::cerr << e.what() << std::endl;
+    std::cerr << rang::style::bold << rang::fg::red << e.what() << rang::style::reset << std::endl;
     std::cerr << parser;
     return 1;
   }
@@ -131,7 +132,15 @@ int main(int argc, char **argv)
 
     if ( echo )
     {
-      std::cout << line << " " << ( eq ? "OK" : "ERROR" ) << std::endl;
+      std::cout << line << ' ';
+      if ( eq )
+      {
+        std::cout << rang::style::bold << rang::fg::blue << "OK" << rang::style::reset << std::endl;
+      }
+      else
+      {
+        std::cout << rang::style::bold << rang::fg::red << "ERROR" << rang::style::reset << std::endl;
+      }
     }
   }
 
