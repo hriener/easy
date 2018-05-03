@@ -24,6 +24,7 @@
  */
 
 #include <esop/cube_utils.hpp>
+#include <cassert>
 
 namespace esop
 {

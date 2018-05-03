@@ -25,6 +25,8 @@
 
 #include <esop/esop.hpp>
 #include <esop/exact_synthesis.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/constructors.hpp>
 #include <cassert>
 
 namespace esop

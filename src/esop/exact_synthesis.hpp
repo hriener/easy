@@ -27,7 +27,6 @@
 
 #if defined(GLUCOSE_EXTENSION)
 
-#include <kitty/kitty.hpp>
 #include <esop/esop.hpp>
 #include <json/json.hpp>
 #include <vector>

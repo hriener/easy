@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <kitty/kitty.hpp>
+#include <kitty/cube.hpp>
 #include <iostream>
 #include <vector>
 

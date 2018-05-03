@@ -33,6 +33,7 @@
 #include <sat/xor_clauses_to_cnf.hpp>
 #include <sat/cnf_symmetry_breaking.hpp>
 #include <utils/string_utils.hpp>
+#include <kitty/cube.hpp>
 #include <fmt/format.h>
 #include <fstream>
 
