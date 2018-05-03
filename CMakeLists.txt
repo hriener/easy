@@ -53,6 +53,7 @@ set(SOURCES
   src/sat/xor_clauses_to_cnf.cpp
   src/sat/cnf_symmetry_breaking.cpp
   src/esop/esop.cpp
+  src/esop/esop_synthesis.cpp
   src/esop/helliwell.cpp
   src/esop/combine.cpp
   src/esop/cube_utils.cpp

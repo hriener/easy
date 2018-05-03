@@ -25,45 +25,62 @@
 
 #pragma once
 
-#include <kitty/cube.hpp>
-#include <vector>
+#include <esop/esop.hpp>
+#include <json/json.hpp>
+#include <esop/exact_synthesis.hpp>
 
 namespace esop
 {
 
-using esop_t  = std::vector<kitty::cube>;
-using esops_t = std::vector<esop_t>;
+struct spec
+{
+  std::string bits;
+  std::string care;
+}; /* spec */
 
-/*! \brief Printer function for ESOP.
- *
- * Print ESOP as an expression.
- *
- * \param esop ESOP
- * \param num_vars Number of variables
- * \param os Output stream
- */
-void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
+struct esop_synthesizer_params
+{
+  /*! A fixed number of product terms (= k) */
+  unsigned number_of_terms;
+}; /* esop_synthesizer_params */
 
-/*! \brief Printer function for ESOP.
+/*! \brief ESOP Synthesizer
  *
- * Print ESOP as a list of cubes.
- *
- * \param esop ESOP
- * \param num_vars Number of variables
- * \param os Output stream
+ * Synthesizes a $k$-ESOP given an incompletely-specified Boolean function as specifiction.
  */
-void print_esop_as_cubes( const esop_t& esop, unsigned num_vars, std::ostream& os = std::cout );
+class esop_synthesizer
+{
+public:
+  esop_synthesizer( const spec& spec )
+    : _spec( spec )
+  {}
+  
+  esop_t synthesize( const esop_synthesizer_params& params )
+  {
+    nlohmann::json config;
+    config[ "maximum_cubes" ] = params.number_of_terms;
+    config[ "one_esop" ]      = true;
 
-/*! \brief Verify ESOP.
- *
- * Verify ESOP given an incompletely-specified Boolean function as specification.
- *
- * \param esop ESOP
- * \param bits output as Boolean function
- * \param care care-set as Boolean function
- * \return true if ESOP and bits are equal within the care set, or false otherwise
- */
-bool verify_esop( const esop_t& esop, const std::string& bits, const std::string& care );
+    const auto esops = esop::exact_synthesis_from_binary_string( _spec.bits, _spec.care, config );
+    if ( esops.size() > 0 )
+    {
+      return esops[ 0u ];
+    }
+    else
+    {
+      return {};
+    }
+  }
+
+  nlohmann::json stats() const
+  {
+    return _stats;
+  }
+
+private:
+  const spec& _spec;
+  nlohmann::json _stats;
+}; /* esop_synthesizer */
 
 } /* esop */
 

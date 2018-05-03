@@ -23,19 +23,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <esop/esop.hpp>
-#include <esop/exact_synthesis.hpp>
-#include <kitty/dynamic_truth_table.hpp>
-#include <kitty/constructors.hpp>
-#include <cassert>
-
 namespace esop
 {
 
 /******************************************************************************
  * Types                                                                      *
  ******************************************************************************/
-static constexpr auto XOR_SYMBOL = "\u2295";
 
 /******************************************************************************
  * Private functions                                                          *
@@ -44,72 +37,6 @@ static constexpr auto XOR_SYMBOL = "\u2295";
 /******************************************************************************
  * Public functions                                                           *
  ******************************************************************************/
-
-bool verify_esop( const esop::esop_t& esop, const std::string& bits, const std::string& care )
-{
-  assert( bits.size() == care.size() );
-  const auto number_of_variables = unsigned( log2( bits.size() ) );
-
-  kitty::dynamic_truth_table tt( number_of_variables );
-  kitty::create_from_cubes( tt, esop, true );
-
-  for ( auto i = 0; i < bits.size(); ++i )
-  {
-    if ( care[i] && bits[i] != '0' + get_bit( tt, i ) )
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ostream& os )
-{
-  assert( num_vars <= 32 );
-  os << esop.size() << ' ';
-  for ( auto i = 0u; i < esop.size(); ++i )
-  {
-    const auto& c = esop[i];
-    auto lit_count = c.num_literals();
-    if ( lit_count == 0 )
-    {
-      os << "(1)";
-    }
-    else
-    {
-      os << "(";
-      for ( auto j = 0u; j < num_vars; ++j )
-      {
-	if ( ( c._mask >> j ) & 1 )
-	{
-	  os << ( ( ( c._bits >> j ) & 1 ) ? "x" : "~x" ) << j;
-	  --lit_count;
-	  if ( lit_count != 0 )
-	  {
-	    os << "*";
-	  }
-	}
-      }
-      os << ")";
-    }
-    if ( i+1 < esop.size() )
-    {
-      os << XOR_SYMBOL;
-    }
-  }
-  os << '\n';
-}
-
-void print_esop_as_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostream& os )
-{
-  assert( num_vars <= 32 );
-  for ( const auto& c : esop )
-  {
-    c.print( num_vars, os );
-    os << ' ';
-  }
-  os << '\n';
-}
 
 } /* esop */
 

@@ -1,4 +1,6 @@
 #include <catch.hpp>
+#include <esop/esop.hpp>
+#include <esop/esop_synthesis.hpp>
 #include <esop/exact_synthesis.hpp>
 
 /**
@@ -58,15 +60,20 @@ TEST_CASE( "all_esop", "[synthesis]" )
  */
 TEST_CASE( "new_api", "[synthesis]" )
 {
-  const auto number_of_variables = 5u;
-  const std::string bits = "01111111111101010111111101010011";
-  const std::string care = "11111111111111111111111111111111";
+  /* specification */
+  esop::spec s{ "01111111111101010111111101010011", "11111111111111111111111111111111" };
 
-  /* try to synthesize with 4 terms which is not enough */
-  auto esop = esop::synthesize_esop( bits, care, 4u );
+  /* synthesizer */
+  esop::esop_synthesizer synth( s );
+  esop::esop_synthesizer_params params;
+
+  /* try to synthesize with 4 terms which is *not* enough */
+  params.number_of_terms = 4;
+  auto esop = synth.synthesize( params );
   CHECK( esop.empty() );
 
   /* try again with 5 terms */
-  esop = esop::synthesize_esop( bits, care, 5u );
-  CHECK( esop::verify_esop( esop, bits, care ) );
+  params.number_of_terms = 5;
+  esop = synth.synthesize( params );
+  CHECK( esop::verify_esop( esop, s.bits, s.care ) );
 }
