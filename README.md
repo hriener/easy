@@ -3,13 +3,15 @@
 
 # ESOP Synthesis
 
-## Quick installation guide
+A toolkit for finding exclusive-or sum-of-product forms of (incompletely-specified) Boolean functions.
+
+## Installation
 
 Use git to clone the repository
 
     git clone --recursive https://github.com/hriener/esop_synthesis.git
 
-Afterwards build the ESOP synthesis tool as follows:
+Build the ESOP synthesis toolkit as follows:
 
     mkdir build
     cd build
@@ -20,7 +22,7 @@ Afterwards build the ESOP synthesis tool as follows:
 
  Generate ESOPs for function `0xcafeaffe`
 
-    ./enum_esops -e --repr=expr <<< "0xcafeaffe"
+    ./enum_esops --all --echo --repr=expr <<< "0xcafeaffe"
  
  Output:
 
@@ -36,7 +38,7 @@ Afterwards build the ESOP synthesis tool as follows:
 
  Generate ESOPs and verify results
 
-    ./enum_esops --repr=cube <<< "0xcafeaffe" | ./verify_esops -e -s
+    ./enum_esops --all --repr=cube <<< "0xcafeaffe" | ./verify_esops --echo --summary
 
  Output:
 
@@ -51,6 +53,7 @@ Afterwards build the ESOP synthesis tool as follows:
     
 ## External libraries
 
+* [BreakIt](https://bitbucket.org/krr/breakid)
 * [cryptominisat](https://github.com/msoos/cryptominisat)
 * [glucose](http://www.labri.fr/perso/lsimon/glucose)
-* [BreakIt](https://bitbucket.org/krr/breakid)
+* [kitty](https://github.com/msoeken/kitty.git)
