@@ -24,6 +24,8 @@
  */
 
 #include <esop/combine.hpp>
+#include <algorithm>
+
 #include <cassert>
 
 namespace esop
@@ -80,8 +82,8 @@ esop_t complex_combine( esop_t a, esop_t b, uint8_t var_index, uint8_t i, uint8_
   assert( i != j );
 
   std::vector<kitty::cube> common;
-  sort( a.begin(), a.end() );
-  sort( b.begin(), b.end() );
+  std::sort( a.begin(), a.end() );
+  std::sort( b.begin(), b.end() );
   std::set_intersection( a.begin(), a.end(), b.begin(), b.end(), std::back_inserter( common ) );
 
   for ( const auto& c : common )
