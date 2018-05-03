@@ -26,6 +26,7 @@
 #pragma once
 
 #include <kitty/cube.hpp>
+#include <vector>
 
 namespace esop
 {
