@@ -7,3 +7,6 @@
 [submodule "ext/breakid-2.3"]
 	path = ext/breakid-2.3
 	url = https://github.com/hriener/breakid-2.3
+[submodule "ext/args/args"]
+	path = ext/args/args
+	url = https://github.com/Taywee/args.git
