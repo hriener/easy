@@ -55,6 +55,7 @@ Build the ESOP synthesis toolkit as follows:
     ./enum_esops --all --echo --repr=expr <<< "0xcafeaffe"
  
  Output:
+ 
     0111111101010011 0111111111110101 3 (~x1*~x2*~x3)⊕(~x0*x2*~x3)⊕(x3)
     0111111101010011 0111111111110101 3 (~x0*~x1*~x2*~x3)⊕(~x0*x2*~x3)⊕(x3)
     0111111101010011 0111111111110101 3 (~x0*x1*x2*~x3)⊕(~x0*~x1*~x3)⊕(x3)
