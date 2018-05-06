@@ -51,7 +51,7 @@ Build the ESOP synthesis toolkit as follows:
 
  Generate all minimum ESOP forms for the (incompletely-specified) Boolean function `0xcafe` (`0111111101010011`) with care function `0xaffe` (`0111111111110101`)
 
-    ./enum_esops --all --echo --repr=expr <<< "0xcafeaffe"
+    ./enum_esops --all --echo --repr=expr <<< "0xcafe 0xaffe"
  
  Output:
  
