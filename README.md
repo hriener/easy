@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/hriener/esop_synthesis.svg?branch=master)](https://travis-ci.org/hriener/esop_synthesis)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# ESOP Synthesis
+# EASY
 
-A toolkit for finding exclusive-or sum-of-product forms of (incompletely-specified) Boolean functions.
+`easy` is a toolkit for finding exclusive-or sum-of-product forms of (incompletely-specified) Boolean functions.
 
 ## Installation
 
