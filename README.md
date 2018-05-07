@@ -1,7 +1,8 @@
 [![Build Status](https://travis-ci.org/hriener/esop_synthesis.svg?branch=master)](https://travis-ci.org/hriener/esop_synthesis)
+[![Documentation Status](https://readthedocs.org/projects/easy/badge/?version=latest)](http://easy.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# EASY
+# easy
 
 easy is a toolkit for finding exclusive-or sum-of-product forms of (incompletely-specified) Boolean functions.
 
