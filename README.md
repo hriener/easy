@@ -3,7 +3,7 @@
 
 # EASY
 
-`easy` is a toolkit for finding exclusive-or sum-of-product forms of (incompletely-specified) Boolean functions.
+easy is a toolkit for finding exclusive-or sum-of-product forms of (incompletely-specified) Boolean functions.
 
 ## Installation
 
