@@ -7,9 +7,9 @@ set(CMAKE_CXX_STANDARD 14)
 option(ESOP_TEST "Build tests" OFF)
 
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
-   set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-   set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3 -pg")
-   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+  set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3 -pg")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 endif()
 
 add_subdirectory(ext)
@@ -46,14 +46,14 @@ endif()
 include_directories(src)
 
 set(SOURCES
+  src/esop/esop.cpp
+  src/esop/synthesis.cpp
   src/utils/string_utils.cpp
   src/sat/sat_solver.cpp
   src/sat/cnf_writer.cpp
   src/sat/gauss.cpp
   src/sat/xor_clauses_to_cnf.cpp
   src/sat/cnf_symmetry_breaking.cpp
-  src/esop/esop.cpp
-  src/esop/esop_synthesis.cpp
   src/esop/helliwell.cpp
   src/esop/combine.cpp
   src/esop/cube_utils.cpp
