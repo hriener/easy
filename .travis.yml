@@ -5,7 +5,7 @@ language: cpp
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DESOP_TEST=ON ..
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DEASY_TEST=ON ..
   - make run_tests
   - ./test/run_tests
 
