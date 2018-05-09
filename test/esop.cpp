@@ -111,7 +111,7 @@ TEST_CASE( "new_api_minimize", "[synthesis]" )
 }
 
 /**
- * Minimum and maximum distance
+ * Compute minimum pairwise and maximum pairwise distance of an ESOP
  */
 TEST_CASE( "distance", "[synthesis]" )
 {
