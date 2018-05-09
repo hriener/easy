@@ -109,3 +109,31 @@ TEST_CASE( "new_api_minimize", "[synthesis]" )
   CHECK( !esop.empty() );
   CHECK( esop.size() == 5u );
 }
+
+/**
+ * Minimum and maximum distance
+ */
+TEST_CASE( "distance", "[synthesis]" )
+{
+  /* specification */
+  esop::spec s{ "01111111111101010111111101010011", "11111111111111111111111111111111" };
+
+  /* synthesizer */
+  esop::minimum_synthesizer synth( s );
+  esop::minimum_synthesizer_params params;
+
+  esop::esop_t esop;
+
+  /* search downwards */
+  params.begin = 8;
+  params.next = [&]( int& i, bool sat ){ if ( i <= 0 || !sat ) return false; --i; return true; };
+  esop = synth.synthesize( params );
+  CHECK( !esop.empty() );
+  CHECK( esop.size() == 5u );
+
+  const auto min = esop::min_pairwise_distance( esop );
+  CHECK( min == 2 );
+
+  const auto max = esop::max_pairwise_distance( esop );
+  CHECK( max == 4 );
+}

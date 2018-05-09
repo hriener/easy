@@ -34,6 +34,24 @@ namespace esop
 using esop_t  = std::vector<kitty::cube>;
 using esops_t = std::vector<esop_t>;
 
+/*! \brief Minimum pairwise distance
+ *
+ * Compute the minimum pairwise distance between ESOP terms.
+ *
+ * \param esop ESOP
+ * \return Minimum pairwise distance
+ */
+unsigned min_pairwise_distance( const esop_t& esop );
+
+/*! \brief Maximum pairwise distance
+ *
+ * Compute the maximum pairwise distance between ESOP terms.
+ *
+ * \param esop ESOP
+ * \return maximum pairwise distance
+ */
+unsigned max_pairwise_distance( const esop_t& esop );
+
 /*! \brief Printer function for ESOP.
  *
  * Print ESOP as an expression.

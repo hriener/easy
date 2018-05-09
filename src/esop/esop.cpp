@@ -45,6 +45,40 @@ static constexpr auto XOR_SYMBOL = "\u2295";
  * Public functions                                                           *
  ******************************************************************************/
 
+unsigned min_pairwise_distance( const esop_t& esop )
+{
+  unsigned min = std::numeric_limits<unsigned>::max();
+  for ( auto i = 0u; i < esop.size(); ++i )
+  {
+    for ( auto j = i+1; j < esop.size(); ++j )
+    {
+      const auto d = esop[i].distance( esop[j] );
+      if ( d < min )
+      {
+        min = d;
+      }
+    }
+  }
+  return min;
+}
+
+unsigned max_pairwise_distance( const esop_t& esop )
+{
+  unsigned max = 0u;
+  for ( auto i = 0u; i < esop.size(); ++i )
+  {
+    for ( auto j = i+1; j < esop.size(); ++j )
+    {
+      const auto d = esop[i].distance( esop[j] );
+      if ( d > max )
+      {
+        max = d;
+      }
+    }
+  }
+  return max;
+}
+
 bool verify_esop( const esop::esop_t& esop, const std::string& bits, const std::string& care )
 {
   assert( bits.size() == care.size() );
