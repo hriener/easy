@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.5.1)
-project(esop LANGUAGES CXX)
+project(easy LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
 # Options
-option(ESOP_TEST "Build tests" OFF)
+option(EASY_TEST "Build tests" OFF)
 
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
   set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra")
@@ -59,15 +59,15 @@ set(SOURCES
   src/esop/cube_utils.cpp
   src/esop/exact_synthesis.cpp)
 
-add_library(esop_synthesis ${SOURCES})
-target_link_libraries(esop_synthesis ${EXT_LIBS} esop_fmt esop_kitty esop_json)
+add_library(easy ${SOURCES})
+target_link_libraries(easy ${EXT_LIBS} easy_fmt easy_kitty easy_json)
 
 add_executable(enum_esops programs/enum_esops.cpp)
-target_link_libraries(enum_esops esop_synthesis esop_args)
+target_link_libraries(enum_esops easy easy_args)
 
 add_executable(verify_esops programs/verify_esops.cpp)
-target_link_libraries(verify_esops esop_synthesis esop_args esop_rang)
+target_link_libraries(verify_esops easy easy_args easy_rang)
 
-if(ESOP_TEST)
+if(EASY_TEST)
   add_subdirectory(test)
 endif()

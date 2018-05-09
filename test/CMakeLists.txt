@@ -5,4 +5,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2 -Wall -Wextra")
 file(GLOB FILENAMES *.cpp)
 
 add_executable(run_tests ${FILENAMES})
-target_link_libraries(run_tests PUBLIC esop_synthesis)
+target_link_libraries(run_tests PUBLIC easy easy_lorina)
