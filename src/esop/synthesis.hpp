@@ -98,17 +98,17 @@ private:
  *
  * Parameters for the minimum ESOP synthesizer.
  *
- * The parameters begin, end, next can be customized for upwards search or downwards search.
+ * The parameters begin and next can be customized for upwards or downwards search.
  *
  * Example: (upwards search)
  *   minimum_synthesizer_params params;
  *   params.begin = 0;
- *   params.next = [&]( int i ){ if ( i >= max_k ) return false; ++i; return true; }
+ *   params.next = [&]( int i ){ if ( i >= max_k || sat ) return false; ++i; return true; }
  *
  * Example: (downwards search)
  *   minimum_synthesizer_params params;
  *   params.begin = max_k;
- *   params.next = [&]( int i ){ if ( i <= 0 ) return false; --i; return true; }
+ *   params.next = [&]( int i ){ if ( i <= 0 || !sat ) return false; --i; return true; }
  *
  */
 struct minimum_synthesizer_params
