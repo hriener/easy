@@ -2,6 +2,8 @@
 #include <esop/esop.hpp>
 #include <esop/synthesis.hpp>
 #include <esop/exact_synthesis.hpp>
+#include <kitty/kitty.hpp>
+#include <lorina/pla.hpp>
 
 /**
  * Synthesize one ESOP for a given Boolean function
@@ -137,3 +139,72 @@ TEST_CASE( "distance", "[synthesis]" )
   const auto max = esop::max_pairwise_distance( esop );
   CHECK( max == 4 );
 }
+
+class pla_storage_reader : public lorina::pla_reader
+{
+public:
+  pla_storage_reader( esop::esop_t& esop )
+    : _esop( esop )
+  {}
+
+  virtual void on_term( const std::string& term, const std::string& out ) const override
+  {
+    assert( out == "1" );
+    _esop.emplace_back( term );
+  }
+
+  esop::esop_t& _esop;
+}; /* pla_storage_reader */
+
+/**
+ * Resynthesize all minimum ESOPs for a given ESOP.
+ */
+TEST_CASE( "esop_resynthesis", "[synthesis]" )
+{
+  const auto num_vars = 4u;
+
+  const std::string pla =
+    ".i 4\n"
+    ".o 1\n"
+    ".p 4\n"
+    "011- 1\n"
+    "0-11 1\n"
+    "-11- 1\n"
+    "1010 1\n"
+    ".e\n";
+
+  std::istringstream ss( pla );
+
+  esop::esop_t esop;
+  auto parsing_result = lorina::read_pla( ss, pla_storage_reader( esop ) );
+  CHECK( parsing_result == lorina::return_code::success );
+  CHECK( esop.size() == 4 );
+  // esop::print_esop_as_exprs( esop, num_vars );
+
+  /* esop to truth table */
+  kitty::dynamic_truth_table tt( num_vars );
+  kitty::create_from_cubes( tt, esop, true );
+  auto func = to_binary( tt );
+  std::reverse( func.begin(), func.end() );
+
+  /* specification */
+  esop::spec s{ func, std::string( func.size(), '1' ) };
+
+  /* synthesizer */
+  esop::minimum_all_synthesizer synth( s );
+
+  /* search upwards */
+  esop::minimum_all_synthesizer_params params;
+  params.begin = 1;
+  params.next = [&]( int& i, bool sat ){ if ( i >= 4 || sat ) return false; ++i; return true; };
+
+  auto result = synth.synthesize( params );
+  CHECK( result.size() == 10 );
+  for ( const auto& r : result )
+  {
+    // esop::print_esop_as_exprs( r, num_vars );
+    CHECK( r.size() == 3 );
+    CHECK( esop::equivalent_esops( r, esop, num_vars ) );
+  }
+}
+
