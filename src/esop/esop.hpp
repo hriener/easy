@@ -83,6 +83,17 @@ void print_esop_as_cubes( const esop_t& esop, unsigned num_vars, std::ostream& o
  */
 bool verify_esop( const esop_t& esop, const std::string& bits, const std::string& care );
 
+/*! \brief Check ESOP equivalence of two ESOP forms.
+ *
+ * Check if two given ESOP forms are functionally equivalent.
+ *
+ * \param esop1 First ESOP
+ * \param esop2 Second ESOP
+ * \param num_vars Number of Boolean variables
+ * \return true if esop1 == esop2 and false otherwise
+ */
+bool equivalent_esops( const esop::esop_t& esop1, const esop::esop_t& esop2, unsigned num_vars );
+
 } /* esop */
 
 // Local Variables:

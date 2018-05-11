@@ -145,6 +145,19 @@ void print_esop_as_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostr
   os << '\n';
 }
 
+bool equivalent_esops( const esop::esop_t& esop1, const esop::esop_t& esop2, unsigned num_vars )
+{
+  assert( num_vars <= 20 );
+
+  kitty::dynamic_truth_table tt1( num_vars );
+  kitty::create_from_cubes( tt1, esop1, true );
+
+  kitty::dynamic_truth_table tt2( num_vars );
+  kitty::create_from_cubes( tt2, esop2, true );
+
+  return tt1 == tt2;
+}
+
 } /* esop */
 
 // Local Variables:
