@@ -167,6 +167,79 @@ private:
   nlohmann::json _stats;
 }; /* minimum_synthesizer */
 
+/*! \brief minimum_synthesizer_params
+ *
+ * Parameters for the minimum ESOP synthesizer.
+ *
+ * The parameters begin and next can be customized for upwards or downwards search.
+ *
+ * Example: (upwards search)
+ *   minimum_synthesizer_params params;
+ *   params.begin = 0;
+ *   params.next = [&]( int i ){ if ( i >= max_k || sat ) return false; ++i; return true; }
+ *
+ * Example: (downwards search)
+ *   minimum_synthesizer_params params;
+ *   params.begin = max_k;
+ *   params.next = [&]( int i ){ if ( i <= 0 || !sat ) return false; --i; return true; }
+ *
+ */
+struct minimum_all_synthesizer_params
+{
+  /*! Start value for the search */
+  int begin;
+  /*! A function that evaluates the current value and satisfiability result, decides whether to
+      terminate, and updates the value */
+  std::function<bool(int&,bool)> next;
+}; /* minimum_all_synthesizer_params */
+
+/*! \brief Minimum ESOP synthesizer
+ *
+ * Similar to simple_synthesizer, but searches for a minimum ESOP in a
+ * specified range.
+ */
+class minimum_all_synthesizer
+{
+public:
+  /*! \brief constructor
+   *
+   * Creates an ESOP synthesizer from a specification.
+   *
+   * \param spec Truth-table of a(n) (incompletely-specified) Boolean function
+   */
+  minimum_all_synthesizer( const spec& spec );
+
+  /*! \brief synthesize
+   *
+   * SAT-based ESOP synthesis.
+   *
+   * \params params Parameters
+   * \return An ESOP form
+   */
+  esops_t synthesize( const minimum_all_synthesizer_params& params );
+
+  /*! \brief stats
+   *
+   * \Return A json log with statistics logged during the synthesis
+   */
+  nlohmann::json stats() const;
+
+private:
+  /*! \brief make_esop
+   *
+   * Extract the ESOP from a satisfying assignments.
+   *
+   * \param model Satisfying assignment
+   * \param num_terms Number of terms
+   * \param num_vars Number of variables
+   */
+  esop_t make_esop( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars );
+
+private:
+  const spec& _spec;
+  nlohmann::json _stats;
+}; /* minimum_all_synthesizer */
+
 } /* esop */
 
 // Local Variables:
