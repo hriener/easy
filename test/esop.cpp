@@ -208,3 +208,90 @@ TEST_CASE( "esop_resynthesis", "[synthesis]" )
   }
 }
 
+TEST_CASE( "nong_example8", "[synthesis]" )
+{
+  /**
+   * Example 8 from [1].
+   *
+   * Ning Song and Marek A. Perkowski, Minimization of Exclusive
+   * Sum-of-Products Expressions for Multiple-Valued Input,
+   * Incompletely Specified Functions, TCAD 15(4), 1996.
+   */
+
+  const auto num_vars = 4u;
+
+  const std::string pla =
+    ".i 4\n"
+    ".o 1\n"
+    ".p 4\n"
+    "000- 1\n"
+    "0-11 1\n"
+    "-11- 1\n"
+    "1010 1\n"
+    ".e\n";
+
+  std::istringstream ss( pla );
+
+  esop::esop_t esop;
+  auto parsing_result = lorina::read_pla( ss, pla_storage_reader( esop ) );
+  CHECK( parsing_result == lorina::return_code::success );
+  CHECK( esop.size() == 4 );
+
+  const auto min = esop::min_pairwise_distance( esop );
+  const auto max = esop::max_pairwise_distance( esop );
+  CHECK( min == max );
+  CHECK( min == 3u );
+
+  /* esop to truth table */
+  kitty::dynamic_truth_table tt( num_vars );
+  kitty::create_from_cubes( tt, esop, true );
+  auto func = to_binary( tt );
+  std::reverse( func.begin(), func.end() );
+
+  /* specification */
+  esop::spec s{ func, std::string( func.size(), '1' ) };
+
+  /* synthesizer */
+  esop::minimum_all_synthesizer synth( s );
+
+  /* search upwards */
+  esop::minimum_all_synthesizer_params params;
+  params.begin = 1;
+  params.next = [&]( int& i, bool sat ){ if ( i >= 4 || sat ) return false; ++i; return true; };
+
+  auto result = synth.synthesize( params );
+  CHECK( result.size() == 1u );
+  for ( const auto& r : result )
+  {
+    // esop::print_esop_as_cubes( r, num_vars );
+    CHECK( r.size() == 3 );
+    CHECK( esop::equivalent_esops( r, esop, num_vars ) );
+  }
+
+  /**
+   * EXORLINK simplification approach:
+   *
+   * ESOP: 000- XOR 0-11 XOR -11- XOR 1010
+   *
+   * 1) EXORLINK-3(000-,0-11) = 0111 XOR 00-1 XOR 0000
+   *
+   *    ESOP: 0111 XOR 00-1 XOR 0000 XOR -11- XOR 1010
+   *
+   * 2) EXORLINK-2(0000,1010) = -010 XOR 00-0
+   *
+   *    ESOP: 0111 XOR 00-1 XOR -11- XOR -010 XOR 00-0
+   *
+   * 3) EXORLINK-1(00-1,00-0) = 00--
+   *
+   *    ESOP: 0111 XOR 00-- XOR -010 XOR -11-
+   *
+   * 4) EXORLINK-2(-010,-11-) = --10 XOR -111
+   *
+   *    ESOP: 0111 XOR 00-- XOR --10 XOR -111
+   *
+   * 5) EXORLINK-1(0111,-111) = -111
+   *
+   *    ESOP: 00-- XOR --10 XOR -111
+   *
+   */
+}
