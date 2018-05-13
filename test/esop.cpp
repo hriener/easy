@@ -2,6 +2,7 @@
 #include <esop/esop.hpp>
 #include <esop/synthesis.hpp>
 #include <esop/exact_synthesis.hpp>
+#include <esop/exorlink.hpp>
 #include <kitty/kitty.hpp>
 #include <lorina/pla.hpp>
 
@@ -217,7 +218,6 @@ TEST_CASE( "nong_example8", "[synthesis]" )
    * Sum-of-Products Expressions for Multiple-Valued Input,
    * Incompletely Specified Functions, TCAD 15(4), 1996.
    */
-
   const auto num_vars = 4u;
 
   const std::string pla =
@@ -295,3 +295,38 @@ TEST_CASE( "nong_example8", "[synthesis]" )
    *
    */
 }
+
+TEST_CASE( "exorlink", "[synthesis]" )
+{
+  const auto num_vars = 4u;
+
+  {
+    /* exorlink-2 */
+    kitty::cube cube0( "-110" );
+    kitty::cube cube1( "0111" );
+
+    for ( auto i = 0; i < 8; i += 4 )
+    {
+      const auto cubes = esop::exorlink( cube0, cube1, 2, &esop::cube_groups2[i] );
+      // cubes[0].print( num_vars ); std::cout << ' ';
+      // cubes[1].print( num_vars ); std::cout << std::endl;
+      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1]}, num_vars ) );
+    }
+  }
+
+  {
+    /* exorlink-3 */
+    kitty::cube cube0( "000-" );
+    kitty::cube cube1( "0-11" );
+
+    for ( auto i = 0; i < 54; i += 9 )
+    {
+      const auto cubes = esop::exorlink( cube0, cube1, 3, &esop::cube_groups3[i] );
+      // cubes[0].print( num_vars ); std::cout << ' ';
+      // cubes[1].print( num_vars ); std::cout << ' ';
+      // cubes[2].print( num_vars ); std::cout << std::endl;
+      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2]}, num_vars ) );
+    }
+  }
+}
+

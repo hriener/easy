@@ -48,6 +48,7 @@ include_directories(src)
 set(SOURCES
   src/esop/esop.cpp
   src/esop/synthesis.cpp
+  src/esop/exorlink.cpp
   src/utils/string_utils.cpp
   src/sat/sat_solver.cpp
   src/sat/cnf_writer.cpp
