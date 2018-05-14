@@ -4,7 +4,8 @@ project(easy LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
 
 # Options
-option(EASY_TEST "Build tests" OFF)
+option(EASY_BENCH "Build benchmarks" OFF)
+option(EASY_TEST  "Build tests"      OFF)
 
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
   set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra")
@@ -68,6 +69,10 @@ target_link_libraries(enum_esops easy easy_args)
 
 add_executable(verify_esops programs/verify_esops.cpp)
 target_link_libraries(verify_esops easy easy_args easy_rang)
+
+if(EASY_BENCH)
+  add_subdirectory(bench)
+endif()
 
 if(EASY_TEST)
   add_subdirectory(test)
