@@ -35,7 +35,7 @@ namespace esop
  */
 std::array<kitty::cube,4> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t distance, std::uint32_t *group )
 {
-  assert( distance < 4 );
+  assert( distance <= 4 );
   const auto diff = c0.difference( c1 );
 
   std::array<kitty::cube, 4> result;

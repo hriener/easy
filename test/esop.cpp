@@ -328,5 +328,22 @@ TEST_CASE( "exorlink", "[synthesis]" )
       CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2]}, num_vars ) );
     }
   }
+
+  {
+    /* exorlink-4 */
+    kitty::cube cube0( "0000" );
+    kitty::cube cube1( "----" );
+
+    for ( auto i = 0; i < 384; i += 16 )
+    {
+      const auto cubes = esop::exorlink( cube0, cube1, 4, &esop::cube_groups4[i] );
+      // cubes[0].print( num_vars ); std::cout << ' ';
+      // cubes[1].print( num_vars ); std::cout << ' ';
+      // cubes[2].print( num_vars ); std::cout << ' ';
+      // cubes[3].print( num_vars ); std::cout << std::endl;
+      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3]}, num_vars ) );
+    }
+  }
+
 }
 
