@@ -30,10 +30,10 @@
 namespace esop
 {
 
-inline unsigned cube_groups2[8] = {/* 0 */2, 0, 1, 2,
+static unsigned cube_groups2[8] = {/* 0 */2, 0, 1, 2,
                                    /* 4 */0, 2, 2, 1};
 
-inline unsigned cube_groups3[54] = {/*  0 */2, 0, 0, 1, 2, 0, 1, 1, 2,
+static unsigned cube_groups3[54] = {/*  0 */2, 0, 0, 1, 2, 0, 1, 1, 2,
                                     /*  9 */2, 0, 0, 1, 0, 2, 1, 2, 1,
                                     /* 18 */0, 2, 0, 2, 1, 0, 1, 1, 2,
                                     /* 27 */0, 2, 0, 0, 1, 2, 2, 1, 1,

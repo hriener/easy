@@ -24,6 +24,7 @@
  */
 
 #include <esop/exorlink.hpp>
+#include <cassert>
 
 namespace esop
 {
