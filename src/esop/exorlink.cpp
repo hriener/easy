@@ -79,6 +79,89 @@ std::array<kitty::cube,4> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_
   return result;
 }
 
+std::array<kitty::cube,4> exorlink4( const kitty::cube& c0, const kitty::cube& c1, uint32_t offset )
+{
+  std::uint32_t *group = &cube_groups4[ offset ];
+  const auto diff = c0.difference( c1 );
+
+  std::array<kitty::cube, 4> result;
+  const auto bits = ~( c0._bits ) & ~( c1._bits );
+  const auto mask = c0._mask ^ c1._mask;
+
+  if ( c0 < c1 )
+  {
+    for ( auto i = 0; i < 4; ++i )
+    {
+      auto tmp_bits = c0._bits;
+      auto tmp_mask = c0._mask;
+      auto tmp_pos = diff;
+
+      for ( auto j = 0; j < 4; ++j )
+      {
+        /* compute next position */
+        std::uint64_t p = tmp_pos & -tmp_pos;
+        tmp_pos &= tmp_pos - 1;
+        switch ( *group++ )
+        {
+        case 0:
+          /* take from c0 */
+          break;
+        case 1:
+          {
+          /* take from c1 */
+          tmp_bits ^= ((c1._bits & p) ^ tmp_bits) & p;
+          tmp_mask ^= ((c1._mask & p) ^ tmp_mask) & p;
+          }
+          break;
+        case 2:
+          /* take other */
+          tmp_bits ^= ((bits & p) ^ tmp_bits) & p;
+          tmp_mask ^= ((mask & p) ^ tmp_mask) & p;
+          break;
+        }
+      }
+      result[i]._bits = tmp_bits;
+      result[i]._mask = tmp_mask;
+    }
+  }
+  else
+  {
+    for ( auto i = 0; i < 4; ++i )
+    {
+      auto tmp_bits = c1._bits;
+      auto tmp_mask = c1._mask;
+      auto tmp_pos = diff;
+
+      for ( auto j = 0; j < 4; ++j )
+      {
+        /* compute next position */
+        std::uint64_t p = tmp_pos & -tmp_pos;
+        tmp_pos &= tmp_pos - 1;
+        switch ( *group++ )
+        {
+        case 0:
+          /* take from c0 */
+          break;
+        case 1:
+          /* take from c1 */
+          tmp_bits ^= ((c0._bits & p) ^ tmp_bits) & p;
+          tmp_mask ^= ((c0._mask & p) ^ tmp_mask) & p;
+          break;
+        case 2:
+          /* take other */
+          tmp_bits ^= ((bits & p) ^ tmp_bits) & p;
+          tmp_mask ^= ((mask & p) ^ tmp_mask) & p;
+          break;
+        }
+      }
+      result[i]._bits = tmp_bits;
+      result[i]._mask = tmp_mask;
+    }
+  }
+
+  return result;
+}
+
 } /* esop */
 
 // Local Variables:

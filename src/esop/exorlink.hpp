@@ -77,6 +77,17 @@ static unsigned cube_groups4[384] = { /*   0 */ 2, 0, 0, 0, 1, 2, 0, 0, 1, 1, 2,
  */
 std::array<kitty::cube,4> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t distance, std::uint32_t *group );
 
+/*! \brief EXORLINK4 cube transformation
+ *
+ * Transform two cubes with distance 4 into a functionally equivalent set of 4 other cubes.
+ *
+ * \param c0 First cube
+ * \param c1 Second cube
+ * \param offset An offset that determines the transformation (must be a value in the series 0, 16, 32, ..., 368)
+ * \return An array of 4 new cubes which are functionally equivalent to ``c0`` and ``c1``.
+ */
+std::array<kitty::cube,4> exorlink4( const kitty::cube& c0, const kitty::cube& c1, uint32_t offset );
+
 } /* esop */
 
 // Local Variables:
