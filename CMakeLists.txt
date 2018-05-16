@@ -70,6 +70,9 @@ target_link_libraries(enum_esops easy easy_args)
 add_executable(verify_esops programs/verify_esops.cpp)
 target_link_libraries(verify_esops easy easy_args easy_rang)
 
+add_executable(esop_maniac programs/esop_maniac.cpp)
+target_link_libraries(esop_maniac easy easy_args easy_rang easy_lorina)
+
 if(EASY_BENCH)
   add_subdirectory(bench)
 endif()
