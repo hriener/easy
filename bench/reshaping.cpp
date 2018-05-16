@@ -52,6 +52,26 @@ void BM_exorlink4( benchmark::State& state )
   }
 }
 
-BENCHMARK( BM_exorlink4 )->Arg( 9 )->Arg( 11 )->Arg( 13 )->Arg( 15 )->Arg( 17 )->Arg( 19 )->Arg( 21 )->Arg( 23 )->Arg( 25 )->Arg( 27 );
+void BM_exorlink4_alt( benchmark::State& state )
+{
+  /* exorlink-4 */
+  std::default_random_engine gen( std::chrono::system_clock::now().time_since_epoch().count() );
+  std::uniform_int_distribution<uint64_t> dist( 0ul, 15ul );
+
+  while ( state.KeepRunning() )
+  {
+    kitty::cube cube0;
+    cube0._value = 0xfffffffff - dist( gen );
+
+    kitty::cube cube1( "----" );
+    for ( auto i = 0; i < 384; i += 16 )
+    {
+      esop::exorlink4( cube0, cube1, i );
+    }
+  }
+}
+
+BENCHMARK( BM_exorlink4 );
+BENCHMARK( BM_exorlink4_alt );
 
 BENCHMARK_MAIN()
