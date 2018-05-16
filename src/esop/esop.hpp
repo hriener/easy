@@ -52,6 +52,15 @@ unsigned min_pairwise_distance( const esop_t& esop );
  */
 unsigned max_pairwise_distance( const esop_t& esop );
 
+/*! \brief Average pairwise distance
+ *
+ * Compute the average pairwise distance between ESOP terms.
+ *
+ * \param esop ESOP
+ * \return average pairwise distance
+ */
+double avg_pairwise_distance( const esop_t& esop );
+
 /*! \brief Printer function for ESOP.
  *
  * Print ESOP as an expression.

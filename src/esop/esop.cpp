@@ -79,6 +79,22 @@ unsigned max_pairwise_distance( const esop_t& esop )
   return max;
 }
 
+double avg_pairwise_distance( const esop_t& esop )
+{
+  double dist = 0;
+  auto counter = 0;
+  for ( auto i = 0u; i < esop.size(); ++i )
+  {
+    for ( auto j = i+1; j < esop.size(); ++j )
+    {
+      const auto d = esop[i].distance( esop[j] );
+      dist += d;
+      ++counter;
+    }
+  }
+  return dist / counter;
+}
+
 bool verify_esop( const esop::esop_t& esop, const std::string& bits, const std::string& care )
 {
   assert( bits.size() == care.size() );
