@@ -508,6 +508,94 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
     }
   } while ( params.next( k, bool(result) ) );
 
+  /* restore the state if the last call has been unsat */
+  if ( k < esop.size() )
+  {
+    k = esop.size();
+
+    int sid = 1 + 2*num_vars*k;
+
+    constraints.reset( new sat::constraints );
+    solver.reset( new sat::sat_solver );
+
+    /* add constraints */
+    kitty::cube minterm = kitty::cube::neg_cube( num_vars );
+
+    auto sample_counter = 0u;
+    do
+    {
+      /* skip don't cares */
+      if ( ( _spec.bits[ minterm._bits ] != '0' && _spec.bits[ minterm._bits ] != '1' ) || _spec.care[ minterm._bits ] != '1' )
+      {
+        ++minterm._bits;
+        continue;
+      }
+
+      std::vector<int> z_vars( k, 0u );
+      for ( auto j = 0; j < k; ++j )
+      {
+        assert( sid == 1 + 2*num_vars*k + sample_counter*k + j );
+        z_vars[ j ] = sid++;
+      }
+
+      for ( auto j = 0u; j < k; ++j )
+      {
+        const int z = z_vars[ j ];
+
+        // positive
+        for ( auto l = 0; l < num_vars; ++l )
+        {
+          if ( minterm.get_bit( l ) )
+          {
+            std::vector<int> clause;
+            clause.push_back( -z ); // - z_j
+            clause.push_back( -( 1 + num_vars*k + num_vars*j + l ) ); // -q_j,l
+
+            constraints->add_clause( clause );
+          }
+          else
+          {
+            std::vector<int> clause;
+            clause.push_back( -z ); // -z_j
+            clause.push_back( -( 1 + num_vars*j + l ) ); // -p_j,l
+
+            constraints->add_clause( clause );
+          }
+        }
+      }
+
+      for ( auto j = 0u; j < k; ++j )
+      {
+        const int z = z_vars[ j ];
+
+        // negative
+        std::vector<int> clause = { z };
+        for ( auto l = 0; l < num_vars; ++l )
+        {
+          if ( minterm.get_bit( l ) )
+          {
+            clause.push_back( 1 + num_vars*k + num_vars*j + l ); // q_j,l
+          }
+          else
+          {
+            clause.push_back( 1 + num_vars*j + l ); // p_j,l
+          }
+        }
+
+        constraints->add_clause( clause );
+      }
+
+      constraints->add_xor_clause( z_vars, _spec.bits[ minterm._bits ] == '1' );
+
+      ++sample_counter;
+      ++minterm._bits;
+    } while( minterm._bits < (1 << num_vars) );
+
+    sat::gauss_elimination().apply( *constraints );
+    sat::xor_clauses_to_cnf( sid ).apply( *constraints );
+    sat::cnf_symmetry_breaking( sid ).apply( *constraints );
+  }
+
   /* enumerate solutions */
   esop::esops_t esops;
   while ( auto result = solver->solve( *constraints ) )
@@ -523,12 +611,6 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
     esop = make_esop( result.model, k, num_vars );
 
     std::sort( esop.begin(), esop.end(), cube_weight_compare( num_vars ) );
-
-    /* solutions with a smaller k than previously determined are not interesting */
-    if ( esop.size() >= k )
-    {
-      esops.push_back( esop );
-    }
 
     /* add one blocking clause for each possible permutation of the cubes */
     do
@@ -554,6 +636,9 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
       }
       constraints->add_clause( blocking_clause );
     } while ( std::next_permutation( vs.begin(), vs.end() ) );
+
+    if ( esop.size() < k ) continue;
+    esops.push_back( esop );
   }
 
   return esops;
