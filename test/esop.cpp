@@ -114,6 +114,45 @@ TEST_CASE( "new_api_minimize", "[synthesis]" )
 }
 
 /**
+ * Synthesize a non-minimum ESOP for a given Boolen function
+ */
+TEST_CASE( "expand_with_synthesis", "[synthesis]" )
+{
+  const auto num_vars = 5u;
+
+  /* synthesize all ESOPs with 4 terms equivalent to cube0, cube 1 */
+  {
+    /* exorlink-4 */
+    kitty::cube cube0( "00111" );
+    kitty::cube cube1( "01000" );
+
+    /* esop to truth table */
+    kitty::dynamic_truth_table tt( num_vars );
+    kitty::create_from_cubes( tt, { cube0, cube1 }, true );
+    auto func = to_binary( tt );
+    std::reverse( func.begin(), func.end() );
+
+    /* specification */
+    esop::spec s{ func, std::string( func.size(), '1' ) };
+
+    /* synthesizer */
+    esop::minimum_all_synthesizer synth( s );
+
+    /* search downwards from 8, but stop at 4 */
+    esop::minimum_all_synthesizer_params params;
+    params.begin = 8;
+    params.next = [&]( int& i, bool sat ){ if ( i <= 4 || !sat ) return false; --i; return true; };
+
+    const auto result = synth.synthesize( params );
+    CHECK( result.size() == 195 );
+    for ( const auto& r : result )
+    {
+      CHECK( esop::equivalent_esops( {cube0, cube1}, r, num_vars ) );
+    }
+  }
+}
+
+/**
  * Compute minimum pairwise and maximum pairwise distance of an ESOP
  */
 TEST_CASE( "distance", "[synthesis]" )

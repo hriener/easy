@@ -523,7 +523,12 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
     esop = make_esop( result.model, k, num_vars );
 
     std::sort( esop.begin(), esop.end(), cube_weight_compare( num_vars ) );
-    esops.push_back( esop );
+
+    /* solutions with a smaller k than previously determined are not interesting */
+    if ( esop.size() >= k )
+    {
+      esops.push_back( esop );
+    }
 
     /* add one blocking clause for each possible permutation of the cubes */
     do
@@ -535,6 +540,13 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
         {
           const auto p_value = result.model[ j*num_vars + l ] == l_True;
           const auto q_value = result.model[ num_vars*k + j*num_vars + l ] == l_True;
+
+          /* do not consider all possibilities for canceled cubes */
+          if ( p_value && q_value )
+          {
+            constraints->add_clause( { int(-(1 + vs[j]*num_vars + l)), int(-(1 + num_vars*k + vs[j]*num_vars + l)) } );
+            continue;
+          }
 
           blocking_clause.push_back( p_value ? -(1 + vs[j]*num_vars + l) : (1 + vs[j]*num_vars + l) );
           blocking_clause.push_back( q_value ? -(1 + num_vars*k + vs[j]*num_vars + l) : (1 + num_vars*k + vs[j]*num_vars + l) );
