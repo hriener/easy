@@ -73,6 +73,9 @@ target_link_libraries(verify_esops easy easy_args easy_rang)
 add_executable(esop_maniac programs/esop_maniac.cpp)
 target_link_libraries(esop_maniac easy easy_args easy_rang easy_lorina)
 
+add_executable(easyshell programs/easy.cpp)
+target_link_libraries(easyshell easy_alice easy_fmt easy_cli11 easy_any easy_json easy)
+
 if(EASY_BENCH)
   add_subdirectory(bench)
 endif()
