@@ -328,9 +328,9 @@ TEST_CASE( "nong_example8", "[synthesis]" )
    *
    *    ESOP: 0111 XOR 00-- XOR --10 XOR -111
    *
-   * 5) EXORLINK-1(0111,-111) = -111
+   * 5) EXORLINK-1(0111,-111) = 1111
    *
-   *    ESOP: 00-- XOR --10 XOR -111
+   *    ESOP: 00-- XOR --10 XOR 1111
    *
    */
 }
@@ -397,6 +397,45 @@ TEST_CASE( "exorlink", "[synthesis]" )
       // cubes[2].print( num_vars ); std::cout << ' ';
       // cubes[3].print( num_vars ); std::cout << std::endl;
       CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3]}, num_vars ) );
+    }
+  }
+}
+
+TEST_CASE( "exorlink5_and_6", "[synthesis]" )
+{
+  {
+    const auto num_vars = 5u;
+
+    /* exorlink-5 */
+    kitty::cube cube0( "00000" );
+    kitty::cube cube1( "-----" );
+
+    for ( auto i = 0; i < 3000; i += 25 )
+    {
+      const auto cubes = esop::exorlink( cube0, cube1, 5, &esop::cube_groups5[i] );
+      // cubes[0].print( num_vars ); std::cout << ' ';
+      // cubes[1].print( num_vars ); std::cout << ' ';
+      // cubes[2].print( num_vars ); std::cout << ' ';
+      // cubes[3].print( num_vars ); std::cout << std::endl;
+      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3], cubes[4]}, num_vars ) );
+    }
+  }
+
+  {
+    const auto num_vars = 6u;
+
+    /* exorlink-6 */
+    kitty::cube cube0( "000000" );
+    kitty::cube cube1( "------" );
+
+    for ( auto i = 0; i < 25920; i += 36 )
+    {
+      const auto cubes = esop::exorlink( cube0, cube1, 6, &esop::cube_groups6[i] );
+      // cubes[0].print( num_vars ); std::cout << ' ';
+      // cubes[1].print( num_vars ); std::cout << ' ';
+      // cubes[2].print( num_vars ); std::cout << ' ';
+      // cubes[3].print( num_vars ); std::cout << std::endl;
+      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3], cubes[4], cubes[5]}, num_vars ) );
     }
   }
 }

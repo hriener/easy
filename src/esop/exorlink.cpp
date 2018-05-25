@@ -33,12 +33,11 @@ namespace esop
  * The implementation is based on Bruno Schmitt's implementation of ``exorlink`` in
  *   https://raw.githubusercontent.com/boschmitt/exorcism/master/source/cube32.cpp
  */
-std::array<kitty::cube,4> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t distance, std::uint32_t *group )
+std::vector<kitty::cube> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t distance, std::uint32_t *group )
 {
-  assert( distance <= 4 );
   const auto diff = c0.difference( c1 );
 
-  std::array<kitty::cube, 4> result;
+  std::vector<kitty::cube> result;
   if ( c1 < c0 ) std::swap( c0, c1 );
 
   const auto bits = ~( c0._bits ) & ~( c1._bits );
