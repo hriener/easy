@@ -347,9 +347,7 @@ TEST_CASE( "exorlink", "[synthesis]" )
     for ( auto i = 0; i < 8; i += 4 )
     {
       const auto cubes = esop::exorlink( cube0, cube1, 2, &esop::cube_groups2[i] );
-      // cubes[0].print( num_vars ); std::cout << ' ';
-      // cubes[1].print( num_vars ); std::cout << std::endl;
-      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1]}, num_vars ) );
+      CHECK( esop::equivalent_esops( {cube0, cube1}, cubes, num_vars ) );
     }
   }
 
@@ -361,10 +359,7 @@ TEST_CASE( "exorlink", "[synthesis]" )
     for ( auto i = 0; i < 54; i += 9 )
     {
       const auto cubes = esop::exorlink( cube0, cube1, 3, &esop::cube_groups3[i] );
-      // cubes[0].print( num_vars ); std::cout << ' ';
-      // cubes[1].print( num_vars ); std::cout << ' ';
-      // cubes[2].print( num_vars ); std::cout << std::endl;
-      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2]}, num_vars ) );
+      CHECK( esop::equivalent_esops( {cube0, cube1}, cubes, num_vars ) );
     }
   }
 
@@ -376,11 +371,7 @@ TEST_CASE( "exorlink", "[synthesis]" )
     for ( auto i = 0; i < 384; i += 16 )
     {
       const auto cubes = esop::exorlink( cube0, cube1, 4, &esop::cube_groups4[i] );
-      // cubes[0].print( num_vars ); std::cout << ' ';
-      // cubes[1].print( num_vars ); std::cout << ' ';
-      // cubes[2].print( num_vars ); std::cout << ' ';
-      // cubes[3].print( num_vars ); std::cout << std::endl;
-      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3]}, num_vars ) );
+      CHECK( esop::equivalent_esops( {cube0, cube1}, cubes, num_vars ) );
     }
   }
 
@@ -392,17 +383,10 @@ TEST_CASE( "exorlink", "[synthesis]" )
     for ( auto i = 0; i < 384; i += 16 )
     {
       const auto cubes = esop::exorlink4( cube0, cube1, i );
-      // cubes[0].print( num_vars ); std::cout << ' ';
-      // cubes[1].print( num_vars ); std::cout << ' ';
-      // cubes[2].print( num_vars ); std::cout << ' ';
-      // cubes[3].print( num_vars ); std::cout << std::endl;
-      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3]}, num_vars ) );
+      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0],cubes[1],cubes[2],cubes[3]}, num_vars ) );
     }
   }
-}
 
-TEST_CASE( "exorlink5_and_6", "[synthesis]" )
-{
   {
     const auto num_vars = 5u;
 
@@ -413,11 +397,7 @@ TEST_CASE( "exorlink5_and_6", "[synthesis]" )
     for ( auto i = 0; i < 3000; i += 25 )
     {
       const auto cubes = esop::exorlink( cube0, cube1, 5, &esop::cube_groups5[i] );
-      // cubes[0].print( num_vars ); std::cout << ' ';
-      // cubes[1].print( num_vars ); std::cout << ' ';
-      // cubes[2].print( num_vars ); std::cout << ' ';
-      // cubes[3].print( num_vars ); std::cout << std::endl;
-      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3], cubes[4]}, num_vars ) );
+      CHECK( esop::equivalent_esops( {cube0, cube1}, cubes, num_vars ) );
     }
   }
 
@@ -431,11 +411,7 @@ TEST_CASE( "exorlink5_and_6", "[synthesis]" )
     for ( auto i = 0; i < 25920; i += 36 )
     {
       const auto cubes = esop::exorlink( cube0, cube1, 6, &esop::cube_groups6[i] );
-      // cubes[0].print( num_vars ); std::cout << ' ';
-      // cubes[1].print( num_vars ); std::cout << ' ';
-      // cubes[2].print( num_vars ); std::cout << ' ';
-      // cubes[3].print( num_vars ); std::cout << std::endl;
-      CHECK( esop::equivalent_esops( {cube0, cube1}, {cubes[0], cubes[1], cubes[2], cubes[3], cubes[4], cubes[5]}, num_vars ) );
+      CHECK( esop::equivalent_esops( {cube0, cube1}, cubes, num_vars ) );
     }
   }
 }

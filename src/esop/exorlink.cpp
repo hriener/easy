@@ -37,7 +37,7 @@ std::vector<kitty::cube> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t
 {
   const auto diff = c0.difference( c1 );
 
-  std::vector<kitty::cube> result;
+  std::vector<kitty::cube> result( distance );
   if ( c1 < c0 ) std::swap( c0, c1 );
 
   const auto bits = ~( c0._bits ) & ~( c1._bits );
