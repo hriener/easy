@@ -18,3 +18,11 @@ add_library(easy_lorina INTERFACE)
 target_include_directories(easy_lorina INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/lorina/include)
 target_link_libraries(easy_lorina INTERFACE easy_fmt easy_rang)
 
+add_library(easy_any INTERFACE)
+target_include_directories(easy_any INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/any)
+
+add_library(easy_cli11 INTERFACE) # v1.3
+target_include_directories(easy_cli11 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cli11)
+
+add_library(easy_alice INTERFACE)
+target_include_directories(easy_alice INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/alice/include)
