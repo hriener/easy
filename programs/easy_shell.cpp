@@ -93,7 +93,7 @@ protected:
       }
     }
     else if ( d == 4 )
-    {
+    {    
       for ( auto k = 0; k < 384; k += 16 )
       {
         const auto cubes = esop::exorlink( cube0, cube1, 4, &esop::cube_groups4[k] );
