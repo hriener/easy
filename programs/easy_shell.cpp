@@ -24,6 +24,7 @@
  */
 
 #define READLINE_USE_READLINE 1
+
 #include <alice/alice.hpp>
 #include <esop/exorlink.hpp>
 #include <io/read_esop.hpp>
@@ -39,13 +40,13 @@ std::uint32_t k_size[] = { /* 0 */0, /* 1 */0, /* 2 */8, /* 3 */54, /* 4 */384, 
 std::uint32_t k_incr[] = { /* 0 */0, /* 1 */0, /* 2 */4, /* 3 */ 9, /* 4 */ 16, /* 5 */  25, /* 6 */   36 };
 
 std::uint32_t *cube_groups[] = {
-  nullptr,
-  nullptr,
-  &esop::cube_groups2[0],
-  &esop::cube_groups3[0],
-  &esop::cube_groups4[0],
-  &esop::cube_groups5[0],
-  &esop::cube_groups6[0]
+  nullptr
+, nullptr
+, &esop::cube_groups2[0]
+, &esop::cube_groups3[0]
+, &esop::cube_groups4[0]
+, &esop::cube_groups5[0]
+, &esop::cube_groups6[0]
 };
 
 struct esop_storee
@@ -84,7 +85,11 @@ ALICE_READ_FILE( esop_storee, pla, filename, cmd )
   esop::esop_t esop;
   unsigned num_vars;
   auto parsing_result = lorina::read_pla( filename, easy::esop_storage_reader( esop, num_vars ), &diag );
-  assert( parsing_result == lorina::return_code::success );
+  if ( parsing_result != lorina::return_code::success )
+  {
+    std::cerr << "[e] unable to parse ESOP-PLA file" << std::endl;
+    return esop_storee{ "", {}, 0 };
+  }
   return esop_storee{ filename, esop, num_vars };
 }
 
@@ -151,7 +156,7 @@ protected:
 private:
   std::string cube0;
   std::string cube1;
-  bool change_order= true;
+  bool change_order = true;
 };
 
 ALICE_ADD_COMMAND( exorlink, "Cube" )
