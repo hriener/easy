@@ -213,8 +213,47 @@ private:
   int j = 1;
 };
 
+class sort_command : public command
+{
+public:
+  explicit sort_command( const environment::ptr& env )
+    : command( env, "sort current ESOP" )
+  {
+    opts.add_flag( "-i,--index", index, "Index" );
+    opts.add_flag( "-r,--random", random, "Randomize the cubes in the ESOP" );
+  }
+
+protected:
+  rules validity_rules() const
+  {
+    rules rules;
+
+    rules.push_back( {[this]() { return index == -1 || index < store<esop_storee>().size(); }, "index out of bounds"} );
+
+    return rules;
+  }
+
+  void execute()
+  {
+    auto& current = index == -1 ? store<esop_storee>().current() : store<esop_storee>()[index];
+    if ( random )
+    {
+      std::random_shuffle( current.esop.begin(), current.esop.end() );
+    }
+    else
+    {
+      std::sort( current.esop.begin(), current.esop.end() );
+    }
+  }
+
+private:
+  bool random;
+  int index = -1;
+};
+
 ALICE_ADD_COMMAND( exorlink, "Cube" )
 ALICE_ADD_COMMAND( ec, "ESOP" )
+ALICE_ADD_COMMAND( sort, "ESOP" )
 
 } /* namespace alice */
 
