@@ -26,3 +26,4 @@ target_include_directories(easy_cli11 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cli1
 
 add_library(easy_alice INTERFACE)
 target_include_directories(easy_alice INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/alice/include)
+target_link_libraries(easy_alice INTERFACE readline)

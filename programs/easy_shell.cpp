@@ -23,6 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#define READLINE_USE_READLINE 1
 #include <alice/alice.hpp>
 #include <esop/exorlink.hpp>
 #include <lorina/pla.hpp>
