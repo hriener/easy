@@ -32,6 +32,19 @@
 #include <sstream>
 #include <string>
 
+std::uint32_t k_size[] = { /* 0 */0, /* 1 */0, /* 2 */8, /* 3 */54, /* 4 */384, /* 5 */3000, /* 6 */25920 };
+std::uint32_t k_incr[] = { /* 0 */0, /* 1 */0, /* 2 */4, /* 3 */ 9, /* 4 */ 16, /* 5 */  25, /* 6 */   36 };
+
+std::uint32_t *cube_groups[] = {
+  nullptr,
+  nullptr,
+  &esop::cube_groups2[0],
+  &esop::cube_groups3[0],
+  &esop::cube_groups4[0],
+  &esop::cube_groups5[0],
+  &esop::cube_groups6[0]
+};
+
 namespace alice
 {
 
@@ -68,59 +81,13 @@ protected:
     const auto d = c0.distance( c1 );
     std::cout << "[i] distance = " << d << std::endl;
 
-    if ( d == 2 )
+    if ( d >= 2 && d <= 7 )
     {
-      for ( auto k = 0; k < 8; k += 4 )
+      const auto size = k_size[ d ];
+      const auto incr = k_incr[ d ];
+      for ( auto k = 0; k < size; k += incr )
       {
-        const auto cubes = esop::exorlink( cube0, cube1, 2, &esop::cube_groups2[k] );
-        for ( const auto& c : cubes )
-        {
-          c.print( num_vars ); std::cout << ' ';
-        }
-        std::cout << std::endl;
-      }
-    }
-    else if ( d == 3 )
-    {
-      for ( auto k = 0; k < 54; k += 9 )
-      {
-        const auto cubes = esop::exorlink( cube0, cube1, 3, &esop::cube_groups3[k] );
-        for ( const auto& c : cubes )
-        {
-          c.print( num_vars ); std::cout << ' ';
-        }
-        std::cout << std::endl;
-      }
-    }
-    else if ( d == 4 )
-    {    
-      for ( auto k = 0; k < 384; k += 16 )
-      {
-        const auto cubes = esop::exorlink( cube0, cube1, 4, &esop::cube_groups4[k] );
-        for ( const auto& c : cubes )
-        {
-          c.print( num_vars ); std::cout << ' ';
-        }
-        std::cout << std::endl;
-      }
-    }
-    else if ( d == 5 )
-    {
-      for ( auto k = 0; k < 3000; k += 25 )
-      {
-        const auto cubes = esop::exorlink( cube0, cube1, 5, &esop::cube_groups5[k] );
-        for ( const auto& c : cubes )
-        {
-          c.print( num_vars ); std::cout << ' ';
-        }
-        std::cout << std::endl;
-      }
-    }
-    else if ( d == 6 )
-    {
-      for ( auto k = 0; k < 25920; k += 36 )
-      {
-        const auto cubes = esop::exorlink( cube0, cube1, 6, &esop::cube_groups6[k] );
+        const auto cubes = esop::exorlink( cube0, cube1, d, cube_groups[d] + k );
         for ( const auto& c : cubes )
         {
           c.print( num_vars ); std::cout << ' ';
@@ -130,9 +97,8 @@ protected:
     }
     else
     {
-      std::cout << "[e] distance > 6 are not supported" << std::endl;
+      std::cout << "[e] only distances in the interval [2,...,6] are supported" << std::endl;
     }
-
   }
 
 private:
