@@ -25,6 +25,7 @@
 
 #include <alice/alice.hpp>
 #include <esop/exorlink.hpp>
+#include <lorina/pla.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -45,14 +46,106 @@ std::uint32_t *cube_groups[] = {
   &esop::cube_groups6[0]
 };
 
+class pla_storage_reader : public lorina::pla_reader
+{
+public:
+  pla_storage_reader( esop::esop_t& esop, unsigned& num_vars )
+    : _esop( esop )
+    , _num_vars( num_vars )
+  {}
+
+  void on_number_of_inputs( std::size_t i ) const override
+  {
+    _num_vars = i;
+  }
+
+  void on_term( const std::string& term, const std::string& out ) const override
+  {
+    assert( out == "1" );
+    _esop.emplace_back( term );
+  }
+
+  bool on_keyword( const std::string& keyword, const std::string& value ) const override
+  {
+    if ( keyword == "type" && value == "esop" )
+    {
+      return true;
+    }
+    return false;
+  }
+
+  esop::esop_t& _esop;
+  unsigned& _num_vars;
+}; /* pla_storage_reader */
+
+struct esop_storee
+{
+  std::string model_name;
+  esop::esop_t esop;
+  std::size_t num_vars;
+}; /* esop_storee */
+
+void write_esop( std::ostream& os, const esop::esop_t& esop, unsigned num_vars )
+{
+  lorina::pla_writer writer( os );
+  writer.on_number_of_inputs( num_vars );
+  writer.on_number_of_outputs( 1 );
+  writer.on_number_of_terms( esop.size() );
+  writer.on_keyword( "type", "esop" );
+  for ( const auto& e : esop )
+  {
+    std::stringstream ss;
+    e.print( num_vars, ss );
+    writer.on_term( ss.str(), "1" );
+  }
+  writer.on_end();
+}
+
 namespace alice
 {
+
+ALICE_ADD_STORE( esop_storee, "esop", "e", "ESOP", "ESOPs" )
+
+ALICE_PRINT_STORE( esop_storee, os, element )
+{
+  auto i = 0;
+  for ( const auto& c : element.esop )
+  {
+    os << (i++) << ". ";
+    c.print( element.num_vars );
+    os << '\n';
+  }
+}
+
+ALICE_DESCRIBE_STORE( esop_storee, element )
+{
+  return fmt::format( "[i] esop<{}>: vars={} cubes={}\n", element.model_name, element.num_vars, element.esop.size() );
+}
+
+ALICE_ADD_FILE_TYPE( pla, "PLA" )
+
+ALICE_READ_FILE( esop_storee, pla, filename, cmd )
+{
+  lorina::diagnostic_engine diag;
+  esop::esop_t esop;
+  unsigned num_vars;
+  auto parsing_result = lorina::read_pla( filename, pla_storage_reader( esop, num_vars ), &diag );
+  assert( parsing_result == lorina::return_code::success );
+  return esop_storee{ filename, esop, num_vars };
+}
+
+ALICE_WRITE_FILE( esop_storee, pla, element, filename, cmd )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+  write_esop( os, element.esop, element.num_vars );
+  os.close();
+}
 
 class exorlink_command : public command
 {
 public:
   explicit exorlink_command( const environment::ptr& env )
-      : command( env, "exorlink operation" )
+    : command( env, "exorlink operation" )
   {
     opts.add_option( "cube0", cube0, "First cube" );
     opts.add_option( "cube1", cube1, "Second cube" );
@@ -68,7 +161,7 @@ protected:
       std::cout << "[e] cube must have the same length" << std::endl;
       return;
     }
-    
+
     if ( !change_order )
     {
       std::reverse( cube0.begin(), cube0.end() );
@@ -107,8 +200,8 @@ private:
   bool change_order= true;
 };
 
-ALICE_ADD_COMMAND( exorlink, "Exorlink" )
+ALICE_ADD_COMMAND( exorlink, "Cube" )
 
 }
 
-ALICE_MAIN( easyshell )
+ALICE_MAIN( easy )
