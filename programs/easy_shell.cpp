@@ -53,7 +53,8 @@ struct esop_storee
 {
   std::string model_name;
   esop::esop_t esop;
-  std::size_t num_vars;
+  std::size_t number_of_inputs;
+  std::size_t number_of_outputs;
 }; /* esop_storee */
 
 namespace alice
@@ -67,14 +68,19 @@ ALICE_PRINT_STORE( esop_storee, os, element )
   for ( const auto& c : element.esop )
   {
     os << (i++) << ". ";
-    c.print( element.num_vars );
+    c.print( element.number_of_inputs );
     os << '\n';
   }
 }
 
 ALICE_DESCRIBE_STORE( esop_storee, element )
 {
-  return fmt::format( "[i] esop<{}>: vars={} cubes={}\n", element.model_name, element.num_vars, element.esop.size() );
+  return fmt::format( "[i] esop<{}>", element.model_name );
+}
+
+ALICE_PRINT_STORE_STATISTICS( esop_storee, os, element )
+{
+  os << fmt::format( "[i] esop<{}>: vars={} cubes={}", element.model_name, element.number_of_inputs, element.esop.size() ) << '\n';
 }
 
 ALICE_ADD_FILE_TYPE( pla, "PLA" )
@@ -83,20 +89,21 @@ ALICE_READ_FILE( esop_storee, pla, filename, cmd )
 {
   lorina::diagnostic_engine diag;
   esop::esop_t esop;
-  unsigned num_vars;
-  auto parsing_result = lorina::read_pla( filename, easy::esop_storage_reader( esop, num_vars ), &diag );
+  unsigned number_of_inputs;
+  unsigned number_of_outputs;
+  auto parsing_result = lorina::read_pla( filename, easy::esop_storage_reader( esop, number_of_inputs ), &diag );
   if ( parsing_result != lorina::return_code::success )
   {
     std::cerr << "[e] unable to parse ESOP-PLA file" << std::endl;
-    return esop_storee{ "", {}, 0 };
+    return esop_storee{ "", {}, 0, 0 };
   }
-  return esop_storee{ filename, esop, num_vars };
+  return esop_storee{ filename, esop, number_of_inputs, number_of_outputs };
 }
 
 ALICE_WRITE_FILE( esop_storee, pla, element, filename, cmd )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
-  easy::write_esop( os, element.esop, element.num_vars );
+  easy::write_esop( os, element.esop, element.number_of_inputs );
   os.close();
 }
 
@@ -185,13 +192,13 @@ protected:
     const auto& elm1 = store<esop_storee>()[i];
     const auto& elm2 = store<esop_storee>()[j];
 
-    if ( elm1.num_vars != elm2.num_vars )
+    if ( elm1.number_of_inputs != elm2.number_of_inputs )
     {
       std::cout << "[i] ESOPs are NOT equivalent" << std::endl;
       return;
     }
 
-    if ( esop::equivalent_esops( elm1.esop, elm2.esop, elm1.num_vars ) )
+    if ( esop::equivalent_esops( elm1.esop, elm2.esop, elm1.number_of_inputs ) )
     {
       std::cout << "[i] ESOPs are equivalent" << std::endl;
     }
@@ -209,7 +216,7 @@ private:
 ALICE_ADD_COMMAND( exorlink, "Cube" )
 ALICE_ADD_COMMAND( ec, "ESOP" )
 
-}
+} /* namespace alice */
 
 ALICE_MAIN( easy )
 
