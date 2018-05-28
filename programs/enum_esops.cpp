@@ -187,6 +187,12 @@ int main(int argc, char **argv)
       continue;
     }
 
+    if ( care == std::string( 1 << number_of_variables, '0' ) )
+    {
+      std::cout << "[e] at least one bit must be within the care set to syntheize a function" << std::endl;
+      continue;
+    }
+
     /* echo */
     if ( echo )
     {
