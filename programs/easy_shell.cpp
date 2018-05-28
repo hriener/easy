@@ -1,4 +1,4 @@
-/* alice: C++ command shell library
+/* easy: C++ command shell library
  * Copyright (C) 2017-2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,7 +26,8 @@
 #define READLINE_USE_READLINE 1
 #include <alice/alice.hpp>
 #include <esop/exorlink.hpp>
-#include <lorina/pla.hpp>
+#include <io/read_esop.hpp>
+#include <io/write_esop.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -47,60 +48,12 @@ std::uint32_t *cube_groups[] = {
   &esop::cube_groups6[0]
 };
 
-class pla_storage_reader : public lorina::pla_reader
-{
-public:
-  pla_storage_reader( esop::esop_t& esop, unsigned& num_vars )
-    : _esop( esop )
-    , _num_vars( num_vars )
-  {}
-
-  void on_number_of_inputs( std::size_t i ) const override
-  {
-    _num_vars = i;
-  }
-
-  void on_term( const std::string& term, const std::string& out ) const override
-  {
-    assert( out == "1" );
-    _esop.emplace_back( term );
-  }
-
-  bool on_keyword( const std::string& keyword, const std::string& value ) const override
-  {
-    if ( keyword == "type" && value == "esop" )
-    {
-      return true;
-    }
-    return false;
-  }
-
-  esop::esop_t& _esop;
-  unsigned& _num_vars;
-}; /* pla_storage_reader */
-
 struct esop_storee
 {
   std::string model_name;
   esop::esop_t esop;
   std::size_t num_vars;
 }; /* esop_storee */
-
-void write_esop( std::ostream& os, const esop::esop_t& esop, unsigned num_vars )
-{
-  lorina::pla_writer writer( os );
-  writer.on_number_of_inputs( num_vars );
-  writer.on_number_of_outputs( 1 );
-  writer.on_number_of_terms( esop.size() );
-  writer.on_keyword( "type", "esop" );
-  for ( const auto& e : esop )
-  {
-    std::stringstream ss;
-    e.print( num_vars, ss );
-    writer.on_term( ss.str(), "1" );
-  }
-  writer.on_end();
-}
 
 namespace alice
 {
@@ -130,7 +83,7 @@ ALICE_READ_FILE( esop_storee, pla, filename, cmd )
   lorina::diagnostic_engine diag;
   esop::esop_t esop;
   unsigned num_vars;
-  auto parsing_result = lorina::read_pla( filename, pla_storage_reader( esop, num_vars ), &diag );
+  auto parsing_result = lorina::read_pla( filename, easy::esop_storage_reader( esop, num_vars ), &diag );
   assert( parsing_result == lorina::return_code::success );
   return esop_storee{ filename, esop, num_vars };
 }
@@ -138,7 +91,7 @@ ALICE_READ_FILE( esop_storee, pla, filename, cmd )
 ALICE_WRITE_FILE( esop_storee, pla, element, filename, cmd )
 {
   std::ofstream os( filename.c_str(), std::ofstream::out );
-  write_esop( os, element.esop, element.num_vars );
+  easy::write_esop( os, element.esop, element.num_vars );
   os.close();
 }
 
@@ -206,3 +159,9 @@ ALICE_ADD_COMMAND( exorlink, "Cube" )
 }
 
 ALICE_MAIN( easy )
+
+// Local Variables:
+// c-basic-offset: 2
+// eval: (c-set-offset 'substatement-open 0)
+// eval: (c-set-offset 'innamespace 0)
+// End:

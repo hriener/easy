@@ -50,6 +50,8 @@ set(SOURCES
   src/esop/esop.cpp
   src/esop/synthesis.cpp
   src/esop/exorlink.cpp
+  src/io/write_esop.cpp
+  src/io/read_esop.cpp
   src/utils/string_utils.cpp
   src/sat/sat_solver.cpp
   src/sat/cnf_writer.cpp
@@ -62,7 +64,7 @@ set(SOURCES
   src/esop/exact_synthesis.cpp)
 
 add_library(easy ${SOURCES})
-target_link_libraries(easy ${EXT_LIBS} easy_fmt easy_kitty easy_json)
+target_link_libraries(easy ${EXT_LIBS} easy_fmt easy_kitty easy_json easy_lorina)
 
 add_subdirectory(programs)
 
