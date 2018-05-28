@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <rang/rang.hpp>
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -103,7 +104,7 @@ private:
 
       if ( !output.empty() )
       {
-        env->out() << "[i] found match in command \033[1;34m" << command.first << "\033[0m" << std::endl
+        env->out() << "[i] found match in command " << rang::fg::blue << command.first << rang::style::reset << std::endl
                   << output << std::endl
                   << std::endl;
       }
@@ -114,7 +115,7 @@ private:
   {
     for ( auto& p : env->_categories )
     {
-      env->out() << p.first << " commands:" << std::endl;
+      env->out() << rang::style::bold << p.first << " commands:" << rang::style::reset << std::endl;
 
       std::sort( p.second.begin(), p.second.end() );
 
