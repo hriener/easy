@@ -1,4 +1,4 @@
-/* easy: C++ command shell library
+/* easy
  * Copyright (C) 2017-2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
@@ -106,8 +106,8 @@ public:
   explicit exorlink_command( const environment::ptr& env )
     : command( env, "exorlink operation" )
   {
-    opts.add_option( "cube0", cube0, "First cube" );
-    opts.add_option( "cube1", cube1, "Second cube" );
+    opts.add_option( "cube0", cube0, "First cube" )->required();
+    opts.add_option( "cube1", cube1, "Second cube" )->required();
     opts.add_flag( "-r,--reverse", change_order, "Reverse variable order (default: 0...n left to right)" );
   }
 
@@ -117,7 +117,7 @@ protected:
     const auto num_vars = cube0.size();
     if ( cube1.size() != num_vars )
     {
-      std::cout << "[e] cube must have the same length" << std::endl;
+      std::cerr << "[e] cube must have the same length" << std::endl;
       return;
     }
 
@@ -149,7 +149,7 @@ protected:
     }
     else
     {
-      std::cout << "[e] only distances in the interval [2,...,6] are supported" << std::endl;
+      std::cerr << "[e] only distances in the interval [2,...,6] are supported" << std::endl;
     }
   }
 
@@ -159,7 +159,55 @@ private:
   bool change_order = true;
 };
 
+class ec_command : public command
+{
+public:
+  explicit ec_command( const environment::ptr& env )
+    : command( env, "exorlink operation" )
+  {
+    opts.add_option( "store index", i, "First index in ESOP storage (default: 0)" );
+    opts.add_option( "store index", j, "Second index in ESOP storage (default: 1)" );
+  }
+
+protected:
+  rules validity_rules() const
+  {
+    rules rules;
+
+    rules.push_back( {[this]() { return i < store<esop_storee>().size(); }, "first index out of bounds"} );
+    rules.push_back( {[this]() { return j < store<esop_storee>().size(); }, "second index out of bounds"} );
+
+    return rules;
+  }
+
+  void execute()
+  {
+    const auto& elm1 = store<esop_storee>()[i];
+    const auto& elm2 = store<esop_storee>()[j];
+
+    if ( elm1.num_vars != elm2.num_vars )
+    {
+      std::cout << "[i] ESOPs are NOT equivalent" << std::endl;
+      return;
+    }
+
+    if ( esop::equivalent_esops( elm1.esop, elm2.esop, elm1.num_vars ) )
+    {
+      std::cout << "[i] ESOPs are equivalent" << std::endl;
+    }
+    else
+    {
+      std::cout << "[i] ESOPs are NOT equivalent" << std::endl;
+    }
+  }
+
+private:
+  int i = 0;
+  int j = 1;
+};
+
 ALICE_ADD_COMMAND( exorlink, "Cube" )
+ALICE_ADD_COMMAND( ec, "ESOP" )
 
 }
 
