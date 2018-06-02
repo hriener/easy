@@ -75,6 +75,11 @@ void sat_solver::set_conflict_limit( int limit )
   _solver->setConfBudget( limit );
 }
 
+int sat_solver::get_conflicts() const
+{
+  return _solver->conflicts;
+}
+
 sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
 {
   /* add clauses to solver & remove them from constraints */

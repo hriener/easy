@@ -67,10 +67,11 @@ struct sat_solver
       , model( m )
     {}
 
-    operator bool() const
-    {
-      return ( state == l_True );
-    }
+    inline operator bool() const { return ( state == l_True ); }
+
+    inline bool is_sat()  const  { return ( state == l_True );  }
+    inline bool is_unsat() const { return ( state == l_False ); }
+    inline bool is_undef() const { return ( state == l_Undef ); }
 
     state_t state;
     model_t model;
@@ -81,6 +82,7 @@ struct sat_solver
   void reset();
 
   void set_conflict_limit( int limit );
+  int get_conflicts() const;
 
   unsigned _num_vars = 0;
 
