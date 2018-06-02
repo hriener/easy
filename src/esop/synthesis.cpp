@@ -29,6 +29,28 @@ namespace esop
 {
 
 /******************************************************************************
+ * esop_cover                                                                 *
+ ******************************************************************************/
+
+esop::esop_t esop_cover( const esop::spec& spec )
+{
+  assert( spec.bits.size() == spec.care.size() );
+
+  const auto size = spec.bits.size();
+  const int num_vars = log2( size );
+
+  esop::esop_t cover;
+  for ( auto i = 0; i < size; ++i )
+  {
+    if ( spec.care[i] == '1' && spec.bits[i] == '1' )
+    {
+      cover.emplace_back( kitty::cube( size-1 - i, size-1 ) );
+    }
+  }
+  return cover;
+}
+
+/******************************************************************************
  * simple_synthesizer                                                         *
  ******************************************************************************/
 

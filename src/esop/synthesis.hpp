@@ -42,6 +42,15 @@ struct spec
   std::string care;
 }; /* spec */
 
+/*! \brief Compute a cover from a truth table.
+ *
+ * Convert each minterm of the specification into a cube.
+ *
+ * \param spec Spec Truth-table of a(n) (incompletely-specified) Boolean function
+ * \return An ESOP form
+ */
+esop::esop_t esop_cover( const esop::spec& spec );
+
 struct simple_synthesizer_params
 {
   /*! A fixed number of product terms (= k) */
