@@ -80,7 +80,13 @@ struct sat_solver
   result solve( constraints& constraints, const assumptions_t& assumptions = {} );
   void reset();
 
+  void set_conflict_limit( int limit );
+
   unsigned _num_vars = 0;
+
+  /* -1 indicates no conflict limit */
+  int _conflict_limit = -1;
+
   std::unique_ptr<Glucose::Solver> _solver;
 };
 

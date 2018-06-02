@@ -66,6 +66,13 @@ void sat_solver::reset()
 {
   _solver = std::make_unique<Glucose::Solver>();
   _num_vars = 0;
+  _solver->budgetOff();
+}
+
+void sat_solver::set_conflict_limit( int limit )
+{
+  _conflict_limit = limit;
+  _solver->setConfBudget( limit );
 }
 
 sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
@@ -79,8 +86,8 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
       const unsigned var = abs(l)-1;
       while ( _num_vars <= var )
       {
-	_solver->newVar();
-	++_num_vars;
+        _solver->newVar();
+        ++_num_vars;
       }
       clause.push( Glucose::mkLit( var, l < 0 ) );
     }
@@ -92,7 +99,6 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
   assert( constraints._xor_clauses.size() == 0u );
 
   bool sat;
-
   if ( assumptions.size() > 0 )
   {
     Glucose::vec<Glucose::Lit> assume;
@@ -101,16 +107,38 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
       const unsigned var = abs(v)-1;
       while ( _num_vars <= var )
       {
-	_solver->newVar();
-	++_num_vars;
+        _solver->newVar();
+        ++_num_vars;
       }
       assume.push( Glucose::mkLit( var, v < 0 ) );
     }
-    sat = _solver->solve( assume );
+
+    if ( _conflict_limit == -1 )
+    {
+      sat = _solver->solve( assume );
+    }
+    else
+    {
+      const auto solver_result = _solver->solveLimited( assume );
+      if ( solver_result == l_Undef )
+      {
+        return result( l_Undef );
+      }
+      else
+      {
+        assert( solver_result == l_True || solver_result == l_False );
+        sat = solver_result == l_True;
+      }
+    }
   }
   else
   {
     sat = _solver->solve();
+  }
+
+  if ( _solver->conflicts >= _conflict_limit )
+  {
+    return result( l_Undef );
   }
 
   if ( sat )
