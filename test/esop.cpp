@@ -72,16 +72,16 @@ TEST_CASE( "new_api_synthesize", "[synthesis]" )
 
   /* try to synthesize with 4 terms which is *not* enough */
   params.number_of_terms = 4;
-  auto esop = synth.synthesize( params );
-  CHECK( esop.empty() );
+  auto result = synth.synthesize( params );
+  CHECK( result.esop.empty() );
 
   /* try again with 5 terms */
   params.number_of_terms = 5;
-  esop = synth.synthesize( params );
+  result = synth.synthesize( params );
 
   auto number_of_variables = 5u;
-  // esop::print_esop_as_exprs( esop, number_of_variables );
-  CHECK( esop::verify_esop( esop, s.bits, s.care ) );
+  // esop::print_esop_as_exprs( result.esop, number_of_variables );
+  CHECK( esop::verify_esop( result.esop, s.bits, s.care ) );
 }
 
 /**

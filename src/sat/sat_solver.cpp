@@ -104,9 +104,10 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
   assert( constraints._xor_clauses.size() == 0u );
 
   bool sat;
+
+  Glucose::vec<Glucose::Lit> assume;
   if ( assumptions.size() > 0 )
   {
-    Glucose::vec<Glucose::Lit> assume;
     for ( const auto& v : assumptions )
     {
       const unsigned var = abs(v)-1;
@@ -117,33 +118,24 @@ sat_solver::result sat_solver::solve( constraints& constraints, const assumption
       }
       assume.push( Glucose::mkLit( var, v < 0 ) );
     }
+  }
 
-    if ( _conflict_limit == -1 )
-    {
-      sat = _solver->solve( assume );
-    }
-    else
-    {
-      const auto solver_result = _solver->solveLimited( assume );
-      if ( solver_result == l_Undef )
-      {
-        return result( l_Undef );
-      }
-      else
-      {
-        assert( solver_result == l_True || solver_result == l_False );
-        sat = solver_result == l_True;
-      }
-    }
+  if ( _conflict_limit == -1 )
+  {
+    sat = _solver->solve( assume );
   }
   else
   {
-    sat = _solver->solve();
-  }
-
-  if ( _solver->conflicts >= _conflict_limit )
-  {
-    return result( l_Undef );
+    const auto solver_result = _solver->solveLimited( assume );
+    if ( solver_result == l_Undef || _solver->conflicts >= _conflict_limit )
+    {
+      return result( l_Undef );
+    }
+    else
+    {
+      assert( solver_result == l_True || solver_result == l_False );
+      sat = solver_result == l_True;
+    }
   }
 
   if ( sat )
