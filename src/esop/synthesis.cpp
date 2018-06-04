@@ -29,6 +29,48 @@ namespace esop
 {
 
 /******************************************************************************
+ * esop_from_model                                                            *
+ ******************************************************************************/
+esop_t esop_from_model( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars )
+{
+  assert( !(num_terms > 0) || (model.size() != 0) );
+
+  esop_t esop;
+  for ( auto j = 0u; j < num_terms; ++j )
+  {
+    kitty::cube c;
+    bool cancel_cube = false;
+    for ( auto l = 0; l < num_vars; ++l )
+    {
+      const auto p_value = model[ j*num_vars + l ] == l_True;
+      const auto q_value = model[ num_vars*num_terms + j*num_vars + l ] == l_True;
+
+      if ( p_value && q_value )
+      {
+        cancel_cube = true;
+        break;
+      }
+      else if ( p_value )
+      {
+        c.add_literal( l, true );
+      }
+      else if ( q_value )
+      {
+        c.add_literal( l, false );
+      }
+    }
+
+    if ( cancel_cube )
+    {
+      continue;
+    }
+
+    esop.push_back( c );
+  }
+  return esop;
+}
+
+/******************************************************************************
  * esop_cover                                                                 *
  ******************************************************************************/
 
@@ -58,7 +100,7 @@ simple_synthesizer::simple_synthesizer( const spec& spec )
   : _spec( spec )
 {}
 
-esop_t simple_synthesizer::synthesize( const simple_synthesizer_params& params )
+result simple_synthesizer::synthesize( const simple_synthesizer_params& params )
 {
   const int num_vars = log2( _spec.bits.size() );
   assert( _spec.bits.size() == (1ull << num_vars) && "bit-width of bits is not a power of 2" );
@@ -72,6 +114,11 @@ esop_t simple_synthesizer::synthesize( const simple_synthesizer_params& params )
 
   sat::constraints constraints;
   sat::sat_solver solver;
+
+  if ( params.conflict_limit != -1 )
+  {
+    solver.set_conflict_limit( params.conflict_limit );
+  }
 
   /* add constraints */
   kitty::cube minterm = kitty::cube::neg_cube( num_vars );
@@ -150,13 +197,19 @@ esop_t simple_synthesizer::synthesize( const simple_synthesizer_params& params )
   sat::xor_clauses_to_cnf( sid ).apply( constraints );
   sat::cnf_symmetry_breaking( sid ).apply( constraints );
 
-  if ( auto result = solver.solve( constraints ) )
+  const auto sat = solver.solve( constraints );
+  if ( sat.is_undef() )
   {
-    return make_esop( result.model, num_terms, num_vars );
+    return result();
+  }
+  else if ( sat.is_unsat() )
+  {
+    return result( unrealizable );
   }
   else
   {
-    return {};
+    assert( sat.is_sat() );
+    return result( make_esop( sat.model, num_terms, num_vars ) );
   }
 }
 
@@ -167,39 +220,7 @@ nlohmann::json simple_synthesizer::stats() const
 
 esop_t simple_synthesizer::make_esop( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars )
 {
-  esop_t esop;
-  for ( auto j = 0u; j < num_terms; ++j )
-  {
-    kitty::cube c;
-    bool cancel_cube = false;
-    for ( auto l = 0; l < num_vars; ++l )
-    {
-      const auto p_value = model[ j*num_vars + l ] == l_True;
-      const auto q_value = model[ num_vars*num_terms + j*num_vars + l ] == l_True;
-
-      if ( p_value && q_value )
-      {
-        cancel_cube = true;
-        break;
-      }
-      else if ( p_value )
-      {
-        c.add_literal( l, true );
-      }
-      else if ( q_value )
-      {
-        c.add_literal( l, false );
-      }
-    }
-
-    if ( cancel_cube )
-    {
-      continue;
-    }
-
-    esop.push_back( c );
-  }
-  return esop;
+  return esop_from_model( model, num_terms, num_vars );
 }
 
 /******************************************************************************
@@ -320,39 +341,7 @@ nlohmann::json minimum_synthesizer::stats() const
 
 esop_t minimum_synthesizer::make_esop( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars )
 {
-  esop_t esop;
-  for ( auto j = 0u; j < num_terms; ++j )
-  {
-    kitty::cube c;
-    bool cancel_cube = false;
-    for ( auto l = 0; l < num_vars; ++l )
-    {
-      const auto p_value = model[ j*num_vars + l ] == l_True;
-      const auto q_value = model[ num_vars*num_terms + j*num_vars + l ] == l_True;
-
-      if ( p_value && q_value )
-      {
-        cancel_cube = true;
-        break;
-      }
-      else if ( p_value )
-      {
-        c.add_literal( l, true );
-      }
-      else if ( q_value )
-      {
-        c.add_literal( l, false );
-      }
-    }
-
-    if ( cancel_cube )
-    {
-      continue;
-    }
-
-    esop.push_back( c );
-  }
-  return esop;
+  return esop_from_model( model, num_terms, num_vars );
 }
 
 /******************************************************************************
@@ -673,39 +662,7 @@ nlohmann::json minimum_all_synthesizer::stats() const
 
 esop_t minimum_all_synthesizer::make_esop( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars )
 {
-  esop_t esop;
-  for ( auto j = 0u; j < num_terms; ++j )
-  {
-    kitty::cube c;
-    bool cancel_cube = false;
-    for ( auto l = 0; l < num_vars; ++l )
-    {
-      const auto p_value = model[ j*num_vars + l ] == l_True;
-      const auto q_value = model[ num_vars*num_terms + j*num_vars + l ] == l_True;
-
-      if ( p_value && q_value )
-      {
-        cancel_cube = true;
-        break;
-      }
-      else if ( p_value )
-      {
-        c.add_literal( l, true );
-      }
-      else if ( q_value )
-      {
-        c.add_literal( l, false );
-      }
-    }
-
-    if ( cancel_cube )
-    {
-      continue;
-    }
-
-    esop.push_back( c );
-  }
-  return esop;
+  return esop_from_model( model, num_terms, num_vars );
 }
 
 } /* esop */

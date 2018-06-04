@@ -42,11 +42,39 @@ struct spec
   std::string care;
 }; /* spec */
 
+enum state_t
+{
+  unknown      = 0
+, realizable   = 10
+, unrealizable = 20
+}; /* state_t */
+
+struct result
+{
+  result( state_t state = unknown )
+    : state( state )
+  {}
+
+  result( const esop_t& esop )
+    : state( realizable )
+    , esop( esop )
+  {}
+
+  inline operator bool() const { return ( state == realizable ); }
+
+  inline bool is_realizable()  const  { return ( state == realizable );  }
+  inline bool is_unrealizable() const { return ( state == unrealizable ); }
+  inline bool is_unknown() const      { return ( state == unknown ); }
+
+  state_t state;
+  esop_t  esop;
+}; /* result */
+
 /*! \brief Compute a cover from a truth table.
  *
- * Convert each minterm of the specification into a cube.
+ * Convert each minterm of the specification into one cube.
  *
- * \param spec Spec Truth-table of a(n) (incompletely-specified) Boolean function
+ * \param spec Truth-table of a (incompletely-specified) Boolean function
  * \return An ESOP form
  */
 esop::esop_t esop_cover( const esop::spec& spec );
@@ -55,6 +83,7 @@ struct simple_synthesizer_params
 {
   /*! A fixed number of product terms (= k) */
   unsigned number_of_terms;
+  int conflict_limit = -1;
 }; /* simple_synthesizer_params */
 
 /*! \brief Simple ESOP synthesizer
@@ -77,9 +106,11 @@ public:
    * SAT-based ESOP synthesis.
    *
    * \params params Parameters
-   * \return An ESOP form
+   * \return Synthesis result. If the specification is realizable and
+   *         the no resource limit is reached, the result contains an ESOP
+   *         that implements the specification.
    */
-  esop_t synthesize( const simple_synthesizer_params& params );
+  result synthesize( const simple_synthesizer_params& params );
 
   /*! \brief stats
    *
@@ -99,7 +130,7 @@ private:
   esop_t make_esop( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars );
 
 private:
-  const spec& _spec;
+  const spec _spec;
   nlohmann::json _stats;
 }; /* simple_synthesizer */
 
@@ -172,7 +203,7 @@ private:
   esop_t make_esop( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars );
 
 private:
-  const spec& _spec;
+  const spec _spec;
   nlohmann::json _stats;
 }; /* minimum_synthesizer */
 
@@ -245,7 +276,7 @@ private:
   esop_t make_esop( const sat::sat_solver::model_t& model, unsigned num_terms, unsigned num_vars );
 
 private:
-  const spec& _spec;
+  const spec _spec;
   nlohmann::json _stats;
 }; /* minimum_all_synthesizer */
 
