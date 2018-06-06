@@ -24,50 +24,55 @@
  */
 
 #include <alice/alice.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/bit_operations.hpp>
+#include <esop/synthesis.hpp>
+#include <esop/esop.hpp>
 
 namespace alice
 {
 
-class function_command : public command
+class cover_command : public command
 {
 public:
-  explicit function_command( const environment::ptr& env )
-    : command( env, "loads an incompletely-specified Boolean function and adds it to the store" )
+  explicit cover_command( const environment::ptr& env )
+    : command( env, "computes the cover of an incompletely-specified Boolean function and adds it to the ESOP store" )
   {
-    opts.add_option( "string", f, "Incompletely-specified Boolean function (MSB ... LSB)" );
+    opts.add_option( "store index", i, "Index in function storage (default: last element)" );
   }
 
 protected:
+  rules validity_rules() const
+  {
+    rules rules;
+
+    rules.push_back( {[this]() { return i < store<function_storee>().size() || i == -1 && store<function_storee>().size() > 0; }, "first index out of bounds"} );
+
+    return rules;
+  }
+
   void execute()
   {
-    const unsigned number_of_variables = std::ceil( std::log2( f.size() ) );
-    std::reverse( f.begin(), f.end() );
+    const auto& elm = i == -1 ? store<function_storee>()[store<function_storee>().size()-1u] : store<function_storee>()[i];
 
-    kitty::dynamic_truth_table bits( number_of_variables );
-    kitty::dynamic_truth_table care( number_of_variables );
-
-    unsigned i;
-    for ( i = 0; i < f.size(); ++i )
+    esop::spec spec;
+    assert( elm.bits.num_bits() == elm.care.num_bits() );
+    for ( auto i = 0; i < elm.bits.num_bits(); ++i )
     {
-      if ( f[i] == '1' )
-      {
-        kitty::set_bit( bits, i );
-        kitty::set_bit( care, i );
-      }
-      else if ( f[i] == '0' )
-      {
-        kitty::clear_bit( bits, i );
-        kitty::set_bit(   care, i );
-      }
+      spec.bits.append( 1, kitty::get_bit( elm.bits, i ) ? '1' : '0' );
+      spec.care.append( 1, kitty::get_bit( elm.care, i ) ? '1' : '0' );
     }
 
-    env->store<function_storee>().extend() = function_storee{bits, care, number_of_variables};
+    std::reverse( spec.bits.begin(), spec.bits.end() );
+    std::reverse( spec.care.begin(), spec.care.end() );
+
+    env->store<esop_storee>().extend() = { "", esop::esop_cover( spec ), std::size_t(elm.bits.num_vars()), 1 };
   }
 
 private:
-  std::string f = "";
+  int i = -1;
 };
- 
+
 } // namespace alice
 
 // Local Variables:

@@ -26,14 +26,16 @@
 namespace alice
 {
 
-class ec_command : public command
+class ec_command: public command
 {
 public:
   explicit ec_command( const environment::ptr& env )
-    : command( env, "exorlink operation" )
+    : command( env, "check equivalence of two ESOPs" )
   {
-    opts.add_option( "store index", i, "First index in ESOP storage (default: 0)" );
-    opts.add_option( "store index", j, "Second index in ESOP storage (default: 1)" );
+    opts.add_option( "store index", i,    "First index in ESOP storage (default: 0)" );
+    opts.add_option( "store index", j,    "Second index in ESOP storage (default: 0)" );
+    opts.add_flag( "--func,-f",     func, "Check if an ESOP implements a Boolean function. If set, "
+                                          "the first index identifies the function in the store." );
   }
 
 protected:
@@ -41,7 +43,14 @@ protected:
   {
     rules rules;
 
-    rules.push_back( {[this]() { return i < store<esop_storee>().size(); }, "first index out of bounds"} );
+    if ( !func )
+    {
+      rules.push_back( {[this]() { return i < store<esop_storee>().size(); }, "first index out of bounds"} );
+    }
+    else
+    {
+      rules.push_back( {[this]() { return i < store<function_storee>().size(); }, "first index out of bounds"} );
+    }
     rules.push_back( {[this]() { return j < store<esop_storee>().size(); }, "second index out of bounds"} );
 
     return rules;
@@ -49,28 +58,54 @@ protected:
 
   void execute()
   {
-    const auto& elm1 = store<esop_storee>()[i];
-    const auto& elm2 = store<esop_storee>()[j];
-
-    if ( elm1.number_of_inputs != elm2.number_of_inputs )
+    if ( !func )
     {
-      std::cout << "[i] ESOPs are NOT describes using the same number of inputs" << std::endl;
-      return;
-    }
+      /* check if two ESOPs are equivalent */
+      const auto& elm1 = store<esop_storee>()[i];
+      const auto& elm2 = store<esop_storee>()[j];
 
-    if ( esop::equivalent_esops( elm1.esop, elm2.esop, elm1.number_of_inputs ) )
-    {
-      std::cout << "[i] ESOPs are equivalent" << std::endl;
+      if ( elm1.number_of_inputs != elm2.number_of_inputs )
+      {
+        std::cout << "[i] ESOPs are NOT described using the same number of inputs" << std::endl;
+        return;
+      }
+
+      if ( esop::equivalent_esops( elm1.esop, elm2.esop, elm1.number_of_inputs ) )
+      {
+        std::cout << "[i] ESOPs are equivalent" << std::endl;
+      }
+      else
+      {
+        std::cout << "[i] ESOPs are NOT equivalent" << std::endl;
+      }
     }
     else
     {
-      std::cout << "[i] ESOPs are NOT equivalent" << std::endl;
+      /* check if an ESOP implements a Boolean function */
+      const auto& func = store<function_storee>()[i];
+      const auto& elm  = store<esop_storee>()[j];
+
+      if ( elm.number_of_inputs != func.number_of_variables )
+      {
+        std::cout << "[i] ESOP and Boolean function are NOT described using the same number of variables" << std::endl;
+        return;
+      }
+
+      if ( esop::implements_function( elm.esop, func.bits, func.care, elm.number_of_inputs ) )
+      {
+        std::cout << "[i] ESOP is an implementation of the Boolean function" << std::endl;
+      }
+      else
+      {
+        std::cout << "[i] ESOP does NOT implement the Boolean function" << std::endl;
+      }
     }
   }
 
 private:
+  bool func = false;
   int i = 0;
-  int j = 1;
+  int j = 0;
 }; /* ec_command */
 
 } // namespace alice

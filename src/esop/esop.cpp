@@ -25,8 +25,8 @@
 
 #include <esop/esop.hpp>
 #include <esop/exact_synthesis.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/constructors.hpp>
+#include <kitty/print.hpp>
 #include <cassert>
 
 namespace esop
@@ -163,7 +163,7 @@ void print_esop_as_cubes( const esop::esop_t& esop, unsigned num_vars, std::ostr
 
 bool equivalent_esops( const esop::esop_t& esop1, const esop::esop_t& esop2, unsigned num_vars )
 {
-  assert( num_vars <= 20 );
+  assert( num_vars <= 20 && "20 and more variables cannot be handled using explicit truth table manipulation");
 
   kitty::dynamic_truth_table tt1( num_vars );
   kitty::create_from_cubes( tt1, esop1, true );
@@ -172,6 +172,16 @@ bool equivalent_esops( const esop::esop_t& esop1, const esop::esop_t& esop2, uns
   kitty::create_from_cubes( tt2, esop2, true );
 
   return tt1 == tt2;
+}
+
+bool implements_function( const esop::esop_t& esop, const kitty::dynamic_truth_table& bits, const kitty::dynamic_truth_table& care, unsigned num_vars )
+{
+  assert( num_vars <= 20 && "20 and more variables cannot be handled using explicit truth table manipulation");
+
+  kitty::dynamic_truth_table tt( num_vars );
+  kitty::create_from_cubes( tt, esop, true );
+
+  return (tt & care) == (bits & care);
 }
 
 } /* esop */

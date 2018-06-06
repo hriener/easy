@@ -28,6 +28,7 @@
 #include <alice/alice.hpp>
 #include <cli/stores/esop.hpp>
 #include <cli/stores/function.hpp>
+#include <cli/commands/cover.hpp>
 #include <cli/commands/exorlink.hpp>
 #include <cli/commands/ec.hpp>
 #include <cli/commands/function.hpp>
@@ -82,6 +83,7 @@ ALICE_ADD_COMMAND( exorlink, "Cube" )
 /******************************************************************************
  * ESOP commands                                                              *
  ******************************************************************************/
+ALICE_ADD_COMMAND( cover,    "ESOP" )
 ALICE_ADD_COMMAND( ec,       "ESOP" )
 ALICE_ADD_COMMAND( sort,     "ESOP" )
 

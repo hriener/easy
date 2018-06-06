@@ -26,6 +26,7 @@
 #pragma once
 
 #include <kitty/cube.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <vector>
 
 namespace esop
@@ -102,6 +103,18 @@ bool verify_esop( const esop_t& esop, const std::string& bits, const std::string
  * \return true if esop1 == esop2 and false otherwise
  */
 bool equivalent_esops( const esop::esop_t& esop1, const esop::esop_t& esop2, unsigned num_vars );
+
+/*! \brief Check if ESOP form implements an incompletely-specified Boolean function
+ *
+ * Check if an ESOP form implements an incompletely-specified Boolean function.
+ *
+ * \param esop ESOP form
+ * \param bits Boolean function
+ * \param care Care function
+ * \param num_vars Number of Boolean variables
+ * \return true if esop element Impl(bits,care) and false otherwise
+ */
+bool implements_function( const esop::esop_t& esop, const kitty::dynamic_truth_table& bits, const kitty::dynamic_truth_table& care, unsigned num_vars );
 
 } /* esop */
 
