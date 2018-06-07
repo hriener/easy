@@ -39,6 +39,7 @@ public:
     opts.add_option( "--num,-n",        num,        "Specifies how many Boolean functions are generated (default: 1)" );
     opts.add_option( "--truthtable,-t", tt,         "Truth table (in binary) of Boolean function (MSB ... LSB)" );
     opts.add_option( "--random,-r",     variables,  "Random completely-specified Boolean function.  As parameter the number of Boolean variables has to be passed." );
+    opts.add_option( "--seed,-s",       seed,       "Random seed" );
   }
 
 protected:
@@ -82,7 +83,7 @@ protected:
     {
       assert( variables != 0 );
 
-      std::default_random_engine random_engine(std::chrono::steady_clock::now().time_since_epoch().count());
+      std::default_random_engine random_engine(seed != 0 ? seed : std::chrono::steady_clock::now().time_since_epoch().count());
       std::uniform_int_distribution<> dist( 0, 100 );
 
       const auto len = 1ul << variables;
@@ -126,7 +127,8 @@ private:
   unsigned num = 1u;
   std::string tt = "";
   unsigned variables = 0u;
-}; /* function */
+  unsigned long seed = 0ul;
+}; /* function_command */
 
 } // namespace alice
 
