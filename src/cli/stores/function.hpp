@@ -41,7 +41,7 @@ struct function_storee
     std::string s( len, '0' );
     for ( auto i = 0; i < len; ++i )
     {
-      if ( get_bit( care, i ) )
+      if ( !get_bit( care, i ) )
       {
         s[i] = '-';
       }
