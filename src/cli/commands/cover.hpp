@@ -71,7 +71,7 @@ protected:
 
 private:
   int i = -1;
-};
+}; /* cover_command */
 
 } // namespace alice
 
