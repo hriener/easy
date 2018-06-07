@@ -33,6 +33,7 @@
 #include <cli/commands/ec.hpp>
 #include <cli/commands/function.hpp>
 #include <cli/commands/sort.hpp>
+#include <cli/commands/synth.hpp>
 
 #include <io/read_esop.hpp>
 #include <io/write_esop.hpp>
@@ -74,6 +75,7 @@ ALICE_WRITE_FILE( esop_storee, pla, element, filename, cmd )
  * Function commands                                                          *
  ******************************************************************************/
 ALICE_ADD_COMMAND( function, "Function" )
+ALICE_ADD_COMMAND( synth,    "Function" )
 
 /******************************************************************************
  * Cube commands                                                              *
