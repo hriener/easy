@@ -51,12 +51,12 @@ ALICE_PRINT_STORE( esop_storee, os, element )
 
 ALICE_DESCRIBE_STORE( esop_storee, element )
 {
-  return fmt::format( "[i] esop<{}>", element.model_name );
+  return fmt::format( "[i] esop<{}>: vars={} cubes={}\n", element.model_name, element.number_of_inputs, element.esop.size() );
 }
 
 ALICE_PRINT_STORE_STATISTICS( esop_storee, os, element )
 {
-  os << fmt::format( "[i] esop<{}>: vars={} cubes={}", element.model_name, element.number_of_inputs, element.esop.size() ) << '\n';
+  os << fmt::format( "[i] esop<{}>: vars={} cubes={}\n", element.model_name, element.number_of_inputs, element.esop.size() );
 }
 
 } // namespace alice
