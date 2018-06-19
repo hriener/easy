@@ -22,8 +22,8 @@
   </g>
 </g>
 <g id="layer1">
-  <circle id="circle1" stroke="#000000" transform="" stroke-width="4.5px" fill="none" r="30px" cx="54px" cy="65px"></circle>
-  <line id="line1" stroke="#000000" transform="" stroke-width="3.5px" x1="24px" y1="65px" x2="83px" y2="65px"></line>
-  <line id="line1" stroke="#000000" transform="" stroke-width="3.5px" x1="54px" y1="35px" x2="54px" y2="95px"></line>
+  <circle id="circle1" stroke="#000000" transform="" stroke-width="6.0px" fill="none" r="30px" cx="54px" cy="65px"></circle>
+  <line id="line1" stroke="#000000" transform="" stroke-width="4.5px" x1="24px" y1="65px" x2="83px" y2="65px"></line>
+  <line id="line1" stroke="#000000" transform="" stroke-width="4.5px" x1="54px" y1="35px" x2="54px" y2="95px"></line>
 </g>
 </svg>
