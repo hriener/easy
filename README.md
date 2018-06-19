@@ -4,6 +4,7 @@
 
 # easy
 
+<img src="https://cdn.rawgit.com/hriener/easy/master/easy.svg" width="64" height="64" align="left" style="margin-right: 12pt" />
 easy is a toolkit for finding exclusive-or sum-of-product forms of (incompletely-specified) Boolean functions.
 
 ## Installation
