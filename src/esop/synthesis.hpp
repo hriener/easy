@@ -157,7 +157,7 @@ struct minimum_synthesizer_params
   int begin;
   /*! A function that evaluates the current value and satisfiability result, decides whether to
       terminate, and updates the value */
-  std::function<bool(int&,bool)> next;
+  std::function<bool(int&,sat::sat_solver::result)> next;
   int conflict_limit = -1;
 }; /* minimum_synthesizer_params */
 
@@ -184,7 +184,7 @@ public:
    * \params params Parameters
    * \return An ESOP form
    */
-  esop_t synthesize( const minimum_synthesizer_params& params );
+  result synthesize( const minimum_synthesizer_params& params );
 
   /*! \brief stats
    *
@@ -231,7 +231,8 @@ struct minimum_all_synthesizer_params
   int begin;
   /*! A function that evaluates the current value and satisfiability result, decides whether to
       terminate, and updates the value */
-  std::function<bool(int&,bool)> next;
+  std::function<bool(int&,sat::sat_solver::result)> next;
+  int conflict_limit = -1;
 }; /* minimum_all_synthesizer_params */
 
 /*! \brief Minimum ESOP synthesizer

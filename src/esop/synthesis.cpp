@@ -231,7 +231,7 @@ minimum_synthesizer::minimum_synthesizer( const spec& spec )
   : _spec( spec )
 {}
 
-esop_t minimum_synthesizer::synthesize( const minimum_synthesizer_params& params )
+result minimum_synthesizer::synthesize( const minimum_synthesizer_params& params )
 {
   const int num_vars = log2( _spec.bits.size() );
   assert( _spec.bits.size() == (1ull << num_vars) && "bit-width of bits is not a power of 2" );
@@ -240,10 +240,12 @@ esop_t minimum_synthesizer::synthesize( const minimum_synthesizer_params& params
 
   esop_t esop;
   sat::sat_solver::result result;
+  bool all_unsat = true;
 
   auto k = params.begin;
   do
   {
+    assert( k != 0 && "synthesis of constants not supported" );
     int sid = 1 + 2*num_vars*k;
 
     sat::constraints constraints;
@@ -332,11 +334,26 @@ esop_t minimum_synthesizer::synthesize( const minimum_synthesizer_params& params
     // sat::cnf_symmetry_breaking( sid ).apply( constraints );
 
     result = solver.solve( constraints );
+
     if ( result.is_sat() )
     {
       esop = make_esop( result.model, k, num_vars );
     }
-  } while ( params.next( k, bool(result) ) );
+
+    if ( !result.is_unsat() )
+    {
+      all_unsat = false;
+    }
+  } while ( params.next( k, result ) );
+
+  /* no ESOP constructed, either UNSAT or UNREALIZABLE */
+  if ( esop.size() == 0u )
+  {
+    if ( all_unsat )
+      return esop::result( unrealizable );
+    else
+      return esop::result();
+  }
 
   return esop;
 }
@@ -524,7 +541,7 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
     {
       esop = make_esop( result.model, k, num_vars );
     }
-  } while ( params.next( k, bool(result) ) );
+  } while ( params.next( k, result ) );
 
   /* restore the state if the last call has been unsat */
   if ( k < esop.size() )
