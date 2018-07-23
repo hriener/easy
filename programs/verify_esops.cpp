@@ -92,9 +92,9 @@ int main(int argc, char **argv)
   std::string line;
   while ( std::getline( std::cin, line ) )
   {
-    /* remove trailing space and skip empty lines */
+    /* skip empty and comment lines */
     utils::trim( line );
-    if ( line == "" ) continue;
+    if ( line == "" || line[0] == '#' ) continue;
 
     std::vector<std::string> tokens;
     boost::split( tokens, line, boost::is_any_of( " " ) );
