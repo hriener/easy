@@ -62,8 +62,8 @@ std::string parse_function( std::string s )
 {
   std::transform( s.begin(), s.end(), s.begin(), ::tolower );
 
-  std::regex binary_number( "(0b)?([01]*)" );
-  std::regex hex_number( "(0x)?([0123456789abcdef]*)" );
+  std::regex binary_number( "(0b)?([01]+)" );
+  std::regex hex_number( "(0x)?([0123456789abcdef]+)" );
 
   std::smatch match;
   if ( std::regex_match( s, match, binary_number ) )
