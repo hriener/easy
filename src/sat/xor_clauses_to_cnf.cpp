@@ -35,7 +35,7 @@ xor_clauses_to_cnf::xor_clauses_to_cnf( int& sid )
 
 void xor_clauses_to_cnf::add_xor_clause( constraints& constraints, const std::vector<int>& xor_clause, bool value )
 {
-  assert( !clause.first.empty() && "clause must not be empty" );
+  assert( !xor_clause.empty() && "clause must not be empty" );
 
   std::queue<int> lits;
   for ( const auto& l : xor_clause )
