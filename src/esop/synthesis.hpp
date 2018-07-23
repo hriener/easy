@@ -158,6 +158,7 @@ struct minimum_synthesizer_params
   /*! A function that evaluates the current value and satisfiability result, decides whether to
       terminate, and updates the value */
   std::function<bool(int&,bool)> next;
+  int conflict_limit = -1;
 }; /* minimum_synthesizer_params */
 
 /*! \brief Minimum ESOP synthesizer

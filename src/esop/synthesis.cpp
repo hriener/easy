@@ -24,6 +24,7 @@
  */
 
 #include <esop/synthesis.hpp>
+#include <sat/cnf_writer.hpp>
 
 namespace esop
 {
@@ -114,7 +115,6 @@ result simple_synthesizer::synthesize( const simple_synthesizer_params& params )
 
   sat::constraints constraints;
   sat::sat_solver solver;
-
   if ( params.conflict_limit != -1 )
   {
     solver.set_conflict_limit( params.conflict_limit );
@@ -195,7 +195,7 @@ result simple_synthesizer::synthesize( const simple_synthesizer_params& params )
 
   sat::gauss_elimination().apply( constraints );
   sat::xor_clauses_to_cnf( sid ).apply( constraints );
-  sat::cnf_symmetry_breaking( sid ).apply( constraints );
+  // sat::cnf_symmetry_breaking( sid ).apply( constraints );
 
   const auto sat = solver.solve( constraints );
   if ( sat.is_undef() )
@@ -248,6 +248,11 @@ esop_t minimum_synthesizer::synthesize( const minimum_synthesizer_params& params
 
     sat::constraints constraints;
     sat::sat_solver solver;
+
+    if ( params.conflict_limit != -1 )
+    {
+      solver.set_conflict_limit( params.conflict_limit );
+    }
 
     /* add constraints */
     kitty::cube minterm = kitty::cube::neg_cube( num_vars );
@@ -324,13 +329,15 @@ esop_t minimum_synthesizer::synthesize( const minimum_synthesizer_params& params
 
     sat::gauss_elimination().apply( constraints );
     sat::xor_clauses_to_cnf( sid ).apply( constraints );
-    sat::cnf_symmetry_breaking( sid ).apply( constraints );
+    // sat::cnf_symmetry_breaking( sid ).apply( constraints );
 
-    if ( result = solver.solve( constraints ) )
+    result = solver.solve( constraints );
+    if ( result.is_sat() )
     {
       esop = make_esop( result.model, k, num_vars );
     }
   } while ( params.next( k, bool(result) ) );
+
   return esop;
 }
 
@@ -511,7 +518,7 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
 
     sat::gauss_elimination().apply( *constraints );
     sat::xor_clauses_to_cnf( sid ).apply( *constraints );
-    sat::cnf_symmetry_breaking( sid ).apply( *constraints );
+    // sat::cnf_symmetry_breaking( sid ).apply( *constraints );
 
     if ( result = solver->solve( *constraints ) )
     {
@@ -604,7 +611,7 @@ esops_t minimum_all_synthesizer::synthesize( const minimum_all_synthesizer_param
 
     sat::gauss_elimination().apply( *constraints );
     sat::xor_clauses_to_cnf( sid ).apply( *constraints );
-    sat::cnf_symmetry_breaking( sid ).apply( *constraints );
+    // sat::cnf_symmetry_breaking( sid ).apply( *constraints );
   }
 
   /* enumerate solutions */
