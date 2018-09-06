@@ -10,6 +10,7 @@ Welcome to the documentation!
    :maxdepth: 2
 
    introduction
+   installation
    changelog
 
 .. toctree::

@@ -37,4 +37,4 @@ The synthesis procedure also supports resource constraints in terms of conflict 
 Shell Interface
 ^^^^^^^^^^^^^^^
 
-``easy_shell`` is a simple shell interface that allows a user to apply the algorithms implemented in the ``easy`` library to benchmark problems.  ESOP forms in the PLA format are supported; specification are provided as truth tables.
+``easy_shell`` is a simple shell interface that allows a user to apply the algorithms implemented in the easy library to benchmark problems.  ESOP forms in the PLA format are supported; specification are provided as truth tables.
