@@ -39,7 +39,7 @@ namespace easy
  * \param esop ESOP form
  * \param num_vars Number of variables
  */
-inline void write_esop( std::ostream& os, const esop::esop_t const& esop, unsigned num_vars )
+inline void write_esop( std::ostream& os, esop::esop_t const& esop, unsigned num_vars )
 {
   lorina::pla_writer writer( os );
   writer.on_number_of_inputs( num_vars );
