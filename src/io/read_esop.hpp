@@ -40,9 +40,9 @@ class esop_storage_reader : public lorina::pla_reader
 {
 public:
   esop_storage_reader( esop::esop_t& esop, unsigned& num_vars )
-    : _esop( esop )
-    , _num_vars( num_vars )
-  {}
+      : _esop( esop ), _num_vars( num_vars )
+  {
+  }
 
   void on_number_of_inputs( std::size_t i ) const override
   {
