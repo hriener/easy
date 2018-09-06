@@ -1,4 +1,4 @@
-/* easy: C++ command shell library
+/* easy: C++ ESOP library
  * Copyright (C) 2017-2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,27 +24,9 @@
  */
 
 #include <io/write_esop.hpp>
-#include <lorina/pla.hpp>
-#include <sstream>
 
 namespace easy
 {
-
-void write_esop( std::ostream& os, const esop::esop_t& esop, unsigned num_vars )
-{
-  lorina::pla_writer writer( os );
-  writer.on_number_of_inputs( num_vars );
-  writer.on_number_of_outputs( 1 );
-  writer.on_number_of_terms( esop.size() );
-  writer.on_keyword( "type", "esop" );
-  for ( const auto& e : esop )
-  {
-    std::stringstream ss;
-    e.print( num_vars, ss );
-    writer.on_term( ss.str(), "1" );
-  }
-  writer.on_end();
-}
 
 } /* namespace easy */
 
