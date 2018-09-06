@@ -4,13 +4,37 @@ Introduction
 Synopsis
 --------
 
-easy is a C++ library and toolkit for manipulating and finding exclusive-or sum-of-product (ESOP) forms.  An ESOP form is a classical two-level logic representation of a possibly incompletely-specified multi-output Boolean function.  An ESOP form consisting of one level of multi-fanin AND gates followed by one level of multi-input XOR gates.  ESOP forms have remarkable testability and strong compactness properties;  they play an important role in cryptography and quantum computation.
+easy is a C++ library for manipulating exclusive-or sum-of-products (ESOP) forms.  An ESOP form is a two-level logic representation that consists of one level of multi-fanin AND-gates, followed by one level of multi-input XOR-gates.
 
-The easy C++ library provides implementation of logic synthesis and logic optimization algorithms that can be readily integrated with other applications.  Additionally, easy comes with a set of simple tools to synthesize and manipulate ESOP forms.
+The easy library provides data-structures and algorithms for the verification and synthesis of ESOP forms.
 
-Tools
------
+Verification
+^^^^^^^^^^^^
 
-* easy_shell
-* enum_esop
-* verify_esop
+easy implements simple truth table based algorithms to verify that an ESOP form realizes a completely-specified or incompletely-specified Boolean function or to verify that two ESOP forms are functionally equivalent.  Being truth table based, these methods are fast for ESOP forms of up to 16 Boolean variables.
+
+* ``verify_esop`` verifies if an ESOP form implements a specification provided as completely-specified Boolean function
+
+* ``implements_esop`` verifies if an ESOP form implements a specification provided as incompletely-specified Boolean function
+
+* ``equivalent_esops`` verifies if two ESOP forms implement the same completely-specified Boolean function
+
+Synthesis
+^^^^^^^^^
+
+easy implements various SAT-based methods to synthesize exact ESOP forms.  The problem of synthesizing an ESOP form with a restricted number of product terms is formulated as a propositional constraint satisfaction problem over Boolean decision variables in such a way that each satisfying assignment to the decision variables corresponds to an ESOP form.  The problem is solved by invoking a decision procedure for Boolean satisfiability.
+
+* ``helliwell_synthesis`` synthesizes an exact ESOP form for an incompletely-specified Boolean function.  Under the hood, the algorithm formulates the synthesis problem using the Helliwell equation.
+
+* ``exact_synthesis`` synthesizes an exact ESOP form for a possibly incompletely-specified Boolean function using a formulating of Boolean learning.
+
+*Bounded synthesis with upward and downward search*:
+A bounded synthesis procedure enables the search for an ESOP form with a small (or minimum) number of product terms.  A user provides specified a lower and an upper bound on the number of product terms.  The procedure searches systematically synthesizes ESOP forms within these bounds to determine a ESOP form with a minimum number of product terms.  Two search strategies are supported: Upward search starts from the lower bound and increases the bound if the synthesis problem is unsatisfiable.  Downward search starts from the upper bound and systematically decreases the bound if the synthesis problem is satisfiable.  The search proceeds until a minimum is obtained.
+
+*Resource constraints*:
+The synthesis procedure also supports resource constraints in terms of conflict limits.  If enabled, the SAT procedure is terminated after a fixed number of failing attempts to solve the satisfiability problem.  In this case, the result of intermediate synthesis problem is ``unknown'' and the search procedure proceeds to the next problem.  As a consequence, minimality of the solution cannot be guaranteed; however, the conflict limit allows the algorithm to step-over computationally hard instances of the SAT problem and improves the run-time predictability of the search procedure.
+
+Shell Interface
+^^^^^^^^^^^^^^^
+
+``easy_shell`` is a simple shell interface that allows a user to apply the algorithms implemented in the ``easy`` library to benchmark problems.  ESOP forms in the PLA format are supported; specification are provided as truth tables.
