@@ -40,7 +40,7 @@ namespace esop
  * Public functions                                                           *
  ******************************************************************************/
 
-} /* esop */
+} // namespace esop
 
 // Local Variables:
 // c-basic-offset: 2

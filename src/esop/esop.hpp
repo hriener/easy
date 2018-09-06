@@ -37,10 +37,10 @@ namespace esop
 
 namespace detail
 {
-  static constexpr auto XOR_SYMBOL = "\u2295";
+static constexpr auto XOR_SYMBOL = "\u2295";
 }
 
-using esop_t  = std::vector<kitty::cube>;
+using esop_t = std::vector<kitty::cube>;
 using esops_t = std::vector<esop_t>;
 
 /*! \brief Minimum pairwise distance
@@ -55,7 +55,7 @@ inline unsigned min_pairwise_distance( const esop_t& esop )
   unsigned min = std::numeric_limits<unsigned>::max();
   for ( auto i = 0u; i < esop.size(); ++i )
   {
-    for ( auto j = i+1; j < esop.size(); ++j )
+    for ( auto j = i + 1; j < esop.size(); ++j )
     {
       const auto d = esop[i].distance( esop[j] );
       if ( d < min )
@@ -79,7 +79,7 @@ inline unsigned max_pairwise_distance( const esop_t& esop )
   unsigned max = 0u;
   for ( auto i = 0u; i < esop.size(); ++i )
   {
-    for ( auto j = i+1; j < esop.size(); ++j )
+    for ( auto j = i + 1; j < esop.size(); ++j )
     {
       const auto d = esop[i].distance( esop[j] );
       if ( d > max )
@@ -104,7 +104,7 @@ inline double avg_pairwise_distance( const esop_t& esop )
   auto counter = 0;
   for ( auto i = 0u; i < esop.size(); ++i )
   {
-    for ( auto j = i+1; j < esop.size(); ++j )
+    for ( auto j = i + 1; j < esop.size(); ++j )
     {
       const auto d = esop[i].distance( esop[j] );
       dist += d;
@@ -152,7 +152,7 @@ inline bool verify_esop( const esop_t& esop, const std::string& bits, const std:
  */
 inline bool equivalent_esops( const esop_t& esop1, const esop_t& esop2, unsigned num_vars )
 {
-  assert( num_vars <= 20 && "20 and more variables cannot be handled using explicit truth table manipulation");
+  assert( num_vars <= 20 && "20 and more variables cannot be handled using explicit truth table manipulation" );
 
   kitty::dynamic_truth_table tt1( num_vars );
   kitty::create_from_cubes( tt1, esop1, true );
@@ -175,12 +175,12 @@ inline bool equivalent_esops( const esop_t& esop1, const esop_t& esop2, unsigned
  */
 inline bool implements_function( const esop_t& esop, const kitty::dynamic_truth_table& bits, const kitty::dynamic_truth_table& care, unsigned num_vars )
 {
-  assert( num_vars <= 20 && "20 and more variables cannot be handled using explicit truth table manipulation");
+  assert( num_vars <= 20 && "20 and more variables cannot be handled using explicit truth table manipulation" );
 
   kitty::dynamic_truth_table tt( num_vars );
   kitty::create_from_cubes( tt, esop, true );
 
-  return (tt & care) == (bits & care);
+  return ( tt & care ) == ( bits & care );
 }
 
 /*! \brief Printer function for ESOP
@@ -208,19 +208,19 @@ inline void print_esop_as_exprs( const esop_t& esop, unsigned num_vars, std::ost
       os << "(";
       for ( auto j = 0u; j < num_vars; ++j )
       {
-	if ( ( c._mask >> j ) & 1 )
-	{
-	  os << ( ( ( c._bits >> j ) & 1 ) ? "x" : "~x" ) << j;
-	  --lit_count;
-	  if ( lit_count != 0 )
-	  {
-	    os << "*";
-	  }
-	}
+        if ( ( c._mask >> j ) & 1 )
+        {
+          os << ( ( ( c._bits >> j ) & 1 ) ? "x" : "~x" ) << j;
+          --lit_count;
+          if ( lit_count != 0 )
+          {
+            os << "*";
+          }
+        }
       }
       os << ")";
     }
-    if ( i+1 < esop.size() )
+    if ( i + 1 < esop.size() )
     {
       os << detail::XOR_SYMBOL;
     }
