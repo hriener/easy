@@ -1,4 +1,4 @@
-/* easy: C++ command shell library
+/* easy: C++ ESOP library
  * Copyright (C) 2017-2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person

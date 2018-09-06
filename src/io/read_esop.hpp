@@ -1,4 +1,4 @@
-/* easy: C++ command shell library
+/* easy: C++ ESOP library
  * Copyright (C) 2017-2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,6 +31,11 @@
 namespace easy
 {
 
+/*! \brief lorina reader callback for PLA files
+ *
+ * Reads a PLA file and stores the terms as esop_t.
+ *
+ */
 class esop_storage_reader : public lorina::pla_reader
 {
 public:
