@@ -31,7 +31,7 @@ namespace alice
 struct esop_storee
 {
   std::string model_name;
-  esop::esop_t esop;
+  easy::esop::esop_t esop;
   std::size_t number_of_inputs;
   std::size_t number_of_outputs;
 }; /* esop_storee */

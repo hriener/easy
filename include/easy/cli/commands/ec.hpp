@@ -70,7 +70,7 @@ protected:
         return;
       }
 
-      if ( esop::equivalent_esops( elm1.esop, elm2.esop, elm1.number_of_inputs ) )
+      if ( easy::esop::equivalent_esops( elm1.esop, elm2.esop, elm1.number_of_inputs ) )
       {
         std::cout << "[i] ESOPs are equivalent" << std::endl;
       }
@@ -91,7 +91,7 @@ protected:
         return;
       }
 
-      if ( esop::implements_function( elm.esop, func.bits, func.care, elm.number_of_inputs ) )
+      if ( easy::esop::implements_function( elm.esop, func.bits, func.care, elm.number_of_inputs ) )
       {
         std::cout << "[i] ESOP is an implementation of the Boolean function" << std::endl;
       }

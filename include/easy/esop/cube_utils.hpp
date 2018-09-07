@@ -29,7 +29,7 @@
 #include <cassert>
 #include <vector>
 
-namespace esop
+namespace easy::esop
 {
 
 namespace detail
@@ -171,7 +171,7 @@ inline bool ternary_count_next( std::string& digits )
   return false;
 }
 
-} // namespace esop
+} // namespace easy::esop
 
 // Local Variables:
 // c-basic-offset: 2

@@ -31,7 +31,7 @@
 #include <memory>
 #include <vector>
 
-namespace sat
+namespace easy::sat
 {
 
 struct constraints
@@ -213,7 +213,7 @@ inline sat_solver::result sat_solver::solve( constraints& constraints, const ass
   }
 }
 
-} // namespace sat
+} // namespace easy::sat
 
 // Local Variables:
 // c-basic-offset: 2

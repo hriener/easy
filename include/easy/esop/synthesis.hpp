@@ -32,7 +32,7 @@
 #include <easy/sat/cnf_symmetry_breaking.hpp>
 #include <json/json.hpp>
 
-namespace esop
+namespace easy::esop
 {
 
 namespace detail
@@ -843,7 +843,7 @@ private:
   nlohmann::json _stats;
 }; /* minimum_all_synthesizer */
 
-} // namespace esop
+} // namespace easy::esop
 
 // Local Variables:
 // c-basic-offset: 2

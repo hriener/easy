@@ -35,7 +35,7 @@
  * This code is based on
  * https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
  */
-namespace utils
+namespace easy::utils
 {
 
 inline void ltrim( std::string& s )
@@ -182,7 +182,7 @@ inline std::string hex_string_from_binary_string( const std::string& binary )
   return r;
 }
 
-} // namespace utils
+} // namespace easy::utils
 
 // Local Variables:
 // c-basic-offset: 2

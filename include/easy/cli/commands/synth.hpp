@@ -69,34 +69,34 @@ protected:
 
       const auto start_time = std::chrono::system_clock::now();
 
-      esop::result synthesis_result;
+      easy::esop::result synthesis_result;
       if ( strategy == 0 )
       {
-        esop::simple_synthesizer_params params;
+        easy::esop::simple_synthesizer_params params;
         params.conflict_limit = number_of_conflicts;
         params.number_of_terms = number_of_terms;
 
-        esop::simple_synthesizer synthesizer( esop::spec{bits, care} );
+        easy::esop::simple_synthesizer synthesizer( easy::esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
       }
       else if ( strategy == 1 )
       {
-        esop::minimum_synthesizer_params params;
+        easy::esop::minimum_synthesizer_params params;
         params.conflict_limit = number_of_conflicts;
         params.begin = number_of_terms;
-        params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
+        params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
 
-        esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
+        easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
       }
       else if ( strategy == 2 )
       {
-        esop::minimum_synthesizer_params params;
+        easy::esop::minimum_synthesizer_params params;
         params.conflict_limit = number_of_conflicts;
         params.begin = 1;
-        params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
+        params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
 
-        esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
+        easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
       }
       else
@@ -142,34 +142,34 @@ protected:
 
         const auto start_time = std::chrono::system_clock::now();
 
-        esop::result synthesis_result;
+        easy::esop::result synthesis_result;
         if ( strategy == 0 )
         {
-          esop::simple_synthesizer_params params;
+          easy::esop::simple_synthesizer_params params;
           params.conflict_limit = number_of_conflicts;
           params.number_of_terms = number_of_terms;
 
-          esop::simple_synthesizer synthesizer( esop::spec{bits, care} );
+          easy::esop::simple_synthesizer synthesizer( easy::esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );
         }
         else if ( strategy == 1 )
         {
-          esop::minimum_synthesizer_params params;
+          easy::esop::minimum_synthesizer_params params;
           params.conflict_limit = number_of_conflicts;
           params.begin = number_of_terms;
-          params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
+          params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
 
-          esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
+          easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );
         }
         else if ( strategy == 2 )
         {
-          esop::minimum_synthesizer_params params;
+          easy::esop::minimum_synthesizer_params params;
           params.conflict_limit = number_of_conflicts;
           params.begin = 1;
-          params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
+          params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
 
-          esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
+          easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );
         }
         else

@@ -28,7 +28,7 @@
 #include <easy/sat/sat_solver.hpp>
 #include <iostream>
 
-namespace sat
+namespace easy::sat
 {
 
 class cnf_writer
@@ -73,7 +73,7 @@ protected:
   std::ostream& _os;
 };
 
-} // namespace sat
+} // namespace easy::sat
 
 // Local Variables:
 // c-basic-offset: 2
