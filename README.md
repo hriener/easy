@@ -5,20 +5,9 @@
 # easy
 
 <img src="https://cdn.rawgit.com/hriener/easy/master/easy.svg" width="64" height="64" align="left" style="margin-right: 12pt" />
-easy is a library and toolkit for finding and manipulating exclusive-or sum-of-product (ESOP) forms of (incompletely-specified) Boolean functions.
+easy is a C++ library for verification and synthesis of exclusive-or sum-of-product (ESOP) forms.
 
-## Installation
-
-Use git to clone the repository
-
-    git clone --recursive https://github.com/hriener/esop_synthesis.git
-
-Build the ESOP synthesis toolkit as follows:
-
-    mkdir build
-    cd build
-    cmake -DCMAKE_BUILD_TYPE=RELEASE ..
-    make
+[Read the full documentation.](http://easy.readthedocs.io/en/latest/?badge=latest)
 
 ## Usage
 
