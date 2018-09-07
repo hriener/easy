@@ -1,4 +1,4 @@
-/* ESOP
+/* easy: C++ ESOP library
  * Copyright (C) 2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
@@ -25,8 +25,6 @@
 
 #pragma once
 
-#ifdef GLUCOSE_EXTENSION
-
 #include <core/SolverTypes.h>
 #include <core/Solver.h>
 #include <cassert>
@@ -39,10 +37,10 @@ namespace sat
 struct constraints
 {
   using clause_t = std::vector<int>;
-  using xor_clause_t = std::pair<clause_t,bool>;
+  using xor_clause_t = std::pair<clause_t, bool>;
 
   void add_clause( const clause_t& clause );
-  void add_xor_clause( const clause_t& clause, bool value = true);
+  void add_xor_clause( const clause_t& clause, bool value = true );
 
   std::vector<clause_t> _clauses;
   std::vector<xor_clause_t> _xor_clauses;
@@ -59,17 +57,18 @@ struct sat_solver
   struct result
   {
     result( state_t state = l_Undef )
-      : state( state )
-    {}
+        : state( state )
+    {
+    }
 
     result( const model_t& m )
-      : state( l_True )
-      , model( m )
-    {}
+        : state( l_True ), model( m )
+    {
+    }
 
     inline operator bool() const { return ( state == l_True ); }
 
-    inline bool is_sat()  const  { return ( state == l_True );  }
+    inline bool is_sat() const { return ( state == l_True ); }
     inline bool is_unsat() const { return ( state == l_False ); }
     inline bool is_undef() const { return ( state == l_Undef ); }
 
@@ -92,9 +91,129 @@ struct sat_solver
   std::unique_ptr<Glucose::Solver> _solver;
 };
 
-} /* sat */
+inline void constraints::add_clause( const clause_t& clause )
+{
+  for ( const auto& c : clause )
+  {
+    unsigned v = abs( c );
+    if ( v > _num_variables )
+    {
+      _num_variables = v;
+    }
+  }
+  _clauses.push_back( clause );
+}
 
-#endif /* GLUCOSE_EXTENSION */
+inline void constraints::add_xor_clause( const clause_t& clause, bool value )
+{
+  for ( const auto& c : clause )
+  {
+    unsigned v = abs( c );
+    if ( v > _num_variables )
+    {
+      _num_variables = v;
+    }
+  }
+  _xor_clauses.push_back( {clause, value} );
+}
+
+inline sat_solver::sat_solver()
+{
+  _solver = std::make_unique<Glucose::Solver>();
+}
+
+inline void sat_solver::reset()
+{
+  _solver = std::make_unique<Glucose::Solver>();
+  _num_vars = 0;
+  _solver->budgetOff();
+}
+
+inline void sat_solver::set_conflict_limit( int limit )
+{
+  _conflict_limit = limit;
+  _solver->setConfBudget( limit );
+}
+
+inline int sat_solver::get_conflicts() const
+{
+  return _solver->conflicts;
+}
+
+inline sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
+{
+  /* add clauses to solver & remove them from constraints */
+  for ( const auto& c : constraints._clauses )
+  {
+    Glucose::vec<Glucose::Lit> clause;
+    for ( const auto& l : c )
+    {
+      const unsigned var = abs( l ) - 1;
+      while ( _num_vars <= var )
+      {
+        _solver->newVar();
+        ++_num_vars;
+      }
+      clause.push( Glucose::mkLit( var, l < 0 ) );
+    }
+    _solver->addClause( clause );
+  }
+  constraints._clauses.clear();
+
+  /* add xor clauses to solver & remove them from constraints */
+  assert( constraints._xor_clauses.size() == 0u );
+
+  bool sat;
+
+  Glucose::vec<Glucose::Lit> assume;
+  if ( assumptions.size() > 0 )
+  {
+    for ( const auto& v : assumptions )
+    {
+      const unsigned var = abs( v ) - 1;
+      while ( _num_vars <= var )
+      {
+        _solver->newVar();
+        ++_num_vars;
+      }
+      assume.push( Glucose::mkLit( var, v < 0 ) );
+    }
+  }
+
+  if ( _conflict_limit == -1 )
+  {
+    sat = _solver->solve( assume );
+  }
+  else
+  {
+    const auto solver_result = _solver->solveLimited( assume );
+    if ( solver_result == l_Undef || _solver->conflicts >= _conflict_limit )
+    {
+      return result( l_Undef );
+    }
+    else
+    {
+      assert( solver_result == l_True || solver_result == l_False );
+      sat = solver_result == l_True;
+    }
+  }
+
+  if ( sat )
+  {
+    std::vector<Glucose::lbool> model( _num_vars );
+    for ( auto i = 0; i < _num_vars; ++i )
+    {
+      model[i] = _solver->modelValue( i );
+    }
+    return result( model );
+  }
+  else
+  {
+    return result( sat ? l_True : l_False );
+  }
+}
+
+} // namespace sat
 
 // Local Variables:
 // c-basic-offset: 2

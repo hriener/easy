@@ -1,4 +1,4 @@
-/* ESOP
+/* easy: C++ ESOP library
  * Copyright (C) 2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,6 +26,12 @@
 #pragma once
 
 #include <sat/sat_solver.hpp>
+#include <sat/cnf_symmetry_breaking.hpp>
+#include <src/Graph.hpp>
+#include <src/global.hpp>
+#include <src/Algebraic.hpp>
+#include <src/Theory.hpp>
+#include <src/Breaking.hpp>
 
 namespace sat
 {
@@ -33,14 +39,65 @@ namespace sat
 class cnf_symmetry_breaking
 {
 public:
-  cnf_symmetry_breaking( int& sid );
+  cnf_symmetry_breaking( int& sid )
+      : _sid( sid )
+  {
+  }
 
-  void apply( constraints& constraints );
+  inline void apply( constraints& constraints )
+  {
+    std::unordered_set<sptr<Clause>, UVecHash, UvecEqual> clauses;
+    for ( const auto& c : constraints._clauses )
+    {
+      std::set<unsigned> clause;
+      for ( const auto& l : c )
+      {
+        clause.insert( encode( l ) );
+        if ( (uint)abs( l ) > nVars )
+        {
+          nVars = abs( l );
+        }
+      }
+      clauses.insert( std::make_shared<Clause>( clause ) );
+    }
 
+    auto theory = std::make_shared<CNF>( clauses );
+
+    std::vector<sptr<Group>> subgroups;
+    theory->getGroup()->getDisjointGenerators( subgroups );
+    theory->cleanUp(); // improve some memory overhead
+
+    uint totalNbMatrices = 0;
+    uint totalNbRowSwaps = 0;
+
+    Breaker brkr( theory );
+    for ( auto grp : subgroups )
+    {
+      if ( grp->getSize() > 1 )
+      {
+        theory->setSubTheory( grp );
+        grp->addMatrices();
+        totalNbMatrices += grp->getNbMatrices();
+        totalNbRowSwaps += grp->getNbRowSwaps();
+      }
+      grp->addBreakingClausesTo( brkr );
+      grp.reset();
+    }
+
+    auto cls = brkr.get_clauses();
+    for ( const auto& c : cls )
+    {
+      constraints._clauses.push_back( c );
+    }
+    constraints._num_variables = brkr.getTotalNbVars();
+    _sid = brkr.getTotalNbVars();
+  }
+
+public:
   int& _sid;
 }; /* cnf_symmmetry_breaking */
 
-} /* sat */
+} // namespace sat
 
 // Local Variables:
 // c-basic-offset: 2

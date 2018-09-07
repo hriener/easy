@@ -1,4 +1,4 @@
-/* ESOP
+/* easy: C++ ESOP library
  * Copyright (C) 2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,138 +24,11 @@
  */
 
 #include <sat/sat_solver.hpp>
-#include <cassert>
-
-#ifdef GLUCOSE_EXTENSION
 
 namespace sat
 {
 
-void constraints::add_clause( const clause_t& clause )
-{
-  for ( const auto& c : clause )
-  {
-    unsigned v = abs(c);
-    if ( v > _num_variables )
-    {
-      _num_variables = v;
-    }
-  }
-  _clauses.push_back( clause );
-}
-
-void constraints::add_xor_clause( const clause_t& clause, bool value )
-{
-  for ( const auto& c : clause )
-  {
-    unsigned v = abs(c);
-    if ( v > _num_variables )
-    {
-      _num_variables = v;
-    }
-  }
-  _xor_clauses.push_back( { clause, value } );
-}
-
-sat_solver::sat_solver()
-{
-  _solver = std::make_unique<Glucose::Solver>();
-}
-
-void sat_solver::reset()
-{
-  _solver = std::make_unique<Glucose::Solver>();
-  _num_vars = 0;
-  _solver->budgetOff();
-}
-
-void sat_solver::set_conflict_limit( int limit )
-{
-  _conflict_limit = limit;
-  _solver->setConfBudget( limit );
-}
-
-int sat_solver::get_conflicts() const
-{
-  return _solver->conflicts;
-}
-
-sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
-{
-  /* add clauses to solver & remove them from constraints */
-  for ( const auto& c : constraints._clauses )
-  {
-    Glucose::vec<Glucose::Lit> clause;
-    for ( const auto& l : c )
-    {
-      const unsigned var = abs(l)-1;
-      while ( _num_vars <= var )
-      {
-        _solver->newVar();
-        ++_num_vars;
-      }
-      clause.push( Glucose::mkLit( var, l < 0 ) );
-    }
-    _solver->addClause( clause );
-  }
-  constraints._clauses.clear();
-
-  /* add xor clauses to solver & remove them from constraints */
-  assert( constraints._xor_clauses.size() == 0u );
-
-  bool sat;
-
-  Glucose::vec<Glucose::Lit> assume;
-  if ( assumptions.size() > 0 )
-  {
-    for ( const auto& v : assumptions )
-    {
-      const unsigned var = abs(v)-1;
-      while ( _num_vars <= var )
-      {
-        _solver->newVar();
-        ++_num_vars;
-      }
-      assume.push( Glucose::mkLit( var, v < 0 ) );
-    }
-  }
-
-  if ( _conflict_limit == -1 )
-  {
-    sat = _solver->solve( assume );
-  }
-  else
-  {
-    const auto solver_result = _solver->solveLimited( assume );
-    if ( solver_result == l_Undef || _solver->conflicts >= _conflict_limit )
-    {
-      return result( l_Undef );
-    }
-    else
-    {
-      assert( solver_result == l_True || solver_result == l_False );
-      sat = solver_result == l_True;
-    }
-  }
-
-  if ( sat )
-  {
-    std::vector<Glucose::lbool> model( _num_vars );
-    for ( auto i = 0; i < _num_vars; ++i )
-    {
-      model[i] = _solver->modelValue( i );
-    }
-    return result( model );
-  }
-  else
-  {
-    return result( sat ? l_True : l_False );
-  }
-}
-
-} /* sat */
-
-#endif /* GLUCOSE_EXTENSION */
+} // namespace sat
 
 // Local Variables:
 // c-basic-offset: 2
