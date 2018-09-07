@@ -22,17 +22,27 @@ easy implements simple truth table based algorithms to verify that an ESOP form 
 Synthesis
 ^^^^^^^^^
 
-easy implements various SAT-based methods to synthesize exact ESOP forms.
+easy implements various heuristic and exact methods to synthesize ESOP forms.
 
-*Synthesis ESOP forms with a fixed number of product terms*:
+*Synthesis of ESOP forms using decomposition based methods*:
+The Boolean function is systematically decomposed and the ESOP form is re-composed from the individual parts.
+
+* ``esop_from_optimum_pkrm`` synthesizes an Pseudo-Kronecker Read-Muller (PKRM) expression (a special case of an ESOP form) using the algorithm described in [R. Drechsler, IEEE Trans. C 48(9), 1999, 987–990] and applies post-optimization to merge distance-1 cubes
+
+* ``esop_from_pprm`` synthesizes an Positive Polarity Read-Muller (PPRM) expression (a special case of an ESOP form) by recursively applying the positive Davio decomposition
+
+*Synthesis of ESOP forms with a fixed number of product terms using Boolean satisfiability*:
 The problem of synthesizing an ESOP form with a restricted number of product terms is formulated as a propositional constraint satisfaction problem over Boolean decision variables in such a way that each satisfying assignment to the decision variables corresponds to an ESOP form.  The problem is solved by invoking a decision procedure for Boolean satisfiability.
 
 * ``helliwell_synthesis`` synthesizes an exact ESOP form for an incompletely-specified Boolean function.  Under the hood, the algorithm formulates the synthesis problem using the Helliwell equation.
 
 * ``exact_synthesis`` synthesizes an exact ESOP form for a possibly incompletely-specified Boolean function using a formulating of Boolean learning.
 
-*Translating XOR-clauses to CNF*:
-XOR-clauses that occur in the problem formulations are translated to Conjunctive Normal Form (CNF) using a simple greedy strategy commonly known as Paar's method.
+*Simplfications for translating XOR-clauses to CNF*:
+
+* Gauss algorithm identifies and eliminates unnecessary variables from a set of XOR-clauses.
+
+* XOR-clauses are translated to Conjunctive Normal Form (CNF) using a simple greedy strategy commonly known as Paar's method.
 
 *Bounded synthesis with upward or downward search*:
 A bounded synthesis procedure enables the search for an ESOP form with a small (or minimum) number of product terms.  A user specifies a lower and an upper bound on the number of product terms.  The procedure synthesizes ESOP forms while decreasing or increasing the bounds until an ESOP form with a minimum number of product terms is found.  Two search strategies are supported: Upward search starts from the lower bound and increases the bound if the synthesis problem is unsatisfiable.  Downward search starts from the upper bound and systematically decreases the bound if the synthesis problem is satisfiable.  The search proceeds until a minimum is obtained.
