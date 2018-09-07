@@ -39,15 +39,110 @@
 namespace esop
 {
 
-void simple_combine_inplace( esop_t& expr, uint8_t var_index, uint8_t i );
-void simple_combine_inplace( esops_t& esops, uint8_t var_index, uint8_t i );
-esop_t simple_combine( const esop_t& expr, uint8_t var_index, uint8_t i );
-esops_t simple_combine( const esops_t& esops, uint8_t var_index, uint8_t i );
+void simple_combine_inplace( esop_t& expr, uint8_t var_index, uint8_t i )
+{
+  assert( i >= 0 && i <= 2 );
+  if ( i == 2 )
+    return;
+  for ( auto& c : expr )
+  {
+    c.add_literal( var_index, i );
+  }
+}
 
-esop_t complex_combine( esop_t a, esop_t b, uint8_t var_index, uint8_t i, uint8_t j );
-esops_t complex_combine( const esops_t& as, const esops_t& bs, uint8_t var_index, uint8_t i, uint8_t j );
+void simple_combine_inplace( esops_t& esops, uint8_t var_index, uint8_t i )
+{
+  assert( i >= 0 && i <= 2 );
+  if ( i == 2 )
+    return;
+  for ( auto& e : esops )
+  {
+    simple_combine_inplace( e, var_index, i );
+  }
+}
 
-} /* esop */
+esop_t simple_combine( const esop_t& expr, uint8_t var_index, uint8_t i )
+{
+  esop_t result = expr;
+  simple_combine_inplace( result, var_index, i );
+  return result;
+}
+
+esops_t simple_combine( const esops_t& esops, uint8_t var_index, uint8_t i )
+{
+  esops_t result = esops;
+  simple_combine_inplace( result, var_index, i );
+  return result;
+}
+
+esop_t complex_combine( esop_t a, esop_t b, uint8_t var_index, uint8_t i, uint8_t j )
+{
+  assert( i != j );
+
+  std::vector<kitty::cube> common;
+  std::sort( a.begin(), a.end() );
+  std::sort( b.begin(), b.end() );
+  std::set_intersection( a.begin(), a.end(), b.begin(), b.end(), std::back_inserter( common ) );
+
+  for ( const auto& c : common )
+  {
+    a.erase( std::remove( a.begin(), a.end(), c ), a.end() );
+  }
+
+  for ( const auto& c : common )
+  {
+    b.erase( std::remove( b.begin(), b.end(), c ), b.end() );
+  }
+
+  for ( auto& c : common )
+  {
+    c.add_literal( var_index, 3 - i - j );
+  }
+
+  for ( auto& c : a )
+  {
+    if ( i != 2 )
+    {
+      c.add_literal( var_index, i );
+    }
+    common.push_back( c );
+  }
+
+  for ( auto& c : b )
+  {
+    if ( j != 2 )
+    {
+      c.add_literal( var_index, j );
+    }
+    common.push_back( c );
+  }
+
+  return common;
+}
+
+esops_t complex_combine( const esops_t& as, const esops_t& bs, uint8_t var_index, uint8_t i, uint8_t j )
+{
+  assert( i >= 0 && i <= 2 );
+  assert( j >= 0 && j <= 2 );
+  assert( i != j );
+
+  esops_t combinations;
+  for ( const auto& a : as )
+  {
+    for ( const auto& b : bs )
+    {
+      combinations.push_back( complex_combine( a, b, var_index, i, j ) );
+    }
+  }
+
+  /* remove duplicates */
+  std::sort( combinations.begin(), combinations.end() );
+  combinations.erase( std::unique( combinations.begin(), combinations.end() ), combinations.end() );
+
+  return combinations;
+}
+
+} // namespace esop
 
 // Local Variables:
 // c-basic-offset: 2

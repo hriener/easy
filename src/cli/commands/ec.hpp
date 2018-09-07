@@ -26,16 +26,16 @@
 namespace alice
 {
 
-class ec_command: public command
+class ec_command : public command
 {
 public:
   explicit ec_command( const environment::ptr& env )
-    : command( env, "check equivalence of two ESOPs" )
+      : command( env, "check equivalence of two ESOPs" )
   {
-    opts.add_option( "store index", i,    "First index in ESOP storage (default: 0)" );
-    opts.add_option( "store index", j,    "Second index in ESOP storage (default: 0)" );
-    opts.add_flag( "--func,-f",     func, "Check if an ESOP implements a Boolean function. If set, "
-                                          "the first index identifies the function in the store." );
+    opts.add_option( "store index", i, "First index in ESOP storage (default: 0)" );
+    opts.add_option( "store index", j, "Second index in ESOP storage (default: 0)" );
+    opts.add_flag( "--func,-f", func, "Check if an ESOP implements a Boolean function. If set, "
+                                      "the first index identifies the function in the store." );
   }
 
 protected:
@@ -83,7 +83,7 @@ protected:
     {
       /* check if an ESOP implements a Boolean function */
       const auto& func = store<function_storee>()[i];
-      const auto& elm  = store<esop_storee>()[j];
+      const auto& elm = store<esop_storee>()[j];
 
       if ( elm.number_of_inputs != func.number_of_variables )
       {

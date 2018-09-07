@@ -32,16 +32,16 @@ class synth_command : public command
 {
 public:
   explicit synth_command( const environment::ptr& env )
-    : command( env, "SAT-based synthesis of ESOP forms" )
+      : command( env, "SAT-based synthesis of ESOP forms" )
   {
-    opts.add_option( "--terms,-t",       number_of_terms,      "Maximum number of terms used for synthesis (default: 10)" );
-    opts.add_option( "--conflicts,-c",   number_of_conflicts,  "Maximum number of conflicts (default: 10000)" );
-    opts.add_option( "--strategy,-s",   strategy,             "Synthesis strategy (default: 0)\n"
-                                                               "\tfixed-size 0\n"
-                                                               "\tdownward 1\n"
-                                                               "\tupward 2\n" );
-    opts.add_flag(   "--all,-a",        all_flag,             "Use all functions in the function store" );
-    opts.add_flag(   "--delete,-d",     delete_flag,          "Do not store any result but delete them" );
+    opts.add_option( "--terms,-t", number_of_terms, "Maximum number of terms used for synthesis (default: 10)" );
+    opts.add_option( "--conflicts,-c", number_of_conflicts, "Maximum number of conflicts (default: 10000)" );
+    opts.add_option( "--strategy,-s", strategy, "Synthesis strategy (default: 0)\n"
+                                                "\tfixed-size 0\n"
+                                                "\tdownward 1\n"
+                                                "\tupward 2\n" );
+    opts.add_flag( "--all,-a", all_flag, "Use all functions in the function store" );
+    opts.add_flag( "--delete,-d", delete_flag, "Do not store any result but delete them" );
   }
 
 protected:
@@ -60,10 +60,10 @@ protected:
     {
       ++counter;
 
-      const auto& func = store<function_storee>()[ function_store_size-1u ];
+      const auto& func = store<function_storee>()[function_store_size - 1u];
 
-      auto bits = to_binary(func.bits);
-      auto care = to_binary(func.care);
+      auto bits = to_binary( func.bits );
+      auto care = to_binary( func.care );
       std::reverse( bits.begin(), bits.end() );
       std::reverse( care.begin(), care.end() );
 
@@ -76,7 +76,7 @@ protected:
         params.conflict_limit = number_of_conflicts;
         params.number_of_terms = number_of_terms;
 
-        esop::simple_synthesizer synthesizer( esop::spec{ bits, care } );
+        esop::simple_synthesizer synthesizer( esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
       }
       else if ( strategy == 1 )
@@ -84,9 +84,9 @@ protected:
         esop::minimum_synthesizer_params params;
         params.conflict_limit = number_of_conflicts;
         params.begin = number_of_terms;
-        params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
+        params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
 
-        esop::minimum_synthesizer synthesizer( esop::spec{ bits, care } );
+        esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
       }
       else if ( strategy == 2 )
@@ -94,9 +94,9 @@ protected:
         esop::minimum_synthesizer_params params;
         params.conflict_limit = number_of_conflicts;
         params.begin = 1;
-        params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
+        params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
 
-        esop::minimum_synthesizer synthesizer( esop::spec{ bits, care } );
+        esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
       }
       else
@@ -133,10 +133,10 @@ protected:
       {
         ++counter;
 
-        const auto& func = store<function_storee>()[ i ];
+        const auto& func = store<function_storee>()[i];
 
-        auto bits = to_binary(func.bits);
-        auto care = to_binary(func.care);
+        auto bits = to_binary( func.bits );
+        auto care = to_binary( func.care );
         std::reverse( bits.begin(), bits.end() );
         std::reverse( care.begin(), care.end() );
 
@@ -149,7 +149,7 @@ protected:
           params.conflict_limit = number_of_conflicts;
           params.number_of_terms = number_of_terms;
 
-          esop::simple_synthesizer synthesizer( esop::spec{ bits, care } );
+          esop::simple_synthesizer synthesizer( esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );
         }
         else if ( strategy == 1 )
@@ -157,9 +157,9 @@ protected:
           esop::minimum_synthesizer_params params;
           params.conflict_limit = number_of_conflicts;
           params.begin = number_of_terms;
-          params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
+          params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
 
-          esop::minimum_synthesizer synthesizer( esop::spec{ bits, care } );
+          esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );
         }
         else if ( strategy == 2 )
@@ -167,9 +167,9 @@ protected:
           esop::minimum_synthesizer_params params;
           params.conflict_limit = number_of_conflicts;
           params.begin = 1;
-          params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
+          params.next = [&]( int& i, sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
 
-          esop::minimum_synthesizer synthesizer( esop::spec{ bits, care } );
+          esop::minimum_synthesizer synthesizer( esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );
         }
         else
@@ -204,10 +204,10 @@ protected:
 
     std::cout << "[i] " << rang::style::bold << "results: " << rang::style::reset;
     std::cout << fmt::format( "#realizable={} / #unrealizable={} / #unknown={} / avg number of terms={}\n",
-                              number_of_realizable, number_of_unrealizable, number_of_unknown, (double(total_num_terms)/number_of_realizable) );
+                              number_of_realizable, number_of_unrealizable, number_of_unknown, ( double( total_num_terms ) / number_of_realizable ) );
     std::cout << "[i] " << rang::style::bold << "time: " << rang::style::reset;
     std::cout << fmt::format( "total={}s / avg per func={}s\n",
-                              total_duration, (total_duration/counter) );
+                              total_duration, ( total_duration / counter ) );
   }
 
 private:

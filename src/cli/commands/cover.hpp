@@ -36,7 +36,7 @@ class cover_command : public command
 {
 public:
   explicit cover_command( const environment::ptr& env )
-    : command( env, "computes the cover of an incompletely-specified Boolean function and adds it to the ESOP store" )
+      : command( env, "computes the cover of an incompletely-specified Boolean function and adds it to the ESOP store" )
   {
     opts.add_option( "store index", i, "Index in function storage (default: last element)" );
   }
@@ -53,7 +53,7 @@ protected:
 
   void execute()
   {
-    const auto& elm = i == -1 ? store<function_storee>()[store<function_storee>().size()-1u] : store<function_storee>()[i];
+    const auto& elm = i == -1 ? store<function_storee>()[store<function_storee>().size() - 1u] : store<function_storee>()[i];
 
     esop::spec spec;
     assert( elm.bits.num_bits() == elm.care.num_bits() );
@@ -66,7 +66,7 @@ protected:
     std::reverse( spec.bits.begin(), spec.bits.end() );
     std::reverse( spec.care.begin(), spec.care.end() );
 
-    env->store<esop_storee>().extend() = { "", esop::esop_cover( spec ), std::size_t(elm.bits.num_vars()), 1 };
+    env->store<esop_storee>().extend() = {"", esop::esop_cover( spec ), std::size_t( elm.bits.num_vars() ), 1};
   }
 
 private:

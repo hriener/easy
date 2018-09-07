@@ -44,27 +44,8 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/ext/breakid-2.3)
   list(APPEND EXT_LIBS breakid-lib-static)
 endif()
 
-include_directories(src)
-
-set(SOURCES
-  src/esop/esop.cpp
-  src/esop/synthesis.cpp
-  src/esop/exorlink.cpp
-  src/io/write_esop.cpp
-  src/io/read_esop.cpp
-  src/utils/string_utils.cpp
-  src/sat/sat_solver.cpp
-  src/sat/cnf_writer.cpp
-  src/sat/gauss.cpp
-  src/sat/xor_clauses_to_cnf.cpp
-  src/sat/cnf_symmetry_breaking.cpp
-  src/esop/helliwell.cpp
-  src/esop/combine.cpp
-  src/esop/cube_utils.cpp
-  src/esop/exact_synthesis.cpp)
-
-add_library(easy ${SOURCES})
-target_link_libraries(easy ${EXT_LIBS} easy_fmt easy_kitty easy_json easy_lorina)
+add_library(easy INTERFACE)
+target_include_directories(easy INTERFACE ${PROJECT_SOURCE_DIR}/src)
 
 add_subdirectory(programs)
 

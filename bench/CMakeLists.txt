@@ -11,7 +11,7 @@ foreach(FILENAME ${FILENAMES})
   set(TARGET_NAME bench_${BASENAME})
 
   add_executable(${TARGET_NAME} ${FILENAME})
-  target_link_libraries(${TARGET_NAME} benchmark easy)
+  target_link_libraries(${TARGET_NAME} benchmark easy easy_kitty)
   target_compile_options(${TARGET_NAME} PRIVATE -O2 -DNDEBUG)
 endforeach()
 

@@ -58,8 +58,10 @@ ALICE_ADD_STORE( function_storee, "function", "f", "Function", "Functions" )
 
 ALICE_PRINT_STORE( function_storee, os, element )
 {
-  kitty::print_hex( element.bits, os ); os << ' ';
-  kitty::print_hex( element.care, os ); os << '\n';
+  kitty::print_hex( element.bits, os );
+  os << ' ';
+  kitty::print_hex( element.care, os );
+  os << '\n';
 }
 
 ALICE_DESCRIBE_STORE( function_storee, element )

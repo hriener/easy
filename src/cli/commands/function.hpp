@@ -34,12 +34,12 @@ class function_command : public command
 {
 public:
   explicit function_command( const environment::ptr& env )
-    : command( env, "loads an incompletely-specified Boolean function and adds it to the store" )
+      : command( env, "loads an incompletely-specified Boolean function and adds it to the store" )
   {
-    opts.add_option( "--num,-n",        num,        "Specifies how many Boolean functions are generated (default: 1)" );
-    opts.add_option( "--truthtable,-t", tt,         "Truth table (in binary) of Boolean function (MSB ... LSB)" );
-    opts.add_option( "--random,-r",     variables,  "Random completely-specified Boolean function.  As parameter the number of Boolean variables has to be passed." );
-    opts.add_option( "--seed,-s",       seed,       "Random seed" );
+    opts.add_option( "--num,-n", num, "Specifies how many Boolean functions are generated (default: 1)" );
+    opts.add_option( "--truthtable,-t", tt, "Truth table (in binary) of Boolean function (MSB ... LSB)" );
+    opts.add_option( "--random,-r", variables, "Random completely-specified Boolean function.  As parameter the number of Boolean variables has to be passed." );
+    opts.add_option( "--seed,-s", seed, "Random seed" );
   }
 
 protected:
@@ -57,20 +57,20 @@ protected:
       unsigned i;
       for ( i = 0; i < tt.size(); ++i )
       {
-        if ( tt[ i ] != '1' && tt[ i ] != '0' && tt[ i ] != '-' )
+        if ( tt[i] != '1' && tt[i] != '0' && tt[i] != '-' )
         {
-          std::cout << fmt::format( "[w] unsupported character `{}` treated as don't care\n", tt[ i ] );
+          std::cout << fmt::format( "[w] unsupported character `{}` treated as don't care\n", tt[i] );
         }
 
-        if ( tt[ i ] == '1' )
+        if ( tt[i] == '1' )
         {
           kitty::set_bit( bits, i );
           kitty::set_bit( care, i );
         }
-        else if ( tt[ i ] == '0' )
+        else if ( tt[i] == '0' )
         {
           kitty::clear_bit( bits, i );
-          kitty::set_bit(   care, i );
+          kitty::set_bit( care, i );
         }
       }
 
@@ -83,7 +83,7 @@ protected:
     {
       assert( variables != 0 );
 
-      std::default_random_engine random_engine(seed != 0 ? seed : std::chrono::steady_clock::now().time_since_epoch().count());
+      std::default_random_engine random_engine( seed != 0 ? seed : std::chrono::steady_clock::now().time_since_epoch().count() );
       std::uniform_int_distribution<> dist( 0, 100 );
 
       const auto len = 1ul << variables;

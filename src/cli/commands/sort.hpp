@@ -32,9 +32,9 @@ class sort_command : public command
 {
 public:
   explicit sort_command( const environment::ptr& env )
-    : command( env, "sort current ESOP" )
+      : command( env, "sort current ESOP" )
   {
-    opts.add_flag( "-i,--index",  index,  "Index" );
+    opts.add_flag( "-i,--index", index, "Index" );
     opts.add_flag( "-r,--random", random, "Randomize the cubes in the ESOP" );
   }
 
@@ -65,7 +65,7 @@ private:
   bool random;
   int index = -1;
 }; /* sort_command */
- 
+
 } // namespace alice
 
 // Local Variables:

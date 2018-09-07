@@ -43,7 +43,7 @@ ALICE_PRINT_STORE( esop_storee, os, element )
   auto i = 0;
   for ( const auto& c : element.esop )
   {
-    os << (i++) << ". ";
+    os << ( i++ ) << ". ";
     c.print( element.number_of_inputs );
     os << '\n';
   }

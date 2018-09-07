@@ -26,23 +26,22 @@
 #pragma once
 
 #include <esop/esop.hpp>
+#include <cassert>
 
 namespace esop
 {
 
 static unsigned cube_groups2[8] = {
-  /* 0 */2, 0, 1, 2,
-  /* 4 */0, 2, 2, 1
-};
+    /* 0 */ 2, 0, 1, 2,
+    /* 4 */ 0, 2, 2, 1};
 
 static unsigned cube_groups3[54] = {
-  /*  0 */2, 0, 0, 1, 2, 0, 1, 1, 2,
-  /*  9 */2, 0, 0, 1, 0, 2, 1, 2, 1,
-  /* 18 */0, 2, 0, 2, 1, 0, 1, 1, 2,
-  /* 27 */0, 2, 0, 0, 1, 2, 2, 1, 1,
-  /* 36 */0, 0, 2, 2, 0, 1, 1, 2, 1,
-  /* 45 */0, 0, 2, 0, 2, 1, 2, 1, 1
-};
+    /*  0 */ 2, 0, 0, 1, 2, 0, 1, 1, 2,
+    /*  9 */ 2, 0, 0, 1, 0, 2, 1, 2, 1,
+    /* 18 */ 0, 2, 0, 2, 1, 0, 1, 1, 2,
+    /* 27 */ 0, 2, 0, 0, 1, 2, 2, 1, 1,
+    /* 36 */ 0, 0, 2, 2, 0, 1, 1, 2, 1,
+    /* 45 */ 0, 0, 2, 0, 2, 1, 2, 1, 1};
 
 #include "exorlink4.def"
 #include "exorlink5.def"
@@ -58,7 +57,51 @@ static unsigned cube_groups3[54] = {
  * \param group A group of cube transformations
  * \return An array of up to 5 new cubes which are functionally equivalent to ``c0`` and ``c1``.
  */
-std::vector<kitty::cube> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t distance, std::uint32_t *group );
+std::vector<kitty::cube> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t distance, std::uint32_t* group )
+{
+  const auto diff = c0.difference( c1 );
+
+  std::vector<kitty::cube> result( distance );
+  if ( c1 < c0 )
+    std::swap( c0, c1 );
+
+  const auto bits = ~( c0._bits ) & ~( c1._bits );
+  const auto mask = c0._mask ^ c1._mask;
+
+  for ( auto i = 0; i < distance; ++i )
+  {
+    auto tmp_bits = c0._bits;
+    auto tmp_mask = c0._mask;
+    auto tmp_pos = diff;
+
+    for ( auto j = 0; j < distance; ++j )
+    {
+      /* compute next position */
+      std::uint64_t p = tmp_pos & -tmp_pos;
+      tmp_pos &= tmp_pos - 1;
+      switch ( *group++ )
+      {
+      case 0:
+        /* take from c0 */
+        break;
+      case 1:
+        /* take from c1 */
+        tmp_bits ^= ( ( c1._bits & p ) ^ tmp_bits ) & p;
+        tmp_mask ^= ( ( c1._mask & p ) ^ tmp_mask ) & p;
+        break;
+      case 2:
+        /* take other */
+        tmp_bits ^= ( ( bits & p ) ^ tmp_bits ) & p;
+        tmp_mask ^= ( ( mask & p ) ^ tmp_mask ) & p;
+        break;
+      }
+    }
+    result[i]._bits = tmp_bits;
+    result[i]._mask = tmp_mask;
+  }
+
+  return result;
+}
 
 /*! \brief EXORLINK4 cube transformation
  *
@@ -69,9 +112,90 @@ std::vector<kitty::cube> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t
  * \param offset An offset that determines the transformation (must be a value in the series 0, 16, 32, ..., 368)
  * \return An array of 4 new cubes which are functionally equivalent to ``c0`` and ``c1``.
  */
-std::array<kitty::cube,4> exorlink4( const kitty::cube& c0, const kitty::cube& c1, uint32_t offset );
+std::array<kitty::cube, 4> exorlink4( const kitty::cube& c0, const kitty::cube& c1, uint32_t offset )
+{
+  std::uint32_t* group = &cube_groups4[offset];
+  const auto diff = c0.difference( c1 );
 
-} /* esop */
+  std::array<kitty::cube, 4> result;
+  const auto bits = ~( c0._bits ) & ~( c1._bits );
+  const auto mask = c0._mask ^ c1._mask;
+
+  if ( c0 < c1 )
+  {
+    for ( auto i = 0; i < 4; ++i )
+    {
+      auto tmp_bits = c0._bits;
+      auto tmp_mask = c0._mask;
+      auto tmp_pos = diff;
+
+      for ( auto j = 0; j < 4; ++j )
+      {
+        /* compute next position */
+        std::uint64_t p = tmp_pos & -tmp_pos;
+        tmp_pos &= tmp_pos - 1;
+        switch ( *group++ )
+        {
+        case 0:
+          /* take from c0 */
+          break;
+        case 1:
+        {
+          /* take from c1 */
+          tmp_bits ^= ( ( c1._bits & p ) ^ tmp_bits ) & p;
+          tmp_mask ^= ( ( c1._mask & p ) ^ tmp_mask ) & p;
+        }
+        break;
+        case 2:
+          /* take other */
+          tmp_bits ^= ( ( bits & p ) ^ tmp_bits ) & p;
+          tmp_mask ^= ( ( mask & p ) ^ tmp_mask ) & p;
+          break;
+        }
+      }
+      result[i]._bits = tmp_bits;
+      result[i]._mask = tmp_mask;
+    }
+  }
+  else
+  {
+    for ( auto i = 0; i < 4; ++i )
+    {
+      auto tmp_bits = c1._bits;
+      auto tmp_mask = c1._mask;
+      auto tmp_pos = diff;
+
+      for ( auto j = 0; j < 4; ++j )
+      {
+        /* compute next position */
+        std::uint64_t p = tmp_pos & -tmp_pos;
+        tmp_pos &= tmp_pos - 1;
+        switch ( *group++ )
+        {
+        case 0:
+          /* take from c0 */
+          break;
+        case 1:
+          /* take from c1 */
+          tmp_bits ^= ( ( c0._bits & p ) ^ tmp_bits ) & p;
+          tmp_mask ^= ( ( c0._mask & p ) ^ tmp_mask ) & p;
+          break;
+        case 2:
+          /* take other */
+          tmp_bits ^= ( ( bits & p ) ^ tmp_bits ) & p;
+          tmp_mask ^= ( ( mask & p ) ^ tmp_mask ) & p;
+          break;
+        }
+      }
+      result[i]._bits = tmp_bits;
+      result[i]._mask = tmp_mask;
+    }
+  }
+
+  return result;
+}
+
+} // namespace esop
 
 // Local Variables:
 // c-basic-offset: 2
