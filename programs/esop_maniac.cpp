@@ -23,8 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <esop/esop.hpp>
-#include <esop/exorlink.hpp>
+#include <easy/easy.hpp>
 #include <kitty/kitty.hpp>
 #include <lorina/pla.hpp>
 #include <args/args.hxx>

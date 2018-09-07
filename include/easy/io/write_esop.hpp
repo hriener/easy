@@ -25,48 +25,48 @@
 
 #pragma once
 
-#include <esop/esop.hpp>
+#include <easy/esop/esop.hpp>
 #include <lorina/pla.hpp>
+#include <ostream>
+#include <sstream>
 
 namespace easy
 {
 
-/*! \brief lorina reader callback for PLA files
+/*! \brief Writes ESOP form in PLA format to output stream
  *
- * Reads a PLA file and stores the terms as esop_t.
- *
+ * \param os Output stream
+ * \param esop ESOP form
+ * \param num_vars Number of variables
  */
-class esop_storage_reader : public lorina::pla_reader
+inline void write_esop( std::ostream& os, esop::esop_t const& esop, unsigned num_vars )
 {
-public:
-  esop_storage_reader( esop::esop_t& esop, unsigned& num_vars )
-      : _esop( esop ), _num_vars( num_vars )
+  lorina::pla_writer writer( os );
+  writer.on_number_of_inputs( num_vars );
+  writer.on_number_of_outputs( 1 );
+  writer.on_number_of_terms( esop.size() );
+  writer.on_keyword( "type", "esop" );
+  for ( const auto& e : esop )
   {
+    std::stringstream ss;
+    e.print( num_vars, ss );
+    writer.on_term( ss.str(), "1" );
   }
+  writer.on_end();
+}
 
-  void on_number_of_inputs( std::size_t i ) const override
-  {
-    _num_vars = i;
-  }
-
-  void on_term( const std::string& term, const std::string& out ) const override
-  {
-    assert( out == "1" );
-    _esop.emplace_back( term );
-  }
-
-  bool on_keyword( const std::string& keyword, const std::string& value ) const override
-  {
-    if ( keyword == "type" && value == "esop" )
-    {
-      return true;
-    }
-    return false;
-  }
-
-  esop::esop_t& _esop;
-  unsigned& _num_vars;
-}; /* esop_storage_reader */
+/*! \brief Writes ESOP form in PLA format to a file
+ *
+ * \param filename Name of the file to be written
+ * \param esop ESOP form
+ * \param num_vars Number of variables
+ */
+inline void write_esop( std::string const& filename, esop::esop_t const& esop, unsigned num_vars )
+{
+  std::ofstream os( filename.c_str(), std::ofstream::out );
+  write_esop( os, esop, num_vars );
+  os.close();
+}
 
 } /* namespace easy */
 

@@ -25,10 +25,10 @@
 
 #if defined(GLUCOSE_EXTENSION)
 
-#include <esop/exact_synthesis.hpp>
-#include <esop/synthesis.hpp>
-#include <utils/string_utils.hpp>
-#include <utils/stopwatch.hpp>
+#include <easy/esop/exact_synthesis.hpp>
+#include <easy/esop/synthesis.hpp>
+#include <easy/utils/string_utils.hpp>
+#include <easy/utils/stopwatch.hpp>
 #include <kitty/kitty.hpp>
 #include <json/json.hpp>
 #include <args/args.hxx>

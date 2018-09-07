@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <esop/exorlink.hpp>
+#include <easy/esop/exorlink.hpp>
 #include <kitty/print.hpp>
 
 #include <benchmark/benchmark.h>

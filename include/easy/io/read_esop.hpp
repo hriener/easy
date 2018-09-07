@@ -25,48 +25,48 @@
 
 #pragma once
 
-#include <esop/esop.hpp>
+#include <easy/esop/esop.hpp>
 #include <lorina/pla.hpp>
-#include <ostream>
-#include <sstream>
 
 namespace easy
 {
 
-/*! \brief Writes ESOP form in PLA format to output stream
+/*! \brief lorina reader callback for PLA files
  *
- * \param os Output stream
- * \param esop ESOP form
- * \param num_vars Number of variables
+ * Reads a PLA file and stores the terms as esop_t.
+ *
  */
-inline void write_esop( std::ostream& os, esop::esop_t const& esop, unsigned num_vars )
+class esop_storage_reader : public lorina::pla_reader
 {
-  lorina::pla_writer writer( os );
-  writer.on_number_of_inputs( num_vars );
-  writer.on_number_of_outputs( 1 );
-  writer.on_number_of_terms( esop.size() );
-  writer.on_keyword( "type", "esop" );
-  for ( const auto& e : esop )
+public:
+  esop_storage_reader( esop::esop_t& esop, unsigned& num_vars )
+      : _esop( esop ), _num_vars( num_vars )
   {
-    std::stringstream ss;
-    e.print( num_vars, ss );
-    writer.on_term( ss.str(), "1" );
   }
-  writer.on_end();
-}
 
-/*! \brief Writes ESOP form in PLA format to a file
- *
- * \param filename Name of the file to be written
- * \param esop ESOP form
- * \param num_vars Number of variables
- */
-inline void write_esop( std::string const& filename, esop::esop_t const& esop, unsigned num_vars )
-{
-  std::ofstream os( filename.c_str(), std::ofstream::out );
-  write_esop( os, esop, num_vars );
-  os.close();
-}
+  void on_number_of_inputs( std::size_t i ) const override
+  {
+    _num_vars = i;
+  }
+
+  void on_term( const std::string& term, const std::string& out ) const override
+  {
+    assert( out == "1" );
+    _esop.emplace_back( term );
+  }
+
+  bool on_keyword( const std::string& keyword, const std::string& value ) const override
+  {
+    if ( keyword == "type" && value == "esop" )
+    {
+      return true;
+    }
+    return false;
+  }
+
+  esop::esop_t& _esop;
+  unsigned& _num_vars;
+}; /* esop_storage_reader */
 
 } /* namespace easy */
 

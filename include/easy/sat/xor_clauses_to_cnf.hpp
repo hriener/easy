@@ -25,53 +25,69 @@
 
 #pragma once
 
-#include <sat/sat_solver.hpp>
-#include <iostream>
+#include <easy/sat/sat_solver.hpp>
+#include <queue>
 
 namespace sat
 {
 
-class cnf_writer
+class xor_clauses_to_cnf
 {
 public:
-  cnf_writer( std::ostream& os = std::cout )
-      : _os( os )
+  xor_clauses_to_cnf( int& sid )
+      : _sid( sid )
   {
+  }
+
+  inline void add_xor_clause( constraints& constraints, const std::vector<int>& xor_clause, bool value )
+  {
+    assert( !xor_clause.empty() && "clause must not be empty" );
+
+    std::queue<int> lits;
+    for ( const auto& l : xor_clause )
+    {
+      lits.push( l );
+    }
+
+    while ( lits.size() > 1 )
+    {
+      auto a = lits.front();
+      lits.pop();
+      auto b = lits.front();
+      lits.pop();
+
+      int c = _sid++;
+      constraints.add_clause( {-a, -b, -c} );
+      constraints.add_clause( {a, b, -c} );
+      constraints.add_clause( {a, -b, c} );
+      constraints.add_clause( {-a, b, c} );
+
+      lits.push( c );
+    }
+
+    assert( lits.size() == 1u );
+    if ( value )
+    {
+      constraints.add_clause( {lits.front()} );
+    }
+    else
+    {
+      constraints.add_clause( {-lits.front()} );
+    }
   }
 
   inline void apply( constraints& constraints )
   {
-    _os << "p cnf " << ( constraints._num_variables - 1 ) << " " << ( constraints._clauses.size() + constraints._xor_clauses.size() ) << std::endl;
-    for ( const auto& clause : constraints._clauses )
-    {
-      for ( const auto& l : clause )
-      {
-        _os << l << ' ';
-      }
-      _os << '0' << std::endl;
-    }
-
     for ( const auto& clause : constraints._xor_clauses )
     {
-      if ( clause.first.size() > 1 )
-      {
-        _os << "x";
-      }
-      for ( auto i = 0u; i < clause.first.size(); ++i )
-      {
-        if ( !clause.second && i == clause.first.size() - 1 )
-        {
-          _os << "-";
-        }
-        _os << clause.first[i] << ' ';
-      }
-      _os << "0" << std::endl;
+      add_xor_clause( constraints, clause.first, clause.second );
     }
+    constraints._xor_clauses.clear();
   }
 
-protected:
-  std::ostream& _os;
-};
+public:
+  int& _sid;
+}; /* xor_clauses_to_cnf */
 
 } // namespace sat
 

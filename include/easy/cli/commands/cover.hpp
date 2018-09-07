@@ -26,8 +26,8 @@
 #include <alice/alice.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/bit_operations.hpp>
-#include <esop/synthesis.hpp>
-#include <esop/esop.hpp>
+#include <easy/esop/synthesis.hpp>
+#include <easy/esop/esop.hpp>
 
 namespace alice
 {

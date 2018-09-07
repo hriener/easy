@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <sat/sat_solver.hpp>
-#include <sat/cnf_symmetry_breaking.hpp>
+#include <easy/sat/sat_solver.hpp>
+#include <easy/sat/cnf_symmetry_breaking.hpp>
 #include <src/Graph.hpp>
 #include <src/global.hpp>
 #include <src/Algebraic.hpp>

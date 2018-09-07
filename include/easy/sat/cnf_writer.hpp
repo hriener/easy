@@ -1,5 +1,5 @@
-/* easy
- * Copyright (C) 2017-2018  EPFL
+/* easy: C++ ESOP library
+ * Copyright (C) 2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -23,43 +23,57 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <esop/esop.hpp>
+#pragma once
 
-namespace alice
+#include <easy/sat/sat_solver.hpp>
+#include <iostream>
+
+namespace sat
 {
 
-struct esop_storee
+class cnf_writer
 {
-  std::string model_name;
-  esop::esop_t esop;
-  std::size_t number_of_inputs;
-  std::size_t number_of_outputs;
-}; /* esop_storee */
-
-ALICE_ADD_STORE( esop_storee, "esop", "e", "ESOP", "ESOPs" )
-
-ALICE_PRINT_STORE( esop_storee, os, element )
-{
-  auto i = 0;
-  for ( const auto& c : element.esop )
+public:
+  cnf_writer( std::ostream& os = std::cout )
+      : _os( os )
   {
-    os << ( i++ ) << ". ";
-    c.print( element.number_of_inputs );
-    os << '\n';
   }
-}
 
-ALICE_DESCRIBE_STORE( esop_storee, element )
-{
-  return fmt::format( "[i] esop<{}>: vars={} cubes={}\n", element.model_name, element.number_of_inputs, element.esop.size() );
-}
+  inline void apply( constraints& constraints )
+  {
+    _os << "p cnf " << ( constraints._num_variables - 1 ) << " " << ( constraints._clauses.size() + constraints._xor_clauses.size() ) << std::endl;
+    for ( const auto& clause : constraints._clauses )
+    {
+      for ( const auto& l : clause )
+      {
+        _os << l << ' ';
+      }
+      _os << '0' << std::endl;
+    }
 
-ALICE_PRINT_STORE_STATISTICS( esop_storee, os, element )
-{
-  os << fmt::format( "[i] esop<{}>: vars={} cubes={}\n", element.model_name, element.number_of_inputs, element.esop.size() );
-}
+    for ( const auto& clause : constraints._xor_clauses )
+    {
+      if ( clause.first.size() > 1 )
+      {
+        _os << "x";
+      }
+      for ( auto i = 0u; i < clause.first.size(); ++i )
+      {
+        if ( !clause.second && i == clause.first.size() - 1 )
+        {
+          _os << "-";
+        }
+        _os << clause.first[i] << ' ';
+      }
+      _os << "0" << std::endl;
+    }
+  }
 
-} // namespace alice
+protected:
+  std::ostream& _os;
+};
+
+} // namespace sat
 
 // Local Variables:
 // c-basic-offset: 2

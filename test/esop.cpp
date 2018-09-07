@@ -1,7 +1,7 @@
 #include <catch.hpp>
-#include <esop/esop.hpp>
-#include <esop/synthesis.hpp>
-#include <esop/exact_synthesis.hpp>
+#include <easy/esop/esop.hpp>
+#include <easy/esop/synthesis.hpp>
+#include <easy/esop/exact_synthesis.hpp>
 
 TEST_CASE( "Compute minimum, maximum, and average pairwise distance", "[esop]" )
 {

@@ -26,17 +26,17 @@
 #define READLINE_USE_READLINE 1
 
 #include <alice/alice.hpp>
-#include <cli/stores/esop.hpp>
-#include <cli/stores/function.hpp>
-#include <cli/commands/cover.hpp>
-#include <cli/commands/exorlink.hpp>
-#include <cli/commands/ec.hpp>
-#include <cli/commands/function.hpp>
-#include <cli/commands/sort.hpp>
-#include <cli/commands/synth.hpp>
+#include <easy/cli/stores/esop.hpp>
+#include <easy/cli/stores/function.hpp>
+#include <easy/cli/commands/cover.hpp>
+#include <easy/cli/commands/exorlink.hpp>
+#include <easy/cli/commands/ec.hpp>
+#include <easy/cli/commands/function.hpp>
+#include <easy/cli/commands/sort.hpp>
+#include <easy/cli/commands/synth.hpp>
 
-#include <io/read_esop.hpp>
-#include <io/write_esop.hpp>
+#include <easy/io/read_esop.hpp>
+#include <easy/io/write_esop.hpp>
 
 #include <algorithm>
 #include <iostream>

@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <esop/esop.hpp>
+#include <easy/esop/esop.hpp>
 #include <kitty/cube.hpp>
 #include <kitty/hash.hpp>
 #include <kitty/operations.hpp>

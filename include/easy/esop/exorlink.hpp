@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <esop/esop.hpp>
+#include <easy/esop/esop.hpp>
 #include <cassert>
 
 namespace esop

@@ -1,8 +1,8 @@
 #include <catch.hpp>
-#include <esop/esop.hpp>
-#include <esop/synthesis.hpp>
-#include <esop/exact_synthesis.hpp>
-#include <esop/exorlink.hpp>
+#include <easy/esop/esop.hpp>
+#include <easy/esop/synthesis.hpp>
+#include <easy/esop/exact_synthesis.hpp>
+#include <easy/esop/exorlink.hpp>
 #include <kitty/kitty.hpp>
 #include <lorina/pla.hpp>
 

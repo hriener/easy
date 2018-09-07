@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include <esop/constructors.hpp>
+#include <easy/esop/constructors.hpp>
 #include <kitty/constructors.hpp>
 
 template<int NumVars>

@@ -1,6 +1,5 @@
 #include <catch.hpp>
-#include <sat/sat_solver.hpp>
-#include <iostream>
+#include <easy/sat/sat_solver.hpp>
 
 TEST_CASE( "satisfiable", "[sat]" )
 {

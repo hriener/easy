@@ -23,8 +23,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <esop/esop.hpp>
-#include <utils/string_utils.hpp>
+#include <easy/easy.hpp>
+#include <easy/utils/string_utils.hpp>
 #include <kitty/kitty.hpp>
 #include <args/args.hxx>
 #include <rang/rang.hpp>

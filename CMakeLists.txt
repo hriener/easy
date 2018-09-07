@@ -45,7 +45,7 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/ext/breakid-2.3)
 endif()
 
 add_library(easy INTERFACE)
-target_include_directories(easy INTERFACE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(easy INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory(programs)
 

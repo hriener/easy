@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <sat/sat_solver.hpp>
+#include <easy/sat/sat_solver.hpp>
 
 namespace sat
 {

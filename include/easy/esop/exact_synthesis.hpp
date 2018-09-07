@@ -25,14 +25,14 @@
 
 #pragma once
 
-#include <esop/esop.hpp>
-#include <esop/cube_utils.hpp>
-#include <sat/sat_solver.hpp>
-#include <sat/gauss.hpp>
-#include <sat/xor_clauses_to_cnf.hpp>
-#include <sat/cnf_symmetry_breaking.hpp>
-#include <sat/cnf_writer.hpp>
-#include <utils/string_utils.hpp>
+#include <easy/esop/esop.hpp>
+#include <easy/esop/cube_utils.hpp>
+#include <easy/sat/sat_solver.hpp>
+#include <easy/sat/gauss.hpp>
+#include <easy/sat/xor_clauses_to_cnf.hpp>
+#include <easy/sat/cnf_symmetry_breaking.hpp>
+#include <easy/sat/cnf_writer.hpp>
+#include <easy/utils/string_utils.hpp>
 #include <json/json.hpp>
 #include <fmt/format.h>
 #include <fstream>

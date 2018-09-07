@@ -25,13 +25,12 @@
 
 #pragma once
 
-#include <esop/esop.hpp>
+#include <easy/esop/esop.hpp>
+#include <easy/esop/exact_synthesis.hpp>
+#include <easy/sat/gauss.hpp>
+#include <easy/sat/xor_clauses_to_cnf.hpp>
+#include <easy/sat/cnf_symmetry_breaking.hpp>
 #include <json/json.hpp>
-#include <esop/exact_synthesis.hpp>
-
-#include <sat/gauss.hpp>
-#include <sat/xor_clauses_to_cnf.hpp>
-#include <sat/cnf_symmetry_breaking.hpp>
 
 namespace esop
 {
