@@ -4,8 +4,9 @@ project(easy LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
 
 # Options
-option(EASY_BENCH "Build benchmarks" OFF)
-option(EASY_TEST  "Build tests"      OFF)
+option(EASY_BENCH    "Build benchmarks" OFF)
+option(EASY_TEST     "Build tests"      OFF)
+option(EASY_PROGRAMS "Build programs"   ON)
 
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
   set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra")
@@ -47,7 +48,9 @@ endif()
 add_library(easy INTERFACE)
 target_include_directories(easy INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
-add_subdirectory(programs)
+if(EASY_PROGRAMS)
+  add_subdirectory(programs)
+endif()
 
 if(EASY_BENCH)
   add_subdirectory(bench)
