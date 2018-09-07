@@ -2,6 +2,8 @@
 #include <easy/esop/constructors.hpp>
 #include <kitty/constructors.hpp>
 
+using namespace easy;
+
 template<int NumVars>
 inline kitty::static_truth_table<NumVars> from_hex( std::string const& hex )
 {

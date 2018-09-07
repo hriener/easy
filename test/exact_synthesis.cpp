@@ -6,6 +6,8 @@
 #include <kitty/kitty.hpp>
 #include <lorina/pla.hpp>
 
+using namespace easy;
+
 /**
  * Synthesize one ESOP for a given Boolean function
  */
@@ -101,7 +103,7 @@ TEST_CASE( "new_api_minimize", "[synthesis]" )
 
   /* search downwards */
   params.begin = 8;
-  params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i <= 0 || sat.is_unsat() ) return false; --i; return true; };
+  params.next = [&]( int& i, easy::sat::sat_solver::result sat ){ if ( i <= 0 || sat.is_unsat() ) return false; --i; return true; };
   result  = synth.synthesize( params );
   esop = result.esop;
   CHECK( !esop.empty() );
@@ -109,7 +111,7 @@ TEST_CASE( "new_api_minimize", "[synthesis]" )
 
   /* search upwards */
   params.begin = 1;
-  params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i >= 8 || sat.is_sat() ) return false; ++i; return true; };
+  params.next = [&]( int& i, easy::sat::sat_solver::result sat ){ if ( i >= 8 || sat.is_sat() ) return false; ++i; return true; };
   result  = synth.synthesize( params );
   esop = result.esop;
   CHECK( !esop.empty() );
@@ -144,7 +146,7 @@ TEST_CASE( "expand_with_synthesis", "[synthesis]" )
     /* search downwards from 8, but stop at 4 */
     esop::minimum_all_synthesizer_params params;
     params.begin = 8;
-    params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i <= 4 || sat.is_unsat() ) return false; --i; return true; };
+    params.next = [&]( int& i, easy::sat::sat_solver::result sat ){ if ( i <= 4 || sat.is_unsat() ) return false; --i; return true; };
 
     const auto result = synth.synthesize( params );
     //CHECK( result.size() == 195 );
@@ -214,7 +216,7 @@ TEST_CASE( "esop_resynthesis", "[synthesis]" )
   /* search upwards */
   esop::minimum_all_synthesizer_params params;
   params.begin = 1;
-  params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i >= 4 || sat.is_sat() ) return false; ++i; return true; };
+  params.next = [&]( int& i, easy::sat::sat_solver::result sat ){ if ( i >= 4 || sat.is_sat() ) return false; ++i; return true; };
 
   auto result = synth.synthesize( params );
   CHECK( result.size() == 10 );
@@ -274,7 +276,7 @@ TEST_CASE( "nong_example8", "[synthesis]" )
   /* search upwards */
   esop::minimum_all_synthesizer_params params;
   params.begin = 1;
-  params.next = [&]( int& i, sat::sat_solver::result sat ){ if ( i >= 4 || sat.is_sat() ) return false; ++i; return true; };
+  params.next = [&]( int& i, easy::sat::sat_solver::result sat ){ if ( i >= 4 || sat.is_sat() ) return false; ++i; return true; };
 
   auto result = synth.synthesize( params );
   CHECK( result.size() == 1u );

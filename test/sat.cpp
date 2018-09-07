@@ -1,6 +1,8 @@
 #include <catch.hpp>
 #include <easy/sat/sat_solver.hpp>
 
+using namespace easy;
+
 TEST_CASE( "satisfiable", "[sat]" )
 {
   sat::constraints constraints;
