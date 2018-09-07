@@ -1,4 +1,4 @@
 Reference
 =========
 
-.. doxygennamespace:: esop
+.. doxygennamespace:: easy

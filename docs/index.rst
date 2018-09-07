@@ -16,10 +16,10 @@ Welcome to the documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Reference
 
    reference
 
-   :caption: Reference
 
 Indices and tables
 ==================

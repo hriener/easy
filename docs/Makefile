@@ -8,7 +8,7 @@ SPHINXPROJ    = esop
 SOURCEDIR     = .
 BUILDDIR      = _build
 
-doxygen: ../src/esop/*.hpp
+doxygen: ../include/easy/*.hpp
 	doxygen Doxyfile
 
 # Put it first so that "make" without argument is like "make help".
