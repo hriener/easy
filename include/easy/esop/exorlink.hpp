@@ -68,13 +68,13 @@ std::vector<kitty::cube> exorlink( kitty::cube c0, kitty::cube c1, std::uint32_t
   const auto bits = ~( c0._bits ) & ~( c1._bits );
   const auto mask = c0._mask ^ c1._mask;
 
-  for ( auto i = 0; i < distance; ++i )
+  for ( auto i = 0u; i < distance; ++i )
   {
     auto tmp_bits = c0._bits;
     auto tmp_mask = c0._mask;
     auto tmp_pos = diff;
 
-    for ( auto j = 0; j < distance; ++j )
+    for ( auto j = 0u; j < distance; ++j )
     {
       /* compute next position */
       std::uint64_t p = tmp_pos & -tmp_pos;

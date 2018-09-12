@@ -116,7 +116,7 @@ int main(int argc, char **argv)
     assert( size <= care.size() );
 
     auto eq = true;
-    for ( auto i = 0; i < size; ++i )
+    for ( auto i = 0u; i < size; ++i )
     {
       if ( care[i] && bits[i] != get_bit( tt, i ) )
       {
