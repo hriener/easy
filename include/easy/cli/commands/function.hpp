@@ -37,7 +37,7 @@ public:
       : command( env, "loads an incompletely-specified Boolean function and adds it to the store" )
   {
     opts.add_option( "--num,-n", num, "Specifies how many Boolean functions are generated (default: 1)" );
-    opts.add_option( "--truthtable,-t", tt, "Truth table (in binary) of Boolean function (MSB ... LSB)" );
+    opts.add_option( "--tt,-t", tt, "Truth table (in binary) of Boolean function (MSB ... LSB)" );
     opts.add_option( "--random,-r", variables, "Random completely-specified Boolean function.  As parameter the number of Boolean variables has to be passed." );
     opts.add_option( "--seed,-s", seed, "Random seed" );
   }

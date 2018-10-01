@@ -41,7 +41,7 @@ public:
 
   inline void apply( constraints& constraints )
   {
-    _os << "p cnf " << ( constraints._num_variables - 1 ) << " " << ( constraints._clauses.size() + constraints._xor_clauses.size() ) << std::endl;
+    _os << "p cnf " << constraints._num_variables << " " << ( constraints._clauses.size() + constraints._xor_clauses.size() ) << std::endl;
     for ( const auto& clause : constraints._clauses )
     {
       for ( const auto& l : clause )

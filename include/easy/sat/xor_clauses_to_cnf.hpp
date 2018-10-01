@@ -57,10 +57,10 @@ public:
       lits.pop();
 
       int c = _sid++;
-      constraints.add_clause( {-a, -b, -c} );
-      constraints.add_clause( {a, b, -c} );
-      constraints.add_clause( {a, -b, c} );
-      constraints.add_clause( {-a, b, c} );
+      constraints.add_clause( { -a, -b, -c } );
+      constraints.add_clause( {  a,  b, -c } );
+      constraints.add_clause( {  a, -b,  c } );
+      constraints.add_clause( { -a,  b,  c } );
 
       lits.push( c );
     }

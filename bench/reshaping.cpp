@@ -31,7 +31,7 @@
 #include <chrono>
 #include <random>
 
-using namespace esop;
+using namespace easy::esop;
 
 void BM_exorlink4( benchmark::State& state )
 {
@@ -47,7 +47,7 @@ void BM_exorlink4( benchmark::State& state )
     kitty::cube cube1( "----" );
     for ( auto i = 0; i < 384; i += 16 )
     {
-      esop::exorlink( cube0, cube1, 4, &esop::cube_groups4[i] );
+      easy::esop::exorlink( cube0, cube1, 4, &easy::esop::cube_groups4[i] );
     }
   }
 }
@@ -66,7 +66,7 @@ void BM_exorlink4_alt( benchmark::State& state )
     kitty::cube cube1( "----" );
     for ( auto i = 0; i < 384; i += 16 )
     {
-      esop::exorlink4( cube0, cube1, i );
+      easy::esop::exorlink4( cube0, cube1, i );
     }
   }
 }

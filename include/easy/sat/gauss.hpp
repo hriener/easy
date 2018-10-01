@@ -35,13 +35,14 @@ class gauss_elimination
 public:
   gauss_elimination() = default;
 
-  void apply( constraints& constraints )
+  bool apply( constraints& constraints )
   {
     auto A = make_matrix( constraints._xor_clauses, constraints._num_variables );
     matrix_make_upper_triangular_binary( A );
 
     /* reconstruct xor_clauses */
     constraints._xor_clauses.clear();
+
     for ( const auto& row : A )
     {
       std::vector<int> clause;
@@ -52,8 +53,21 @@ public:
           clause.push_back( i + 1 );
         }
       }
-      constraints._xor_clauses.push_back( {clause, row[row.size() - 1u]} );
+
+      if ( clause.empty() && row[ row.size() - 1u ] )
+      {
+        constraints._clauses.clear();
+        constraints._clauses.push_back( {  1 } );
+        constraints._clauses.push_back( { -1 } );
+        return true;
+      }
+      else if ( !clause.empty() )
+      {
+        constraints._xor_clauses.push_back( {clause, row[row.size() - 1u]} );
+      }
     }
+
+    return false;
   }
 
 protected:
