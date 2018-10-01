@@ -25,19 +25,55 @@
 
 /*!
   \file constructors.hpp
-  \brief Constructors for exclusive-or sum-of-product forms.
+  \brief Implements constructors for exclusive-or sum-of-product forms.
 
-  \author Heinz Riener
+  \author Mathias Soeken
+  \author Winston Haaswijk
 */
 
 #pragma once
 
-#include <easy/esop/esop_from_pprm.hpp>
-#include <easy/esop/esop_from_pkrm.hpp>
-#include <easy/esop/helliwell.hpp>
+#include <kitty/cube.hpp>
 
-// Local Variables:
-// c-basic-offset: 2
-// eval: (c-set-offset 'substatement-open 0)
-// eval: (c-set-offset 'innamespace 0)
-// End:
+#include <unordered_set>
+
+namespace easy::esop::detail
+{
+
+inline void add_to_cubes( std::unordered_set<kitty::cube, kitty::hash<kitty::cube>>& pkrm, const kitty::cube& c, bool distance_one_merging = true )
+{
+  /* first check whether cube is already contained; if so, delete it */
+  const auto it = pkrm.find( c );
+  if ( it != pkrm.end() )
+  {
+    pkrm.erase( it );
+    return;
+  }
+
+  /* otherwise, check if there is a distance-1 cube; if so, merge it */
+  if ( distance_one_merging )
+  {
+    for ( auto it = pkrm.begin(); it != pkrm.end(); ++it )
+    {
+      if ( c.distance( *it ) == 1 )
+      {
+        auto new_cube = c.merge( *it );
+        pkrm.erase( it );
+        add_to_cubes( pkrm, new_cube );
+        return;
+      }
+    }
+  }
+
+  /* otherwise, just add the cube */
+  pkrm.insert( c );
+}
+
+inline kitty::cube with_literal( const kitty::cube& c, uint8_t var_index, bool polarity )
+{
+  auto copy = c;
+  copy.add_literal( var_index, polarity );
+  return copy;
+}
+
+} // namespace easy::esop::detail

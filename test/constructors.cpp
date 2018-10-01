@@ -92,3 +92,11 @@ TEST_CASE( "Create PPRM from dynamic truth table", "[constructors]" )
     CHECK( tt == tt_copy );
   }
 }
+
+TEST_CASE( "Create ESOP from helliwell equation", "[constructors]" )
+{
+  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
+  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
+  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
+  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
+}

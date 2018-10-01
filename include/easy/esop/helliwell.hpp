@@ -191,9 +191,9 @@ inline esop_t exact_esop_from_helliwell( const TT& tt_bits,  const TT& tt_care )
 
   assert( !sat );
 
+  esop_t esop;
   if ( sat )
   {
-    esop_t esop;
     for ( auto i = 0u; i < esop_sids-1; ++i )
     {
       if ( sat.model[i] == l_True )
