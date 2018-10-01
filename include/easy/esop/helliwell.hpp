@@ -110,8 +110,8 @@ public:
     conv.apply( constraints );
 
     /* solve */
-    auto sat = solver.solve( constraints );
-    assert( !sat );
+    auto const sat = solver.solve( constraints );
+    assert( sat );
 
     if ( sat )
     {
