@@ -36,7 +36,7 @@
  * Eight Product Terms. Journal of Circuits, Systems, and Computers 13(1): 1-15, 2004.
  */
 
-namespace esop
+namespace easy::esop
 {
 
 void simple_combine_inplace( esop_t& expr, uint8_t var_index, uint8_t i )
@@ -142,7 +142,7 @@ esops_t complex_combine( const esops_t& as, const esops_t& bs, uint8_t var_index
   return combinations;
 }
 
-} // namespace esop
+} // namespace easy::esop
 
 // Local Variables:
 // c-basic-offset: 2

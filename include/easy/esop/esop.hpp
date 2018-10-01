@@ -32,7 +32,7 @@
 #include <cassert>
 #include <vector>
 
-namespace esop
+namespace easy::esop
 {
 
 namespace detail
@@ -247,7 +247,7 @@ inline void print_esop_as_cubes( const esop_t& esop, unsigned num_vars, std::ost
   os << '\n';
 }
 
-} /* namespace esop */
+} /* namespace easy::esop */
 
 // Local Variables:
 // c-basic-offset: 2

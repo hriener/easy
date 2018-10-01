@@ -12,13 +12,14 @@ Welcome to the documentation!
    introduction
    installation
    changelog
+   acknowledgments
 
 .. toctree::
    :maxdepth: 2
+   :caption: Reference
 
    reference
 
-   :caption: Reference
 
 Indices and tables
 ==================

@@ -28,7 +28,7 @@
 #include <easy/esop/esop.hpp>
 #include <cassert>
 
-namespace esop
+namespace easy::esop
 {
 
 static unsigned cube_groups2[8] = {
@@ -195,7 +195,7 @@ std::array<kitty::cube, 4> exorlink4( const kitty::cube& c0, const kitty::cube& 
   return result;
 }
 
-} // namespace esop
+} // namespace easy::esop
 
 // Local Variables:
 // c-basic-offset: 2

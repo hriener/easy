@@ -3,6 +3,8 @@
 #include <easy/esop/synthesis.hpp>
 #include <easy/esop/exact_synthesis.hpp>
 
+using namespace easy;
+
 TEST_CASE( "Compute minimum, maximum, and average pairwise distance", "[esop]" )
 {
   const auto num_vars = 5u;

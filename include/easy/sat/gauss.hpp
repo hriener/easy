@@ -27,7 +27,7 @@
 
 #include <easy/sat/sat_solver.hpp>
 
-namespace sat
+namespace easy::sat
 {
 
 class gauss_elimination
@@ -130,7 +130,7 @@ protected:
   }
 }; /* gauss_elimination */
 
-} // namespace sat
+} // namespace easy::sat
 
 // Local Variables:
 // c-basic-offset: 2

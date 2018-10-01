@@ -33,7 +33,7 @@
 #include <src/Theory.hpp>
 #include <src/Breaking.hpp>
 
-namespace sat
+namespace easy::sat
 {
 
 class cnf_symmetry_breaking
@@ -97,7 +97,7 @@ public:
   int& _sid;
 }; /* cnf_symmmetry_breaking */
 
-} // namespace sat
+} // namespace easy::sat
 
 // Local Variables:
 // c-basic-offset: 2

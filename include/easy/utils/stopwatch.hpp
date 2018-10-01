@@ -35,7 +35,7 @@
 #include <chrono>
 #include <type_traits>
 
-namespace utils
+namespace easy::utils
 {
 
 /*! \brief Stopwatch interface
@@ -153,4 +153,4 @@ inline double to_seconds( Duration const& dur )
   return std::chrono::duration_cast<std::chrono::duration<double>>( dur ).count();
 }
 
-} // namespace utils
+} // namespace easy::utils

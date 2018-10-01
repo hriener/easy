@@ -41,7 +41,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace esop
+namespace easy::esop
 {
 
 namespace detail
@@ -198,7 +198,7 @@ esops_t synthesis_from_binary_string( std::string const& binary )
   return esops;
 }
 
-} // namespace esop
+} // namespace easy::esop
 
 // Local Variables:
 // c-basic-offset: 2

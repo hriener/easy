@@ -42,7 +42,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace esop
+namespace easy::esop
 {
 
 /*! \cond PRIVATE */
@@ -243,7 +243,7 @@ inline esop_t esop_from_pprm( const TT& tt )
   return esop_t( cubes.begin(), cubes.end() );
 }
 
-} /* namespace esop */
+} /* namespace easy::esop */
 
 // Local Variables:
 // c-basic-offset: 2

@@ -55,7 +55,7 @@ protected:
   {
     const auto& elm = i == -1 ? store<function_storee>()[store<function_storee>().size() - 1u] : store<function_storee>()[i];
 
-    esop::spec spec;
+    easy::esop::spec spec;
     assert( elm.bits.num_bits() == elm.care.num_bits() );
     for ( auto i = 0; i < elm.bits.num_bits(); ++i )
     {
@@ -66,7 +66,7 @@ protected:
     std::reverse( spec.bits.begin(), spec.bits.end() );
     std::reverse( spec.care.begin(), spec.care.end() );
 
-    env->store<esop_storee>().extend() = {"", esop::esop_cover( spec ), std::size_t( elm.bits.num_vars() ), 1};
+    env->store<esop_storee>().extend() = {"", easy::esop::esop_cover( spec ), std::size_t( elm.bits.num_vars() ), 1};
   }
 
 private:

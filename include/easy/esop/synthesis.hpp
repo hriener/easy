@@ -32,7 +32,7 @@
 #include <easy/sat/cnf_symmetry_breaking.hpp>
 #include <json/json.hpp>
 
-namespace esop
+namespace easy::esop
 {
 
 namespace detail
@@ -121,14 +121,14 @@ struct result
  * \param spec Truth-table of a (incompletely-specified) Boolean function
  * \return An ESOP form
  */
-inline esop::esop_t esop_cover( const esop::spec& spec )
+inline esop_t esop_cover( const spec& spec )
 {
   assert( spec.bits.size() == spec.care.size() );
 
   const auto size = spec.bits.size();
   const int num_vars = log2( size );
 
-  esop::esop_t cover;
+  esop_t cover;
   for ( auto i = 0; i < size; ++i )
   {
     if ( spec.care[i] == '1' && spec.bits[i] == '1' )
@@ -485,9 +485,9 @@ public:
     if ( esop.size() == 0u )
     {
       if ( all_unsat )
-        return esop::result( unrealizable );
+        return easy::esop::result( unrealizable );
       else
-        return esop::result();
+        return easy::esop::result();
     }
 
     return esop;
@@ -581,7 +581,7 @@ public:
     assert( _spec.care.size() == ( 1ull << num_vars ) && "bit-width of care is not a power of 2" );
     assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
 
-    esop::esop_t esop;
+    esop_t esop;
     sat::sat_solver::result result;
 
     std::unique_ptr<sat::constraints> constraints;
@@ -767,7 +767,7 @@ public:
     }
 
     /* enumerate solutions */
-    esop::esops_t esops;
+    esops_t esops;
     while ( auto result = solver->solve( *constraints ) )
     {
       std::vector<int> blocking_clause;
@@ -843,7 +843,7 @@ private:
   nlohmann::json _stats;
 }; /* minimum_all_synthesizer */
 
-} // namespace esop
+} // namespace easy::esop
 
 // Local Variables:
 // c-basic-offset: 2

@@ -37,7 +37,7 @@
 #include <fmt/format.h>
 #include <fstream>
 
-namespace esop
+namespace easy::esop
 {
 
 inline esops_t exact_synthesis_from_binary_string( const std::string& bits, const std::string& care, const nlohmann::json& config )
@@ -238,7 +238,7 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
   return esops;
 }
 
-} /* namespace esop */
+} /* namespace easy::esop */
 
 // Local Variables:
 // c-basic-offset: 2

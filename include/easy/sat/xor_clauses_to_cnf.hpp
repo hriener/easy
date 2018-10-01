@@ -28,7 +28,7 @@
 #include <easy/sat/sat_solver.hpp>
 #include <queue>
 
-namespace sat
+namespace easy::sat
 {
 
 class xor_clauses_to_cnf
@@ -89,7 +89,7 @@ public:
   int& _sid;
 }; /* xor_clauses_to_cnf */
 
-} // namespace sat
+} // namespace easy::sat
 
 // Local Variables:
 // c-basic-offset: 2

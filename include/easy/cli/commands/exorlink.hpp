@@ -32,7 +32,7 @@ std::uint32_t k_size[] = {/* 0 */ 0, /* 1 */ 0, /* 2 */ 8, /* 3 */ 54, /* 4 */ 3
 std::uint32_t k_incr[] = {/* 0 */ 0, /* 1 */ 0, /* 2 */ 4, /* 3 */ 9, /* 4 */ 16, /* 5 */ 25, /* 6 */ 36};
 
 std::uint32_t* cube_groups[] = {
-    nullptr, nullptr, &esop::cube_groups2[0], &esop::cube_groups3[0], &esop::cube_groups4[0], &esop::cube_groups5[0], &esop::cube_groups6[0]};
+    nullptr, nullptr, &easy::esop::cube_groups2[0], &easy::esop::cube_groups3[0], &easy::esop::cube_groups4[0], &easy::esop::cube_groups5[0], &easy::esop::cube_groups6[0]};
 
 class exorlink_command : public command
 {
@@ -73,7 +73,7 @@ protected:
       const auto incr = k_incr[d];
       for ( auto k = 0; k < size; k += incr )
       {
-        const auto cubes = esop::exorlink( cube0, cube1, d, cube_groups[d] + k );
+        const auto cubes = easy::esop::exorlink( cube0, cube1, d, cube_groups[d] + k );
         for ( const auto& c : cubes )
         {
           c.print( num_vars );

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# esop documentation build configuration file, created by
+# easy documentation build configuration file, created by
 # sphinx-quickstart on Thu Nov 30 18:28:14 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'esop'
+project = 'easy'
 copyright = '2018, Heinz Riener'
 author = 'Heinz Riener'
 
@@ -115,7 +115,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'esopdoc'
+htmlhelp_basename = 'easydoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -142,7 +142,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'esop.tex', 'esop Documentation',
+    (master_doc, 'easy.tex', 'easy Documentation',
      'Heinz Riener', 'manual'),
 ]
 
@@ -152,7 +152,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'esop', 'esop Documentation',
+    (master_doc, 'easy', 'easy Documentation',
      [author], 1)
 ]
 
@@ -163,8 +163,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'esop', 'esop Documentation',
-     author, 'esop', 'One line description of project.',
+    (master_doc, 'easy', 'easy Documentation',
+     author, 'easy', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -177,8 +177,8 @@ read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 if read_the_docs_build:
     subprocess.call('doxygen Doxyfile', shell = True)
 
-breathe_projects = {"esop": "doxyxml/xml"}
-breathe_default_project = "esop"
+breathe_projects = {"easy": "doxyxml/xml"}
+breathe_default_project = "easy"
 
 # -- Custom directives ----------------------------------------------------
 

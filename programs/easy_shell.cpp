@@ -44,6 +44,8 @@
 #include <sstream>
 #include <string>
 
+using namespace easy;
+
 namespace alice
 {
 
