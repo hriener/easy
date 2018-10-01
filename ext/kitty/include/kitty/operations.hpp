@@ -806,7 +806,7 @@ inline dynamic_truth_table shrink_to( const TTFrom& from, unsigned num_vars )
 /*! \brief Left-shift truth table
 
   Drops overflowing most-significant bits and fills up least-significant bits
-  with zeroes.
+  with zeros.
 
   \param tt Truth table
   \param shift Number of bits to shift
@@ -884,7 +884,7 @@ inline TT shift_left( const TT& tt, uint64_t shift )
 /*! \brief Right-shift truth table
 
   Drops overflowing least-significant bits and fills up most-significant bits
-  with zeroes.
+  with zeros.
 
   \param tt Truth table
   \param shift Number of bits to shift
