@@ -88,15 +88,16 @@ private:
 
 std::vector<uint32_t> compute_flips( uint32_t n )
 {
-  auto const total_flips = ( 1u << n ) - 1;
+  auto const size = ( 1u << n );
+  auto const total_flips = size - 1;
   std::vector<uint32_t> flip_vec( total_flips );
 
   auto gray_number = 0u;
   auto temp = 0u;
-  for ( auto i = 1u; i <= total_flips; ++i )
+  for ( auto i = 0u; i < total_flips; ++i )
   {
     gray_number = i ^ ( i >> 1 );
-    flip_vec[total_flips - i] = ffs( temp ^ gray_number ) - 1u;
+    flip_vec[i] = ffs( temp ^ gray_number ) - 1u;
     temp = gray_number;
   }
 
@@ -110,27 +111,29 @@ std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_
 
   std::vector<kitty::cube> impls = {c};
   auto copy = c;
-  for ( auto i = 0u; i < flips.size(); ++i )
+  for ( const auto& flip : flips )
   {
-    if ( copy.get_mask( size - flips[i] - 1 ) )
+    if ( copy.get_mask( flip ) )
     {
-      copy.clear_bit( size - flips[i] - 1 );
-      copy.clear_mask( size - flips[i] - 1 );
+      copy.clear_bit( flip );
+      copy.clear_mask( flip );
     }
     else
     {
-      copy.set_mask( size - flips[i] - 1 );
-      if ( c.get_bit( size - flips[i] - 1 ) )
+      copy.set_mask( flip );
+      if ( c.get_bit( flip ) )
       {
-        copy.set_bit( size - flips[i] - 1 );
+        copy.set_bit( flip );
       }
       else
       {
-        copy.clear_bit( size - flips[i] - 1 );
+        copy.clear_bit( flip );
       }
     }
-    impls.push_back( copy );
+
+    impls.emplace_back( copy );
   }
+
   return impls;
 }
 
