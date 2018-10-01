@@ -25,21 +25,11 @@
 
 #pragma once
 
-/***
- *
- * SAT-based ESOP enumeration algorithm that solves the Helliwell decision problem using CryptoMiniSAT.
- *
- * Marek Perkowski and Malgorzata Chrzanowska-Jeske, An exact algorithm to minimize mixed-radix exclusive
- * sums of products for incompletely specified Boolean funcions, IEEE International Symposium on Circuits
- * and Systems, 1990.
- */
-
-#include <esop/esop.hpp>
-#include <sat/sat_solver.hpp>
-#include <cassert>
-#include <cstring>
-#include <unordered_map>
-#include <vector>
+#include <easy/esop/esop.hpp>
+#include <easy/sat/sat_solver.hpp>
+#include <easy/sat/xor_clauses_to_cnf.hpp>
+#include <easy/sat/cnf_writer.hpp>
+#include <kitty/constructors.hpp>
 
 namespace easy::esop
 {
@@ -47,8 +37,14 @@ namespace easy::esop
 namespace detail
 {
 
-struct vars
+struct helliwell_decision_variables
 {
+public:
+  explicit helliwell_decision_variables( int& sid )
+    : _sid( sid )
+  {
+  }
+
   inline int operator[]( const kitty::cube& c )
   {
     return get_or_create_var( c );
@@ -57,12 +53,14 @@ struct vars
   int get_or_create_var( const kitty::cube& c )
   {
     auto it = cube_to_var.find( c );
+
     int variable;
     if ( it == cube_to_var.end() )
     {
-      variable = sid++;
+      variable = _sid;
       cube_to_var.insert( std::make_pair( c, variable ) );
       var_to_cube.insert( std::make_pair( variable, c ) );
+      _sid++;
     }
     else
     {
@@ -81,124 +79,147 @@ struct vars
     return var_to_cube.at( variable );
   }
 
-  int sid = 1;
+private:
+  int& _sid;
+
   std::unordered_map<kitty::cube, int, kitty::hash<kitty::cube>> cube_to_var;
   std::unordered_map<int, kitty::cube> var_to_cube;
 }; /* vars */
 
-std::vector<unsigned> compute_flips( unsigned n )
+std::vector<uint32_t> compute_flips( uint32_t n )
 {
-  const auto total_flips = ( 1u << n ) - 1;
-  std::vector<unsigned> flip_array( total_flips );
+  auto const total_flips = ( 1u << n ) - 1;
+  std::vector<uint32_t> flip_vec( total_flips );
 
-  auto graynumber = 0u;
+  auto gray_number = 0u;
   auto temp = 0u;
   for ( auto i = 1u; i <= total_flips; ++i )
   {
-    graynumber = i ^ ( i >> 1 );
-    flip_array[total_flips - i] = ffs( temp ^ graynumber ) - 1u;
-    temp = graynumber;
+    gray_number = i ^ ( i >> 1 );
+    flip_vec[total_flips - i] = ffs( temp ^ gray_number ) - 1u;
+    temp = gray_number;
   }
 
-  return flip_array;
+  return flip_vec;
 }
 
-std::vector<kitty::cube> derive_product_group( const kitty::cube& c, unsigned num_vars )
+std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_vars )
 {
   const auto flips = compute_flips( num_vars );
+  const auto size = 1u << num_vars;
 
-  std::vector<kitty::cube> group = {c};
+  std::vector<kitty::cube> impls = {c};
   auto copy = c;
   for ( auto i = 0u; i < flips.size(); ++i )
   {
-    if ( copy.get_mask( flips[i] ) )
+    if ( copy.get_mask( size - flips[i] - 1 ) )
     {
-      copy.clear_bit( flips[i] );
-      copy.clear_mask( flips[i] );
+      copy.clear_bit( size - flips[i] - 1 );
+      copy.clear_mask( size - flips[i] - 1 );
     }
     else
     {
-      copy.set_mask( flips[i] );
-      if ( c.get_bit( flips[i] ) )
+      copy.set_mask( size - flips[i] - 1 );
+      if ( c.get_bit( size - flips[i] - 1 ) )
       {
-        copy.set_bit( flips[i] );
+        copy.set_bit( size - flips[i] - 1 );
       }
       else
       {
-        copy.clear_bit( flips[i] );
+        copy.clear_bit( size - flips[i] - 1 );
       }
     }
-    group.push_back( copy );
+    impls.push_back( copy );
   }
+  return impls;
+}
 
-  return group;
+template<typename TT>
+void derive_xor_clauses( int& sid, sat::constraints& constraints, helliwell_decision_variables& g, TT const& tt_bits, TT const& tt_care )
+{
+  assert( tt_bits.num_vars() == tt_care.num_vars() );
+
+  /* create a zero cube */
+  kitty::cube minterm;
+  for ( auto i = 0; i < tt_bits.num_vars(); ++i )
+    minterm.set_mask( i );
+
+  do
+  {
+    if ( kitty::get_bit( tt_care, minterm._bits ) )
+    {
+      sat::constraints::clause_t clause;
+      for ( const auto& impl : compute_implicants( minterm, tt_bits.num_vars() ) )
+      {
+        clause.push_back( g[impl] );
+      }
+      constraints.add_xor_clause( clause, kitty::get_bit( tt_bits, minterm._bits ) );
+    }
+
+    ++minterm._bits;
+  } while( minterm._bits < ( 1 << tt_bits.num_vars() ) );
 }
 
 } // namespace detail
 
-esops_t synthesis_from_binary_string( std::string const& binary )
-{
-  const int num_vars = log2( binary.size() );
-  assert( binary.size() == ( 1ull << num_vars ) && "bit-width is not a power of 2" );
+/*! \brief Computes ESOP from of truth table
 
-  esops_t esops;
+  This algorithm solves the Helliwell decision problem using SAT-solver.
+
+  \param tt_bits Truth table of function
+  \param tt_care Truth table of care function
+*/
+template<typename TT>
+inline esop_t exact_esop_from_helliwell( const TT& tt_bits,  const TT& tt_care )
+{
+  assert( tt_bits.size() == tt_care.size() );
 
   sat::constraints constraints;
+
+  int sid = 1;
+  detail::helliwell_decision_variables g( sid );
+  detail::derive_xor_clauses( sid, constraints, g, tt_bits, tt_care );
+
+  /* XOR-clauses to CNF */
+  auto const esop_sids = sid;
+  sat::xor_clauses_to_cnf conv( sid );
+  conv.apply( constraints );
+
+  /* solve */
   sat::sat_solver solver;
-  vars g;
-  assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
-  kitty::cube minterm;
-  for ( auto i = 0; i < num_vars; ++i )
-  {
-    minterm.set_mask( i );
-  }
+  auto sat = solver.solve( constraints );
 
-  do
-  {
-    if ( binary[minterm._bits] == '0' || binary[minterm._bits] == '1' )
-    {
-      std::vector<int> clause;
-      for ( const auto& t : derive_product_group( minterm, num_vars ) )
-      {
-        clause.push_back( g[t] );
-      }
-      constraints.add_xor_clause( clause, binary[minterm._bits] == '1' );
-    }
+  assert( !sat );
 
-    ++minterm._bits;
-  } while ( minterm._bits < ( 1 << num_vars ) );
-
-  sat::sat_solver::result result;
-  while ( ( result = solver.solve( constraints ) ) )
+  if ( sat )
   {
     esop_t esop;
-    std::vector<int> blocking_clause;
-    for ( auto i = 0u; i != solver._solver->nVars(); ++i )
+    for ( auto i = 0u; i < esop_sids-1; ++i )
     {
-      const auto var = i + 1;
-      if ( result.model[i] == l_True )
+      if ( sat.model[i] == l_True )
       {
-        blocking_clause.push_back( -var );
-        esop.push_back( g.lookup_cube( var ) );
+        esop.emplace_back( g.lookup_cube( i+1 ) );
       }
-      if ( result.model[i] == l_False )
-      {
-        blocking_clause.push_back( var );
-      }
-    }
-    constraints.add_clause( blocking_clause );
-    esops.push_back( esop );
-
-    if ( esops.size() >= 100 )
-    {
-      std::cout << "[w] terminated " << binary << ": 100 ESOPs have been enumerated" << std::endl;
-      break;
     }
   }
-  return esops;
+
+  return esop;
 }
 
-} // namespace easy::esop
+/*! \brief Computes ESOP from truth table
+
+  This algorithm solves the Helliwell decision problem using SAT-solver.
+
+  \param tt_bits Truth table of function
+*/
+template<typename TT>
+inline esop_t esop_from_helliwell( const TT& tt_bits )
+{
+  auto const tt_care = kitty::create<TT>( tt_bits.num_vars() );
+  return exact_esop_from_helliwell( tt_bits, ~tt_care );
+}
+
+} // easy::esop
 
 // Local Variables:
 // c-basic-offset: 2
