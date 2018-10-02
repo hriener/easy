@@ -109,6 +109,11 @@ public:
   {
     _xor_clauses.clear();
   }
+
+  void add_weighted_clause( const clause_t& cl, uint32_t weight )
+  {
+    add_weighted_clause( {cl, weight} );
+  }
   
   void add_weighted_clause( const wclause_t& cl )
   {
@@ -121,6 +126,11 @@ public:
       }
     }
     _clauses.emplace_back( cl );
+  }
+
+  void add_weighted_xor_clause( const clause_t& cl, bool value, uint32_t weight )
+  {
+    add_weighted_xor_clause( {cl, weight}, value );
   }
   
   void add_weighted_xor_clause( const wclause_t& cl, bool value = true )
