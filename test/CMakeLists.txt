@@ -7,4 +7,4 @@ file(GLOB FILENAMES *.cpp algorithm/*.cpp sat/*.cpp)
 message(${FILENAMES})
 
 add_executable(run_tests ${FILENAMES})
-target_link_libraries(run_tests PUBLIC ${EXT_LIBS} easy lorina kitty json)
+target_link_libraries(run_tests PUBLIC ${EXTERNAL_LIBRARIES} easy lorina kitty json)
