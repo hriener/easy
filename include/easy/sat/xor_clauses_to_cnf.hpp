@@ -78,11 +78,10 @@ public:
 
   inline void apply( constraints& constraints )
   {
-    for ( const auto& clause : constraints._xor_clauses )
-    {
-      add_xor_clause( constraints, clause.first, clause.second );
-    }
-    constraints._xor_clauses.clear();
+    constraints.foreach_xor_clause([&]( xor_clause_t const& cl ){
+        add_xor_clause( constraints, cl.clause, cl.value );
+      });
+    constraints.clear_xor_clauses();
   }
 
 public:

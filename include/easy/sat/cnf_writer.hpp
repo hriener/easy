@@ -41,32 +41,30 @@ public:
 
   inline void apply( constraints& constraints )
   {
-    _os << "p cnf " << constraints._num_variables << " " << ( constraints._clauses.size() + constraints._xor_clauses.size() ) << std::endl;
-    for ( const auto& clause : constraints._clauses )
-    {
-      for ( const auto& l : clause )
-      {
-        _os << l << ' ';
-      }
-      _os << '0' << std::endl;
-    }
-
-    for ( const auto& clause : constraints._xor_clauses )
-    {
-      if ( clause.first.size() > 1 )
-      {
-        _os << "x";
-      }
-      for ( auto i = 0u; i < clause.first.size(); ++i )
-      {
-        if ( !clause.second && i == clause.first.size() - 1 )
+    _os << "p cnf " << constraints.num_variables() << " " << ( constraints.num_clauses() + constraints.num_xor_clauses() ) << std::endl;
+    constraints.foreach_clause( [&]( constraints::clause_t const& cl ){
+        for ( const auto& l : cl )
         {
-          _os << "-";
+          _os << l << ' ';
         }
-        _os << clause.first[i] << ' ';
-      }
-      _os << "0" << std::endl;
-    }
+        _os << '0' << std::endl;
+      });
+
+    constraints.foreach_xor_clause( [&]( xor_clause_t const& cl ){
+        if ( cl.clause.size() > 1 )
+        {
+          _os << "x";
+        }
+        for ( auto i = 0u; i < cl.clause.size(); ++i )
+        {
+          if ( !cl.value && i == cl.clause.size() - 1 )
+          {
+            _os << "-";
+          }
+          _os << cl.clause[i] << ' ';
+        }
+        _os << "0" << std::endl;
+      });
   }
 
 protected:

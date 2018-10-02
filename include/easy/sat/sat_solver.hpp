@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <easy/sat/constraints.hpp>
 #include <core/SolverTypes.h>
 #include <core/Solver.h>
 #include <cassert>
@@ -33,20 +34,6 @@
 
 namespace easy::sat
 {
-
-struct constraints
-{
-  using clause_t = std::vector<int>;
-  using xor_clause_t = std::pair<clause_t, bool>;
-
-  void add_clause( const clause_t& clause );
-  void add_xor_clause( const clause_t& clause, bool value = true );
-
-  std::vector<clause_t> _clauses;
-  std::vector<xor_clause_t> _xor_clauses;
-
-  unsigned _num_variables = 0;
-}; /* constraints */
 
 struct sat_solver
 {
@@ -91,32 +78,6 @@ struct sat_solver
   std::unique_ptr<Glucose::Solver> _solver;
 };
 
-inline void constraints::add_clause( const clause_t& clause )
-{
-  for ( const auto& c : clause )
-  {
-    unsigned v = abs( c );
-    if ( v > _num_variables )
-    {
-      _num_variables = v;
-    }
-  }
-  _clauses.push_back( clause );
-}
-
-inline void constraints::add_xor_clause( const clause_t& clause, bool value )
-{
-  for ( const auto& c : clause )
-  {
-    unsigned v = abs( c );
-    if ( v > _num_variables )
-    {
-      _num_variables = v;
-    }
-  }
-  _xor_clauses.push_back( {clause, value} );
-}
-
 inline sat_solver::sat_solver()
 {
   _solver = std::make_unique<Glucose::Solver>();
@@ -143,25 +104,24 @@ inline int sat_solver::get_conflicts() const
 inline sat_solver::result sat_solver::solve( constraints& constraints, const assumptions_t& assumptions )
 {
   /* add clauses to solver & remove them from constraints */
-  for ( const auto& c : constraints._clauses )
-  {
-    Glucose::vec<Glucose::Lit> clause;
-    for ( const auto& l : c )
-    {
-      const unsigned var = abs( l ) - 1;
-      while ( _num_vars <= var )
+  constraints.foreach_clause( [&]( constraints::clause_t const& c ){
+      Glucose::vec<Glucose::Lit> clause;
+      for ( const auto& l : c )
       {
-        _solver->newVar();
-        ++_num_vars;
+        const unsigned var = abs( l ) - 1;
+        while ( _num_vars <= var )
+        {
+          _solver->newVar();
+          ++_num_vars;
+        }
+        clause.push( Glucose::mkLit( var, l < 0 ) );
       }
-      clause.push( Glucose::mkLit( var, l < 0 ) );
-    }
-    _solver->addClause( clause );
-  }
-  constraints._clauses.clear();
+      _solver->addClause( clause );
+    });
+  constraints.clear_clauses();
 
   /* add xor clauses to solver & remove them from constraints */
-  assert( constraints._xor_clauses.size() == 0u );
+  assert( constraints.num_xor_clauses() == 0u );
 
   bool sat;
 

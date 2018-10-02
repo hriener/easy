@@ -47,19 +47,19 @@ public:
   inline void apply( constraints& constraints )
   {
     std::unordered_set<sptr<Clause>, UVecHash, UvecEqual> clauses;
-    for ( const auto& c : constraints._clauses )
-    {
-      std::set<unsigned> clause;
-      for ( const auto& l : c )
-      {
-        clause.insert( encode( l ) );
-        if ( (uint)abs( l ) > nVars )
+    constraints.foreach_clause( [&]( constraints::clause_t const& c ){
+        std::set<unsigned> clause;
+        for ( const auto& l : c )
         {
-          nVars = abs( l );
+          clause.insert( encode( l ) );
+          if ( (uint)abs( l ) > nVars )
+          {
+            nVars = abs( l );
+          }
         }
+        clauses.insert( std::make_shared<Clause>( clause ) );
       }
-      clauses.insert( std::make_shared<Clause>( clause ) );
-    }
+    );
 
     auto theory = std::make_shared<CNF>( clauses );
 
@@ -87,9 +87,9 @@ public:
     auto cls = brkr.get_clauses();
     for ( const auto& c : cls )
     {
-      constraints._clauses.push_back( c );
+      constraints.add_clause( c );
     }
-    constraints._num_variables = brkr.getTotalNbVars();
+    constraints.set_num_variables( brkr.getTotalNbVars() );
     _sid = brkr.getTotalNbVars();
   }
 

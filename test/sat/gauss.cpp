@@ -2,7 +2,6 @@
 #include <easy/sat/sat_solver.hpp>
 #include <easy/sat/gauss.hpp>
 #include <easy/sat/xor_clauses_to_cnf.hpp>
-#include <easy/sat/cnf_writer.hpp>
 
 using namespace easy;
 
@@ -13,13 +12,13 @@ TEST_CASE( "Eliminate equal xor-constraints", "[sat]" )
   constraints.add_xor_clause( { 1, 2 } );
   constraints.add_xor_clause( { 2, 1 } );
 
-  CHECK( constraints._xor_clauses.size() == 3u );
+  CHECK( constraints.num_xor_clauses() == 3u );
 
   sat::gauss_elimination gauss;
   auto deduced_unsat = gauss.apply( constraints );
   CHECK( !deduced_unsat );
 
-  CHECK( constraints._xor_clauses.size() == 1u );
+  CHECK( constraints.num_xor_clauses() == 1u );
 }
 
 TEST_CASE( "Eliminate variables using Gauss", "[sat]" )
@@ -29,25 +28,38 @@ TEST_CASE( "Eliminate variables using Gauss", "[sat]" )
   constraints.add_xor_clause( { 1, 2, 4 } );
   constraints.add_xor_clause( { 1, 3, 4 } );
 
-  CHECK( constraints._xor_clauses.size() == 3u );
+  CHECK( constraints.num_xor_clauses() == 3u );
 
   sat::gauss_elimination gauss;
   auto deduced_unsat = gauss.apply( constraints );
   CHECK( !deduced_unsat );
+  CHECK( constraints.num_xor_clauses() == 3u );
 
-  CHECK( constraints._xor_clauses.size() == 3u );
-
-  /* constraint 1 does not change */
-  CHECK( constraints._xor_clauses[0u].first == sat::constraints::clause_t{ 1, 2, 3, 4 } );
-  CHECK( constraints._xor_clauses[0u].second );
-
-  /* constraint 2 simplifies to x2 = false */
-  CHECK( constraints._xor_clauses[1u].first == sat::constraints::clause_t{ 2 } );
-  CHECK( !constraints._xor_clauses[1u].second );
-
-  /* constraint 3 simplifies to x3 = false */
-  CHECK( constraints._xor_clauses[2u].first == sat::constraints::clause_t{ 3 } );
-  CHECK( !constraints._xor_clauses[2u].second );
+  auto index = 0;
+  constraints.foreach_xor_clause( [&]( sat::xor_clause_t const& cl ){
+      switch( index )
+      {
+      case 0:
+        /* constraint 1 does not change */
+        CHECK( cl.clause == sat::constraints::clause_t{ 1, 2, 3, 4 } );
+        CHECK( cl.value );
+        break;
+      case 1:
+        /* constraint 2 simplifies to x2 = false */
+        CHECK( cl.clause == sat::constraints::clause_t{ 2 } );
+        CHECK( !cl.value );
+        break;
+      case 2:
+        /* constraint 3 simplifies to x3 = false */
+        CHECK( cl.clause == sat::constraints::clause_t{ 3 } );
+        CHECK( !cl.value );
+        break;
+      default:
+        CHECK( false );
+        break;
+      }
+      index++;
+    });
 }
 
 TEST_CASE( "Gauss algorithm deduces UNSAT", "[sat]" )
@@ -57,14 +69,14 @@ TEST_CASE( "Gauss algorithm deduces UNSAT", "[sat]" )
     constraints.add_xor_clause( {  1,  2 } );
     constraints.add_xor_clause( { -1,  2 } );
 
-    CHECK( constraints._xor_clauses.size() == 2u );
+    CHECK( constraints.num_xor_clauses() == 2u );
 
     int sid = 3;
     sat::xor_clauses_to_cnf conv( sid );
     conv.apply( constraints );
 
-    CHECK( constraints._xor_clauses.size() == 0u );
-    CHECK( constraints._clauses.size() == 10u );
+    CHECK( constraints.num_xor_clauses() == 0u );
+    CHECK( constraints.num_clauses() == 10u );
 
     sat::sat_solver solver;
     auto sat = solver.solve( constraints );
@@ -76,7 +88,7 @@ TEST_CASE( "Gauss algorithm deduces UNSAT", "[sat]" )
     constraints.add_xor_clause( {  1,  2 } );
     constraints.add_xor_clause( { -1,  2 } );
 
-    CHECK( constraints._xor_clauses.size() == 2u );
+    CHECK( constraints.num_xor_clauses() == 2u );
 
     sat::gauss_elimination gauss;
     auto unsat_deduced = gauss.apply( constraints );
@@ -86,7 +98,7 @@ TEST_CASE( "Gauss algorithm deduces UNSAT", "[sat]" )
     sat::xor_clauses_to_cnf conv( sid );
     conv.apply( constraints );
 
-    CHECK( constraints._xor_clauses.size() == 0u );
+    CHECK( constraints.num_xor_clauses() == 0u );
 
     sat::sat_solver solver;
     auto sat = solver.solve( constraints );

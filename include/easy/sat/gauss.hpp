@@ -37,11 +37,11 @@ public:
 
   bool apply( constraints& constraints )
   {
-    auto A = make_matrix( constraints._xor_clauses, constraints._num_variables );
+    auto A = make_matrix( constraints );
     matrix_make_upper_triangular_binary( A );
 
     /* reconstruct xor_clauses */
-    constraints._xor_clauses.clear();
+    constraints.clear_xor_clauses();
 
     for ( const auto& row : A )
     {
@@ -56,14 +56,14 @@ public:
 
       if ( clause.empty() && row[ row.size() - 1u ] )
       {
-        constraints._clauses.clear();
-        constraints._clauses.push_back( {  1 } );
-        constraints._clauses.push_back( { -1 } );
+        constraints.clear_clauses();
+        constraints.add_clause( {  1 } );
+        constraints.add_clause( { -1 } );
         return true;
       }
       else if ( !clause.empty() )
       {
-        constraints._xor_clauses.push_back( {clause, row[row.size() - 1u]} );
+        constraints.add_weighted_xor_clause( sat::wclause_t{clause, 0u}, row[row.size() - 1u] );
       }
     }
 
@@ -71,22 +71,22 @@ public:
   }
 
 protected:
-  inline std::vector<std::vector<bool>> make_matrix( const std::vector<std::pair<std::vector<int>, bool>>& xor_clauses, unsigned num_variables )
+  inline std::vector<std::vector<bool>> make_matrix( const constraints& constraints )
   {
+    auto num_variables = constraints.num_variables();
     std::vector<std::vector<bool>> matrix;
-    for ( const auto& clause : xor_clauses )
-    {
-      std::vector<bool> row( num_variables + 1 );
-      auto sum = 0u;
-      for ( const auto& l : clause.first )
-      {
-        row[abs( l ) - 1] = 1;
-        sum += l < 0;
-      }
-      sum += clause.second;
-      row[row.size() - 1] = sum % 2;
-      matrix.push_back( row );
-    }
+    constraints.foreach_xor_clause( [&]( xor_clause_t const& cl ){
+        std::vector<bool> row( num_variables + 1 );
+        auto sum = 0u;
+        for ( const auto& l : cl.clause )
+        {
+          row[abs( l ) - 1] = 1;
+          sum += l < 0;
+        }
+        sum += cl.value;
+        row[row.size() - 1] = sum % 2;
+        matrix.emplace_back( row );
+      });
     return matrix;
   }
 

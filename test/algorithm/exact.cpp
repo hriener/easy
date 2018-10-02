@@ -148,16 +148,15 @@ public:
   void compute_statistics( easy::sat::constraints const& constraints )
   {
     auto lits = 0;
-    for ( const auto& c : constraints._xor_clauses )
-    {
-      for ( const auto& l : c.first )
-      {
-        (void)l;
-        ++lits;
-      }
-    }
+    constraints.foreach_xor_clause( [&]( easy::sat::xor_clause_t const& c ){
+        for ( const auto& l : c.clause )
+        {
+          (void)l;
+          ++lits;
+        }
+      });
 
-    std::cout << "clauses: " << constraints._xor_clauses.size() << std::endl;
+    std::cout << "clauses: " << constraints.num_xor_clauses() << std::endl;
     std::cout << "literals: " << lits << std::endl;
   }
   
