@@ -2,6 +2,7 @@
 #include <easy/esop/esop.hpp>
 #include <easy/esop/synthesis.hpp>
 #include <easy/esop/exact_synthesis.hpp>
+#include <easy/esop/cost.hpp>
 
 using namespace easy;
 
@@ -67,4 +68,35 @@ TEST_CASE( "Check equivalence of two ESOPs", "[esop]" )
   CHECK( esop::equivalent_esops( esop_a, esop_min, num_vars ) );
   CHECK( esop::equivalent_esops( esop_b, esop_min, num_vars ) );
   CHECK( esop::equivalent_esops( esop_c, esop_min, num_vars ) );
+}
+
+TEST_CASE( "Compute the T_count of an ESOP", "[esop]" )
+{
+  const auto num_vars = 5u;
+  esop::esop_t esop_a = esop::esop_t{
+    kitty::cube( "-1000" ),
+    kitty::cube( "11001" ),
+    kitty::cube( "00111" ),
+    kitty::cube( "1100-" )};
+
+  esop::esop_t esop_b = esop::esop_t{
+    kitty::cube( "00000" ),
+    kitty::cube( "0-010" ),
+    kitty::cube( "0-0-0" ),
+    kitty::cube( "00111" )};
+
+  esop::esop_t esop_c = esop::esop_t{
+    kitty::cube( "01010" ),
+    kitty::cube( "110-0" ),
+    kitty::cube( "-10-0" ),
+    kitty::cube( "00111" )};
+
+  esop::esop_t esop_min = esop::esop_t{
+    kitty::cube( "00111" ),
+    kitty::cube( "01000" )};
+
+  CHECK( esop::T_count( esop_a, num_vars ) == 160 );
+  CHECK( esop::T_count( esop_b, num_vars ) == 128 );
+  CHECK( esop::T_count( esop_c, num_vars ) == 128 );
+  CHECK( esop::T_count( esop_min, num_vars ) == 64 );
 }
