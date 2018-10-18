@@ -2,7 +2,7 @@ file(GLOB FILENAMES *.cpp)
 
 # No debugging and optimization for benchmark test
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Enable testing of the benchmark library." FORCE)
-set(CMAKE_BUILD_TYPE "Release")
+#set(CMAKE_BUILD_TYPE "Release")
 add_subdirectory(benchmark)
 
 foreach(FILENAME ${FILENAMES})
