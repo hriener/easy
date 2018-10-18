@@ -29,9 +29,10 @@
 #include <easy/cli/stores/esop.hpp>
 #include <easy/cli/stores/function.hpp>
 #include <easy/cli/commands/cover.hpp>
-#include <easy/cli/commands/exorlink.hpp>
 #include <easy/cli/commands/ec.hpp>
+#include <easy/cli/commands/exorlink.hpp>
 #include <easy/cli/commands/function.hpp>
+#include <easy/cli/commands/read_fns.hpp>
 #include <easy/cli/commands/sort.hpp>
 #include <easy/cli/commands/synth.hpp>
 
@@ -78,6 +79,7 @@ ALICE_WRITE_FILE( esop_storee, pla, element, filename, cmd )
  ******************************************************************************/
 ALICE_ADD_COMMAND( function, "Function" )
 ALICE_ADD_COMMAND( synth,    "Function" )
+ALICE_ADD_COMMAND( read_fns, "Function" )
 
 /******************************************************************************
  * Cube commands                                                              *

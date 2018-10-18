@@ -33,7 +33,7 @@ struct function_storee
 {
   kitty::dynamic_truth_table bits;
   kitty::dynamic_truth_table care;
-  unsigned number_of_variables;
+  uint32_t number_of_variables;
 
   std::string as_string() const
   {
@@ -52,6 +52,23 @@ struct function_storee
     }
     return s;
   }
+
+  inline static function_storee from_hex_string( std::string s, uint32_t num_vars )
+  {
+    /* remove prefix '0x' if present */
+    if ( s.size() >= 2 && s[0] == '0' && s[1] == 'x' )
+    {
+      s = s.substr( 2, s.size()-3 );
+    }
+
+    function_storee fn;
+    fn.bits = kitty::dynamic_truth_table( num_vars );
+    kitty::create_from_hex_string( fn.bits, s );
+    fn.care = ~kitty::dynamic_truth_table( num_vars );
+    fn.number_of_variables = num_vars;
+
+    return fn;
+  }
 }; // function_storee
 
 ALICE_ADD_STORE( function_storee, "function", "f", "Function", "Functions" )
@@ -66,12 +83,12 @@ ALICE_PRINT_STORE( function_storee, os, element )
 
 ALICE_DESCRIBE_STORE( function_storee, element )
 {
-  return fmt::format( "[i] func<{}>", element.as_string() );
+  return fmt::format( "{}", element.as_string() );
 }
 
 ALICE_PRINT_STORE_STATISTICS( function_storee, os, element )
 {
-  os << fmt::format( "[i] func<{}>", element.as_string() ) << '\n';
+  os << fmt::format( "{}", element.as_string() ) << '\n';
 }
 
 } // namespace alice
