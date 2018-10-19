@@ -24,6 +24,7 @@
  */
 
 #include <alice/alice.hpp>
+#include <algorithm>
 
 namespace alice
 {
@@ -50,10 +51,13 @@ protected:
 
   void execute()
   {
+    std::random_device rd;
+    std::mt19937 g( rd() );
+
     auto& current = index == -1 ? store<esop_storee>().current() : store<esop_storee>()[index];
     if ( random )
     {
-      std::random_shuffle( current.esop.begin(), current.esop.end() );
+      std::shuffle( current.esop.begin(), current.esop.end(), g );
     }
     else
     {
