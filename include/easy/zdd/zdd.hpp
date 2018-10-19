@@ -313,7 +313,7 @@ public:
 
   int32_t zdd_dot_product( std::vector<int32_t> const& vs )
   {
-    return std::reduce( vs.begin(), vs.end(), get_constant( false ),
+    return std::reduce( vs.begin(), vs.end(), get_constant( true ),
                         [&]( const auto& a, const auto& b ){ return zdd_dot_product( a, b ); } );
   }
 
