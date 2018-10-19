@@ -380,7 +380,7 @@ public:
   void print_cover( int32_t a, uint32_t num_vars )
   {
     std::cout << "{ ";
-    print_cover_recur( a, std::string( '-', num_vars ) );
+    print_cover_recur( a, std::string( num_vars, '-' ) );
     std::cout << "}";
   }
 
