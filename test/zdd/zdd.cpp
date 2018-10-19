@@ -142,3 +142,40 @@ TEST_CASE( "Cube set #3", "[zdd]" )
   // mgr.print_cover( cube_set, num_vars );
   // std::cout << std::endl;
 }
+
+TEST_CASE( "Cube set #4", "[zdd]" )
+{
+  auto const num_vars = 3u;
+  zdd::Zdd mgr( 2u*num_vars, 1 << 20 );
+
+  auto const a = mgr.get_ith_var( 0 );
+  auto const b = mgr.get_ith_var( 2 );
+  auto const c = mgr.get_ith_var( 4 );
+
+  auto cube_not =  []( int32_t const &a ){ return a ^ 1; };
+  auto a_onset = mgr.zdd_union( { mgr.zdd_dot_product( { a } ),
+                                  mgr.zdd_dot_product( { a, c } ),
+                                  mgr.zdd_dot_product( { a, b } ),
+                                  mgr.zdd_dot_product( { a, b, c } ) } );
+
+  auto b_onset = mgr.zdd_union( { mgr.zdd_dot_product( { b } ),
+                                  mgr.zdd_dot_product( { a, b } ),
+                                  mgr.zdd_dot_product( { b, c } ),
+                                  mgr.zdd_dot_product( { a, b, c } ) } );
+
+  auto c_onset = mgr.zdd_union( { mgr.zdd_dot_product( { c } ),
+                                  mgr.zdd_dot_product( { c, a } ),
+                                  mgr.zdd_dot_product( { c, b } ),
+                                  mgr.zdd_dot_product( { c, a, b } ) } );
+
+  mgr.print_cover( a_onset, num_vars );
+  std::cout << std::endl;
+
+  mgr.print_cover( b_onset, num_vars );
+  std::cout << std::endl;
+
+  auto cubes = mgr.zdd_sym_diff( { a_onset, b_onset, c_onset } );
+
+  mgr.print_cover( cubes, num_vars );
+  std::cout << std::endl;
+}
