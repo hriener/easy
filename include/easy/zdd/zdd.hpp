@@ -340,7 +340,7 @@ public:
     {
       r0 = zdd_diff( zdd_a.f, zdd_b.f );
       r1 = zdd_diff( zdd_a.t, zdd_b.t );
-      r = unique_create( zdd_a.var, zdd_a.t, r0 );
+      r = unique_create( zdd_a.var, r1, r0 );
     }
     return cache_insert( a, b, ZDD_DIFF, r );
   }
