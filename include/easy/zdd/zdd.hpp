@@ -88,6 +88,8 @@ public:
     ZDD_INTERSECT,
     ZDD_DOT_PRODUCT,
     ZDD_PATHS
+    ZDD_PATHS,
+    ZDD_CUBESET,
   };
 
   explicit Zdd( uint32_t alloc_objects )
@@ -354,6 +356,28 @@ public:
   {
     return std::reduce( vs.begin(), vs.end(), get_constant( false ),
                         [&]( const auto& a, const auto& b ){ return zdd_sym_diff( a, b ); } );
+  }
+
+  int32_t zdd_cubeset( int32_t a )
+  {
+    auto zdd_a = objects.at( a );
+    auto r = get_constant( true );
+
+    int r0, r1;
+    for ( int32_t i = num_variables/2 -1; i >= 0; i-- )
+    {
+      r1 = r;
+      r0 = zdd_a.var != 2*i ? r : get_constant( false );
+
+      if ( ( r = cache_lookup( r1, r0, ZDD_CUBESET ) ) >= 0 )
+        continue;
+      else
+      {
+        r = unique_create( 2*i, r1, r0 );
+        cache_insert( r1, r0, ZDD_CUBESET, r );
+      }
+    }
+    return r;
   }
 
   void print_cover_recur( int32_t a, std::string current )

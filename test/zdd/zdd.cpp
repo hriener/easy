@@ -168,14 +168,11 @@ TEST_CASE( "Cube set #4", "[zdd]" )
                                   mgr.zdd_dot_product( { c, b } ),
                                   mgr.zdd_dot_product( { c, a, b } ) } );
 
-  mgr.print_cover( a_onset, num_vars );
-  std::cout << std::endl;
-
-  mgr.print_cover( b_onset, num_vars );
-  std::cout << std::endl;
+  auto a_set = mgr.zdd_cubeset( a );
+  auto b_set = mgr.zdd_cubeset( b );
+  auto c_set = mgr.zdd_cubeset( c );
 
   auto cubes = mgr.zdd_sym_diff( { a_onset, b_onset, c_onset } );
-
   mgr.print_cover( cubes, num_vars );
   std::cout << std::endl;
 }
