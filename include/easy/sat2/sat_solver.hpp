@@ -26,6 +26,7 @@
 #pragma once
 
 #include <easy/utils/dynamic_bitset.hpp>
+#include <iostream>
 
 namespace easy::sat2
 {
@@ -41,14 +42,49 @@ class model
 {
 public:
   /*! \brief Default constructor
-
-  This constructor creates an empty model.
-  */
+   *
+   * This constructor creates an empty model.
+   */
   explicit model() = default;
 
+  /*! \brief Constructor from dynamic_bitset
+   *
+   * This constructor creates an empty model.
+   */
+  explicit model( utils::dynamic_bitset<> const& bs )
+    : _assignment( bs )
+  {}
+
+  /*! \brief Size of model
+   *
+   * Returns the size of the model.
+   */
   uint64_t size() const
   {
     return _assignment.num_bits();
+  }
+
+  /*! \brief Get value of a literal.
+   *
+   * Returns the value of a literal in the model.
+   */
+  bool operator[]( int lit ) const
+  {
+    assert( lit != 0 );
+    auto const var = abs( lit ) - 1;
+    assert( var < _assignment.num_bits() && "Index out-of-bounds access" );
+    return lit > 0 ? _assignment[var] : !_assignment[var];
+  }
+
+  void print( std::ostream& os = std::cout )
+  {
+    auto const size = _assignment.num_bits();
+    for ( auto i = 0u; i < size; ++i )
+    {
+      os << _assignment[i];
+    }
+    os << '\n';
+    os.flush();
   }
 
 protected:
