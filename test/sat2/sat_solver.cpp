@@ -44,3 +44,12 @@ TEST_CASE( "Test interface of unsatisfiable core", "[sat]" )
   CHECK( c1[1] == 2 );
   CHECK( c1[2] == 3 );
 }
+
+TEST_CASE( "Construct SAT-solver", "[sat]" )
+{
+  sat2::sat_solver_statistics stats;
+  sat2::sat_solver solver( stats );
+  CHECK( solver.get_state() == sat2::sat_solver::state::fresh );
+  CHECK( solver.get_num_variables() == 0u );
+  CHECK( solver.get_budget() == -1 );
+}

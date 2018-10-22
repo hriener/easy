@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <glucose/glucose.hpp>
+
 #include <easy/utils/dynamic_bitset.hpp>
 #include <iostream>
 
@@ -172,5 +174,121 @@ protected:
 protected:
   std::vector<int> _conflict;
 }; /* core */
+
+struct sat_solver_statistics
+{
+};
+
+struct sat_solver_params
+{
+};
+
+class sat_solver
+{
+public:
+  enum class state
+  {
+    fresh = 0,
+    unknown = 1,
+    sat = 2,
+    unsat = 3
+  }; /* state */
+
+public:
+  explicit sat_solver( sat_solver_statistics& stats, sat_solver_params const& params = sat_solver_params() )
+    : _glucose( std::make_unique<Glucose::Solver>() )
+    , _stats( stats )
+    , _params( params )
+  {}
+
+  /*! \brief Return the current state of the SAT-solver */
+  state get_state() const
+  {
+    return _state;
+  }
+
+  /*! \brief Returns the conflict budget */
+  uint64_t get_budget() const
+  {
+    return _budget;
+  }
+
+  /*! \brief Returns the number of variables */
+  uint32_t get_num_variables() const
+  {
+    return _num_variables;
+  }
+
+  /*! \brief Add a clause to the SAT-solver */
+  void add_clause( std::vector<int> const& clause )
+  {
+    Glucose::vec<Glucose::Lit> cl;
+    for ( const auto& l : clause )
+    {
+      const auto v = abs( l ) - 1;
+      while ( _num_variables <= v )
+      {
+        _glucose->newVar();
+        ++_num_variables;
+      }
+      cl.push( Glucose::mkLit( v, l < 0 ) );
+    }
+    _glucose->addClause( cl );
+  }
+
+  /*! \brief Returns model if solver is in state SAT */
+  model get_model() const
+  {
+    assert( is_sat() );
+
+    auto const size = _glucose->model.size();
+    utils::dynamic_bitset<> m;
+    for ( auto i = 0u; i < size; ++i )
+    {
+      m.push_back( _glucose->model[i] == l_True );
+    }
+    return model( m );
+  }
+
+  /*! \brief Return core if solver is in UNSAT state */
+  core<> get_core() const
+  {
+    assert( is_unsat() );
+
+    auto const size = _glucose->conflict.size();
+    std::vector<int> lits( size );
+    for ( auto i = 0u; i < size; ++i )
+    {
+      lits[i] = (Glucose::var(_glucose->conflict[i])+1) * Glucose::sign(_glucose->conflict[i]);
+    }
+    return core( lits );
+  }
+
+  /*! \brief Returns true if and only if SAT-solver is in state UNKNOWN. */
+  bool is_unknown() const
+  {
+    return _state == state::unknown;
+  }
+
+  /*! \brief Returns true if and only if SAT-solver state is in state SAT. */
+  bool is_sat() const
+  {
+    return _state == state::sat;
+  }
+
+  /*! \brief Returns true if and only if SAT-solver is in state UNSAT. */
+  bool is_unsat() const
+  {
+    return _state == state::unsat;
+  }
+
+protected:
+  std::unique_ptr<Glucose::Solver> _glucose;
+  sat_solver_statistics& _stats;
+  sat_solver_params const& _params;
+  state _state{state::fresh};
+  int64_t _budget{-1};
+  uint32_t _num_variables{0};
+}; /* sat_solver */
 
 } /* namespace easy::sat2 */
