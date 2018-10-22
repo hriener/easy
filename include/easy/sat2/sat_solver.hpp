@@ -25,8 +25,59 @@
 
 #pragma once
 
+#include <easy/utils/dynamic_bitset.hpp>
+
 namespace easy::sat2
 {
 
+/*! \brief Satisfying model (or assignment)
+ *
+ * A vector of bits obtained from a SAT-solver.  The bit at index 0,
+ * 1, 2, and so forth corresponds to the variable with ids 1, 2, 3,
+ * and so forth.
+ *
+ */
+class model
+{
+public:
+  /*! \brief Default constructor
+
+  This constructor creates an empty model.
+  */
+  explicit model() = default;
+
+  uint64_t size() const
+  {
+    return _assignment.num_bits();
+  }
+
+protected:
+  utils::dynamic_bitset<> _assignment;
+}; /* model */
+
+/*! \brief Unsatisfiable core
+ *
+ * A sorted vector of assumption literals that together with the hard
+ * clauses of the SAT-solver cannot be satisfied.
+ *
+ * In general, the core is not minimal.
+ */
+class core
+{
+public:
+  /*! \brief Default constructor
+
+  This constructor creates an empty core.
+  */
+  explicit core() = default;
+
+  uint64_t size() const
+  {
+    return _conflict.size();
+  }
+
+protected:
+  std::vector<int> _conflict;
+}; /* core */
 
 } /* namespace easy::sat2 */
