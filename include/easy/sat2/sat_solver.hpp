@@ -23,6 +23,13 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/*!
+  \file sat_solver.hpp
+  \brief SAT-solver interface
+
+  \author Heinz Riener
+*/
+
 #pragma once
 
 #include <glucose/glucose.hpp>
@@ -218,6 +225,13 @@ public:
   {
     _ps.budget = budget;
     _glucose->setConfBudget( budget );
+  }
+
+  /* \brief Reset conflict budget */
+  void reset_budget()
+  {
+    _ps.budget = -1;
+    _glucose->budgetOff();
   }
 
   /*! \brief Return the current state of the SAT-solver */
