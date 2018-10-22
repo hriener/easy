@@ -87,7 +87,7 @@ public:
     ZDD_UNION,
     ZDD_INTERSECT,
     ZDD_DOT_PRODUCT,
-    ZDD_PATHS
+    ZDD_PERM_PRODUCT,
     ZDD_PATHS,
     ZDD_CUBESET,
   };
@@ -319,6 +319,31 @@ public:
                         [&]( const auto& a, const auto& b ){ return zdd_dot_product( a, b ); } );
   }
 
+#if 0
+  int32_t zdd_perm_product( int32_t a, int32_t b )
+  {
+    int32_t r0, r1, r;
+    if ( a == 0 ) return 0;
+    if ( a == 1 ) return b;
+    if ( b == 0 ) return 0;
+    if ( b == 1 ) return a;
+    if ( ( r = cache_lookup( a, b, ZDD_PERM_PRODUCT ) ) >= 0 )
+      return r;
+    auto zdd_b = objects.at( b );
+    r0 = zdd_perm_product( a, zdd_b.f );
+    r1 = zdd_perm_product( a, zdd_b.t );
+    r1 = zdd_perm( r1, zdd_b.var );
+    r = zdd_union( r0, r1 );
+    return cache_insert( a, b, ZDD_PERM_PRODUCT, r );
+  }
+
+  int32_t zdd_perm_product( std::vector<int32_t> const& vs )
+  {
+    return std::reduce( vs.begin(), vs.end(), get_constant( true ),
+                        [&]( const auto& a, const auto& b ){ return zdd_perm_product( a, b ); } );
+  }
+#endif
+
   int32_t zdd_diff( int32_t a, int32_t b )
   {
     int32_t r0, r1, r;
@@ -395,6 +420,7 @@ public:
     }
 
     auto zdd_a = objects.at( a );
+
     current[int32_t( zdd_a.var / 2 )] = ( zdd_a.var % 2 ) == 1 ? '1' : '-';
     print_cover_recur( zdd_a.f, current );
     current[int32_t( zdd_a.var / 2 )] = ( zdd_a.var % 2 ) == 0 ? '1' : '0';
