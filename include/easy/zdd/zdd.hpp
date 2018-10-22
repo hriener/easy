@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <numeric>
