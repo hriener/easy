@@ -26,8 +26,6 @@
 #pragma once
 
 #include <easy/sat/constraints.hpp>
-#include <core/SolverTypes.h>
-#include <core/Solver.h>
 #include <cassert>
 #include <memory>
 #include <vector>

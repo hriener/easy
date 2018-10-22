@@ -45,3 +45,8 @@ if (NOT TARGET alice)
   target_include_directories(alice INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/alice/include)
   target_link_libraries(alice INTERFACE readline)
 endif()
+
+if (NOT TARGET glucose)
+  add_library(glucose INTERFACE)
+  target_include_directories(glucose INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/glucose/include)
+endif()

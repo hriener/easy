@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include <core/SolverTypes.h>
-#include <core/Solver.h>
+#include <glucose/glucose.hpp>
 #include <cassert>
 #include <memory>
 #include <vector>
