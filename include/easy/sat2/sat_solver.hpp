@@ -128,6 +128,17 @@ public:
     sort( SorterPred() );
   }
 
+  /*! \brief Cast operator to std::vector<int>.
+   *
+   * This automatic cast operator allows an unsatisfiable core to be
+   * converted to vector of assumptions.
+   *
+   */
+  operator std::vector<int>() const
+  {
+    return _conflict;
+  }
+
   /*! \brief Size of core
    *
    * Returns the size of the core.

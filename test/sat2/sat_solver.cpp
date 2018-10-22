@@ -84,3 +84,41 @@ TEST_CASE( "Test SAT-solver with assumptions", "[sat]" )
   solver.add_clause( { -2 } );
   CHECK( solver.solve( {} ) == sat2::sat_solver::state::unsat );
 }
+
+TEST_CASE( "Test unsat core extraction", "[sat]" )
+{
+  sat2::sat_solver_statistics stats;
+  sat2::sat_solver_params ps;
+  sat2::sat_solver solver( stats, ps );
+
+  /* Example CNF from ''On Computing Minimum Unsatisfiable Cores'',
+   * SAT 2004: we use assumption literals 4,...,9 for clause activation */
+  solver.add_clause( { -4,  1, 2 } );
+  solver.add_clause( { -5,  2 } );
+  solver.add_clause( { -6, -2, 3 } );
+  solver.add_clause( { -7, -2, -3 } );
+  solver.add_clause( { -8,  2, 3 } );
+  solver.add_clause( { -9, -1, 2, -3 } );
+
+  /* clause selectors */
+  std::vector<int> s = { 4, 5, 6, 7, 8, 9 };
+
+  /* constrained to unsat core */
+  CHECK( solver.solve( { s[0], s[1], s[2], s[3], s[4], s[5] } ) == sat2::sat_solver::state::unsat ); /* UC1 */
+  CHECK( solver.solve( { s[0], s[1], s[2], s[3], s[4] } ) == sat2::sat_solver::state::unsat ); /* UC2 */
+  CHECK( solver.solve( { s[0], s[1], s[2], s[3], s[5] } ) == sat2::sat_solver::state::unsat ); /* UC3 */
+  CHECK( solver.solve( { s[0], s[2], s[3], s[4], s[5] } ) == sat2::sat_solver::state::unsat ); /* UC4 */
+  CHECK( solver.solve( { s[1], s[2], s[3], s[4], s[5] } ) == sat2::sat_solver::state::unsat ); /* UC5 */
+  CHECK( solver.solve( { s[0], s[1], s[2], s[3] } ) == sat2::sat_solver::state::unsat ); /* UC6 */
+  CHECK( solver.solve( { s[1], s[2], s[3], s[4] } ) == sat2::sat_solver::state::unsat ); /* UC7 */
+  CHECK( solver.solve( { s[1], s[2], s[3], s[5] } ) == sat2::sat_solver::state::unsat ); /* UC8 */
+  CHECK( solver.solve( { s[1], s[2], s[3] } ) == sat2::sat_solver::state::unsat ); /* UC9 */
+
+  CHECK( solver.solve( s ) == sat2::sat_solver::state::unsat );
+
+  /* extract core */
+  auto cs = solver.get_core();
+
+  /* verify that it's an unsat core */
+  CHECK( solver.solve( cs ) == sat2::sat_solver::state::unsat );
+}
