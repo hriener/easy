@@ -192,7 +192,7 @@ public:
     fresh = 0,
     dirty = 1,
     sat = 2,
-    unsat = 3
+    unsat = 3,
   }; /* state */
 
 public:
@@ -260,11 +260,11 @@ public:
     auto const result = _glucose->solve( ass );
     if ( result )
     {
-      return (_state = state::sat);
+      return ( _state = state::sat );
     }
     else
     {
-      return (_state = state::unsat);
+      return ( _state = state::unsat );
     }
   }
 
@@ -294,16 +294,16 @@ public:
     auto const result = _glucose->solveLimited( ass );
     if ( result == l_Undef || _glucose->conflicts >= _ps.budget )
     {
-      return (_state = state::dirty);
+      return ( _state = state::dirty );
     }
     else if ( result == l_True )
     {
-      return (_state = state::sat);
+      return ( _state = state::sat );
     }
     else
     {
       assert( result == l_False );
-      return (_state = state::unsat);
+      return ( _state = state::unsat );
     }
   }
 
@@ -350,7 +350,7 @@ public:
     std::vector<int> lits( size );
     for ( auto i = 0u; i < size; ++i )
     {
-      lits[i] = (Glucose::var(_glucose->conflict[i])+1) * Glucose::sign(_glucose->conflict[i]);
+      lits[i] = ( Glucose::var( _glucose->conflict[i] )+1 ) * Glucose::sign( _glucose->conflict[i] );
     }
     return core( lits );
   }
