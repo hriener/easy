@@ -192,7 +192,7 @@ struct sat_solver_statistics
 
 struct sat_solver_params
 {
-  int64_t budget{-1}; /*>! Conflict budget (a value < 0 denotes an unconstrained budget) */
+  mutable int64_t budget{-1}; /*>! Conflict budget (a value < 0 denotes an unconstrained budget) */
 };
 
 class sat_solver
@@ -212,6 +212,13 @@ public:
     , _stats( stats )
     , _ps( ps )
   {}
+
+  /* \brief Set conflict budget */
+  void set_budget( int64_t budget )
+  {
+    _ps.budget = budget;
+    _glucose->setConfBudget( budget );
+  }
 
   /*! \brief Return the current state of the SAT-solver */
   state get_state() const
