@@ -181,6 +181,7 @@ struct sat_solver_statistics
 
 struct sat_solver_params
 {
+  int64_t budget{-1}; /*>! Conflict budget (a value < 0 denotes an unconstrained budget) */
 };
 
 class sat_solver
@@ -189,16 +190,16 @@ public:
   enum class state
   {
     fresh = 0,
-    unknown = 1,
+    dirty = 1,
     sat = 2,
     unsat = 3
   }; /* state */
 
 public:
-  explicit sat_solver( sat_solver_statistics& stats, sat_solver_params const& params = sat_solver_params() )
+  explicit sat_solver( sat_solver_statistics& stats, sat_solver_params& ps )
     : _glucose( std::make_unique<Glucose::Solver>() )
     , _stats( stats )
-    , _params( params )
+    , _ps( ps )
   {}
 
   /*! \brief Return the current state of the SAT-solver */
@@ -207,21 +208,111 @@ public:
     return _state;
   }
 
-  /*! \brief Returns the conflict budget */
-  uint64_t get_budget() const
-  {
-    return _budget;
-  }
-
   /*! \brief Returns the number of variables */
   uint32_t get_num_variables() const
   {
     return _num_variables;
   }
 
+  /*! \brief Check satisfiability under assumptions with respect to the conflict budget
+   *
+   * \param assumption A vector of assumption literals assumed to be true
+   *
+   * Returns the current state of the SAT-solver
+   */
+  state solve( std::vector<int> const& assumptions = {} )
+  {
+    if ( _ps.budget > -1 )
+    {
+      return solve_limited( assumptions );
+    }
+    else
+    {
+      return solve_unlimited( assumptions );
+    }
+  }
+
+  /*! \brief Check satisfiability under assumptions without considering the conflict budget
+   *
+   * \param assumption A vector of assumption literals assumed to be true
+   *
+   * Returns the current state of the SAT-solver
+   */
+  state solve_unlimited( std::vector<int> const& assumptions = {} )
+  {
+    _glucose->budgetOff();
+
+    Glucose::vec<Glucose::Lit> ass;
+    if ( assumptions.size() > 0 )
+    {
+      for ( const auto& l : assumptions )
+      {
+        const auto v = abs( l ) - 1;
+        while ( _num_variables <= v )
+        {
+          _glucose->newVar();
+          ++_num_variables;
+        }
+        ass.push( Glucose::mkLit( v, l < 0 ) );
+      }
+    }
+
+    auto const result = _glucose->solve( ass );
+    if ( result )
+    {
+      return (_state = state::sat);
+    }
+    else
+    {
+      return (_state = state::unsat);
+    }
+  }
+
+  /*! \brief Check satisfiability under assumptions with respect to the conflict budget
+   *
+   * \param assumption A vector of assumption literals assumed to be true
+   *
+   * Returns the current state of the SAT-solver
+   */
+  state solve_limited( std::vector<int> const& assumptions = {} )
+  {
+    Glucose::vec<Glucose::Lit> ass;
+    if ( assumptions.size() > 0 )
+    {
+      for ( const auto& l : assumptions )
+      {
+        const auto v = abs( l ) - 1;
+        while ( _num_variables <= v )
+        {
+          _glucose->newVar();
+          ++_num_variables;
+        }
+        ass.push( Glucose::mkLit( v, l < 0 ) );
+      }
+    }
+
+    auto const result = _glucose->solveLimited( ass );
+    if ( result == l_Undef || _glucose->conflicts >= _ps.budget )
+    {
+      return (_state = state::dirty);
+    }
+    else if ( result == l_True )
+    {
+      return (_state = state::sat);
+    }
+    else
+    {
+      assert( result == l_False );
+      return (_state = state::unsat);
+    }
+  }
+
   /*! \brief Add a clause to the SAT-solver */
   void add_clause( std::vector<int> const& clause )
   {
+    /* update state */
+    _state = state::dirty;
+
     Glucose::vec<Glucose::Lit> cl;
     for ( const auto& l : clause )
     {
@@ -267,7 +358,7 @@ public:
   /*! \brief Returns true if and only if SAT-solver is in state UNKNOWN. */
   bool is_unknown() const
   {
-    return _state == state::unknown;
+    return _state == state::dirty;
   }
 
   /*! \brief Returns true if and only if SAT-solver state is in state SAT. */
@@ -285,9 +376,8 @@ public:
 protected:
   std::unique_ptr<Glucose::Solver> _glucose;
   sat_solver_statistics& _stats;
-  sat_solver_params const& _params;
+  sat_solver_params const& _ps;
   state _state{state::fresh};
-  int64_t _budget{-1};
   uint32_t _num_variables{0};
 }; /* sat_solver */
 

@@ -45,11 +45,42 @@ TEST_CASE( "Test interface of unsatisfiable core", "[sat]" )
   CHECK( c1[2] == 3 );
 }
 
-TEST_CASE( "Construct SAT-solver", "[sat]" )
+TEST_CASE( "Test SAT-solver state", "[sat]" )
 {
   sat2::sat_solver_statistics stats;
-  sat2::sat_solver solver( stats );
+  sat2::sat_solver_params ps;
+  sat2::sat_solver solver( stats, ps );
   CHECK( solver.get_state() == sat2::sat_solver::state::fresh );
   CHECK( solver.get_num_variables() == 0u );
-  CHECK( solver.get_budget() == -1 );
+
+  solver.add_clause( { 1 } );
+  CHECK( solver.solve() == sat2::sat_solver::state::sat );
+  solver.add_clause( { -1 } );
+  CHECK( solver.get_state() == sat2::sat_solver::state::dirty );
+  CHECK( solver.solve() == sat2::sat_solver::state::unsat );
+}
+
+TEST_CASE( "Test SAT-solver with assumptions", "[sat]" )
+{
+  sat2::sat_solver_statistics stats;
+  sat2::sat_solver_params ps;
+  sat2::sat_solver solver( stats, ps );
+
+  solver.add_clause( { 1, 2 } );
+
+  CHECK( solver.solve( {} ) == sat2::sat_solver::state::sat );
+  CHECK( solver.solve( { -1 } ) == sat2::sat_solver::state::sat );
+  CHECK( solver.solve( { -2 } ) == sat2::sat_solver::state::sat );
+  CHECK( solver.solve( { -1, -2 } ) == sat2::sat_solver::state::unsat );
+
+  CHECK( solver.solve( { -1 } ) == sat2::sat_solver::state::sat );
+  CHECK( solver.solve( { -2 } ) == sat2::sat_solver::state::sat );
+  CHECK( solver.solve( {} ) == sat2::sat_solver::state::sat );
+
+  solver.add_clause( { -1 } );
+  CHECK( solver.solve( {} ) == sat2::sat_solver::state::sat );
+  CHECK( solver.solve( { -2 } ) == sat2::sat_solver::state::unsat );
+
+  solver.add_clause( { -2 } );
+  CHECK( solver.solve( {} ) == sat2::sat_solver::state::unsat );
 }
