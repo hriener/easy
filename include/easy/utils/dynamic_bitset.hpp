@@ -158,7 +158,7 @@ public:
   {
     const size_type sz = num_bits();
     resize( sz + 1 );
-    set( sz, value );
+    set_bit( sz, value );
   }
 
   /* \brief Append a block to the dynamic_bitset
@@ -228,18 +228,6 @@ public:
    */
   dynamic_bitset& set_bit( size_type pos, bool value = true )
   {
-    return set( pos, value );
-  }
-
-  /*! \brief Sets a bit at a position
-   *
-   * \param pos A position in the dynamic_bitset
-   * \param val Value to be set
-   *
-   * Returns a reference to the current dynamic_bitset
-   */
-  dynamic_bitset& set( size_type pos, bool value = true )
-  {
     assert( pos < _num_bits && "Index access out-of-bounds" );
 
     if ( value )
@@ -248,7 +236,7 @@ public:
     }
     else
     {
-      reset( pos );
+      reset_bit( pos );
     }
 
     return *this;

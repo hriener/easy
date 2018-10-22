@@ -64,7 +64,9 @@ public:
     return _assignment.num_bits();
   }
 
-  /*! \brief Get value of a literal.
+  /*! \brief Get value of a literal
+   *
+   * \param lit A literal
    *
    * Returns the value of a literal in the model.
    */
@@ -76,6 +78,12 @@ public:
     return lit > 0 ? _assignment[var] : !_assignment[var];
   }
 
+  /*! \brief Print model
+   *
+   * \param os Output stream
+   *
+   * Prints the model to os
+   */
   void print( std::ostream& os = std::cout )
   {
     auto const size = _assignment.num_bits();
@@ -83,8 +91,6 @@ public:
     {
       os << _assignment[i];
     }
-    os << '\n';
-    os.flush();
   }
 
 protected:
@@ -98,18 +104,69 @@ protected:
  *
  * In general, the core is not minimal.
  */
+template<typename SorterPred = std::less<int>>
 class core
 {
 public:
   /*! \brief Default constructor
-
-  This constructor creates an empty core.
-  */
+   *
+   * This constructor creates an empty core.
+   */
   explicit core() = default;
 
+  /*! \brief Constructs a core from a vector of literals.
+   *
+   * This constructor creates a (sorted) core from a vector of literals.
+   *
+   * \param conflicts A vector of conflict literals.
+   */
+  explicit core( std::vector<int> const& conflict )
+    : _conflict( conflict )
+  {
+    sort( SorterPred() );
+  }
+
+  /*! \brief Size of core
+   *
+   * Returns the size of the core.
+   */
   uint64_t size() const
   {
     return _conflict.size();
+  }
+
+  /*! \brief Get assumption in core
+   *
+   * \param pos A position
+   *
+   * Returns an assumption in the core
+   */
+  int operator[]( uint32_t pos ) const
+  {
+    assert( pos < _conflict.size() );
+    return _conflict[pos];
+  }
+
+  /*! \brief Print core
+   *
+   * \param os Output stream
+   *
+   * Prints the core to os
+   */
+  void print( std::ostream& os = std::cout ) const
+  {
+    auto const size = _conflict.size();
+    for ( auto i = 0u; i < size; ++i )
+    {
+      os << _conflict[i] << ' ';
+    }
+  }
+
+protected:
+  template<typename Pred>
+  void sort( Pred&& pred )
+  {
+    std::sort( std::begin( _conflict ), std::end( _conflict ), pred );
   }
 
 protected:
