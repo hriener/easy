@@ -32,6 +32,9 @@
 
 #pragma once
 
+#include <vector>
+#include <cassert>
+
 namespace easy::utils
 {
 
