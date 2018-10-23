@@ -33,8 +33,8 @@
 #pragma once
 
 #include <glucose/glucose.hpp>
-
 #include <easy/utils/dynamic_bitset.hpp>
+#include <algorithm>
 #include <iostream>
 
 namespace easy::sat2
