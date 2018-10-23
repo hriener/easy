@@ -33,6 +33,7 @@
 #pragma once
 
 #include <easy/sat2/sat_solver.hpp>
+#include <easy/sat2/core_utils.hpp>
 
 namespace easy::sat2
 {
@@ -48,9 +49,21 @@ struct maxsat_solver_params
 class maxsat_solver
 {
 public:
-  explicit maxsat_solver() = default;
+  /* \brief Constructor
+   *
+   * Constructs a MAXSAT-solver
+   *
+   * \param stats Statistics
+   * \param ps Parameters
+   */
+  explicit maxsat_solver( maxsat_solver_statistics& stats, maxsat_solver_params& ps )
+    : _stats( stats )
+    , _ps( ps )
+  {}
 
 protected:
+  maxsat_solver_statistics& _stats;
+  maxsat_solver_params const& _ps;
 }; /* maxsat_solver */
 
 } /* easy::sat2 */
