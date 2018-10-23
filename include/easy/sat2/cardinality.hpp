@@ -164,5 +164,33 @@ inline void increase_totalizer( std::vector<std::vector<int>>& dest, int& sid, s
   detail::increase_totalizer_internal( dest, sid, t->vars, kmin, t->left->vars, t->right->vars );
 }
 
+inline std::shared_ptr<totalizer_tree> merge_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree> const& ta, std::shared_ptr<totalizer_tree> const& tb, uint32_t rhs )
+{
+  increase_totalizer( dest, sid, ta, rhs );
+  increase_totalizer( dest, sid, tb, rhs );
+
+  uint32_t n = ta->num_inputs + tb->num_inputs;
+  uint32_t kmin = std::min( rhs, n );
+
+  auto t = std::make_shared<totalizer_tree>();
+  t->num_inputs = n;
+  t->left = ta;
+  t->right = tb;
+  t->vars.resize( kmin );
+
+  for ( auto i = 0; i < kmin; ++i )
+  {
+    t->vars[i] = sid++;
+  }
+
+  detail::create_totalizer_internal( dest, sid, t->vars, kmin, ta->vars, tb->vars );
+  return t;
+}
+
+inline std::shared_ptr<totalizer_tree> extend_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree> const& ta, std::vector<int> const& lhs, uint32_t rhs )
+{
+  auto const tb = create_totalizer( dest, sid, lhs, rhs );
+  return merge_totalizer( dest, sid, ta, tb, rhs );
+}
 
 } /* namespace easy::sat2 */
