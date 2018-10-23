@@ -67,12 +67,47 @@ inline void create_totalizer_internal( std::vector<std::vector<int>>& dest, int&
   /* i, j > 0 */
   for ( auto i = 1; i <= kmin; ++i )
   {
-    auto min_j = std::min( rhs-i, uint32_t( bv.size() ) );
+    auto const min_j = std::min( rhs-i, uint32_t( bv.size() ) );
     for ( auto j = 1; j <= min_j; ++j )
     {
       dest.emplace_back( std::vector<int>{ -av[i-1], -bv[j-1], ov[i+j-1] } );
     }
   }  
+}
+
+inline void increase_totalizer_internal( std::vector<std::vector<int>>& dest, int& sid, std::vector<int>& ov, uint32_t rhs, std::vector<int>& av, std::vector<int>& bv )
+{
+  uint32_t last = ov.size();
+  for ( auto i = last; i < rhs; ++i )
+  {
+    ov.emplace_back( sid++ );
+  }
+
+  // add the constraints
+  /* i = 0 */
+  uint32_t const max_j = std::min( rhs, uint32_t( bv.size() ) );
+  for ( auto j = last; j < max_j; ++j )
+  {
+    dest.emplace_back( std::vector<int>{ -bv[j], ov[j] } );
+  }
+
+  /* j = 0 */
+  uint32_t const max_i = std::min( rhs, uint32_t( av.size() ) );
+  for ( auto i = last; i < max_i; ++i )
+  {
+    dest.emplace_back( std::vector<int>{ -av[i], ov[i] } );
+  }
+
+  /* i, j > 0 */
+  for ( auto i = 1; i <= max_i; ++i )
+  {
+    auto const max_j = std::min( rhs-i, uint32_t( bv.size() ) );
+    auto const min_j = std::max( int( last ) - int( i ) + 1, 1 );
+    for ( auto j = min_j; j <= max_j; ++j )
+    {
+      dest.emplace_back( std::vector<int>{ -av[i-1], -bv[j-1], ov[i+j-1] } );
+    }
+  }
 }
 
 } /* detail */
@@ -117,5 +152,17 @@ inline std::shared_ptr<totalizer_tree> create_totalizer( std::vector<std::vector
 
   return queue.front();
 }
+
+inline void increase_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree> const& t, uint32_t rhs )
+{
+  uint32_t const kmin = std::min( rhs, t->num_inputs );
+  if ( kmin <= t->vars.size() )
+    return;
+
+  increase_totalizer( dest, sid, t->left, rhs );
+  increase_totalizer( dest, sid, t->right, rhs );
+  detail::increase_totalizer_internal( dest, sid, t->vars, kmin, t->left->vars, t->right->vars );
+}
+
 
 } /* namespace easy::sat2 */
