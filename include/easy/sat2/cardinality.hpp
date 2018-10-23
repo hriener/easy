@@ -48,25 +48,20 @@ struct totalizer_tree
 namespace detail
 {
 
-inline void add_clause( std::vector<std::vector<int>>& clauses, std::vector<int> const& cl )
-{
-  clauses.emplace_back( cl );
-}
-
 inline void create_totalizer_internal( std::vector<std::vector<int>>& dest, int& sid, std::vector<int> const& ov, uint32_t rhs, std::vector<int> const& av, std::vector<int> const& bv )
 {
   /* i = 0 */
   uint32_t kmin = std::min( rhs, uint32_t( bv.size() ) );
   for ( auto j = 0; j < kmin; ++j )
   {
-    add_clause( dest, { -bv[j], ov[j] } );
+    dest.emplace_back( std::vector<int>{ -bv[j], ov[j] } );
   }
 
   /* j = 0 */
   kmin = std::min( rhs, uint32_t( av.size() ) );
   for ( auto i = 0; i < kmin; ++i )
   {
-    add_clause( dest, { -av[i], ov[i] } );
+    dest.emplace_back( std::vector<int>{ -av[i], ov[i] } );
   }
   
   /* i, j > 0 */
@@ -75,7 +70,7 @@ inline void create_totalizer_internal( std::vector<std::vector<int>>& dest, int&
     auto min_j = std::min( rhs-i, uint32_t( bv.size() ) );
     for ( auto j = 1; j <= min_j; ++j )
     {
-      add_clause( dest, { -av[i-1], -bv[j-1], ov[i+j-1] } );
+      dest.emplace_back( std::vector<int>{ -av[i-1], -bv[j-1], ov[i+j-1] } );
     }
   }  
 }
