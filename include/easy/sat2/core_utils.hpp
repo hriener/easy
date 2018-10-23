@@ -46,7 +46,7 @@ namespace detail
 {
 
 template<typename T>
-std::vector<T> copy_vector_without_index( std::vector<T> const& vs, uint64_t index )
+inline std::vector<T> copy_vector_without_index( std::vector<T> const& vs, uint64_t index )
 {
   assert( index < vs.size() );
   std::vector<T> copy( vs );
@@ -69,7 +69,7 @@ std::vector<T> copy_vector_without_index( std::vector<T> const& vs, uint64_t ind
  *
  * Returns the trimmed core.
  */
-core<> trim_core_copy( sat_solver& solver, core<> const& cs, uint32_t num_tries = 8u )
+inline core<> trim_core_copy( sat_solver& solver, core<> const& cs, uint32_t num_tries = 8u )
 {
   auto current = cs;
 
@@ -101,7 +101,7 @@ core<> trim_core_copy( sat_solver& solver, core<> const& cs, uint32_t num_tries 
  * \param cs An unsatisfiable core
  * \param num_tries Maximal number of tries to trim core
  */
-void trim_core( sat_solver& solver, core<>& cs, uint32_t num_tries = 8u )
+inline void trim_core( sat_solver& solver, core<>& cs, uint32_t num_tries = 8u )
 {
   cs = trim_core_copy( solver, cs, num_tries );
 }
@@ -119,7 +119,7 @@ void trim_core( sat_solver& solver, core<>& cs, uint32_t num_tries = 8u )
  *
  * Returns a potentially minimized unsatisfiable core.
  */
-core<> minimize_core_copy( sat_solver& solver, core<> const& cs, int64_t budget = 1000 )
+inline core<> minimize_core_copy( sat_solver& solver, core<> const& cs, int64_t budget = 1000 )
 {
   solver.set_budget( budget );
 
@@ -165,7 +165,7 @@ core<> minimize_core_copy( sat_solver& solver, core<> const& cs, int64_t budget 
  * \param budget A budget limit for SAT-solving
  *
  */
-void minimize_core( sat_solver& solver, core<>& cs, int64_t budget = 1000 )
+inline void minimize_core( sat_solver& solver, core<>& cs, int64_t budget = 1000 )
 {
   cs = minimize_core_copy( solver, cs, budget );
 }
