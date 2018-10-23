@@ -28,6 +28,11 @@
   \brief Utility functions for UNSAT cores.
 
   \author Heinz Riener
+
+  The UNSAT core optimization heuristics are based on the
+  implementation of RC2 by Alexey S. Ignatiev [1].
+
+  [1] https://github.com/pysathq/pysat/blob/master/examples/rc2.py
 */
 
 #pragma once
