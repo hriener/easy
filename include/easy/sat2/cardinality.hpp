@@ -84,7 +84,7 @@ inline std::shared_ptr<totalizer_tree> create_totalizer( std::vector<std::vector
   std::deque<std::shared_ptr<totalizer_tree>> queue;
   for ( auto i = 0; i < n; ++i )
   {
-    std::shared_ptr<totalizer_tree> t( new totalizer_tree() );
+    auto t = std::make_shared<totalizer_tree>();
     t->vars.resize( 1 );
     t->vars[0] = lhs[i];
     t->num_inputs = 1;
@@ -100,7 +100,7 @@ inline std::shared_ptr<totalizer_tree> create_totalizer( std::vector<std::vector
     auto const ri = queue.front();
     queue.pop_front();
 
-    std::shared_ptr<totalizer_tree> t( new totalizer_tree() );
+    auto t = std::make_shared<totalizer_tree>();
     t->num_inputs = le->num_inputs + ri->num_inputs;
     t->left = le;
     t->right = ri;
