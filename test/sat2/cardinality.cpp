@@ -67,7 +67,7 @@ TEST_CASE( "Enumerate cardinality-5 solutions", "[cardinality]" )
   }
 }
 
-TEST_CASE( "Test increase", "[cardinality]" )
+TEST_CASE( "Increase cardinality n=7, k=3 to cardinality k=6", "[cardinality]" )
 {
   sat2::sat_solver_statistics stats;
   sat2::sat_solver_params ps;
