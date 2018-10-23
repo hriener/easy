@@ -214,6 +214,13 @@ public:
   }; /* state */
 
 public:
+  /* \brief Constructor
+   *
+   * Constructs a SAT-solver
+   *
+   * \param stats Statistics
+   * \param ps Parameters
+   */
   explicit sat_solver( sat_solver_statistics& stats, sat_solver_params& ps )
     : _glucose( std::make_unique<Glucose::Solver>() )
     , _stats( stats )
