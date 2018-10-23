@@ -237,7 +237,7 @@ public:
 
   int32_t zdd_union( std::vector<int32_t> const& vs )
   {
-    return std::reduce( vs.begin(), vs.end(), get_constant( false ),
+    return std::accumulate( vs.begin(), vs.end(), get_constant( false ),
                         [&]( const auto& a, const auto& b ){ return zdd_union( a, b ); } );
   }
 
@@ -277,7 +277,7 @@ public:
     {
       return get_constant( false );
     }
-    return std::reduce( vs.begin()+1, vs.end(), vs[0],
+    return std::accumulate( vs.begin()+1, vs.end(), vs[0],
                         [&]( const auto& a, const auto& b ){ return zdd_intersect( a, b ); } );
   }
 
@@ -317,7 +317,7 @@ public:
 
   int32_t zdd_dot_product( std::vector<int32_t> const& vs )
   {
-    return std::reduce( vs.begin(), vs.end(), get_constant( true ),
+    return std::accumulate( vs.begin(), vs.end(), get_constant( true ),
                         [&]( const auto& a, const auto& b ){ return zdd_dot_product( a, b ); } );
   }
 
@@ -341,7 +341,7 @@ public:
 
   int32_t zdd_perm_product( std::vector<int32_t> const& vs )
   {
-    return std::reduce( vs.begin(), vs.end(), get_constant( true ),
+    return std::accumulate( vs.begin(), vs.end(), get_constant( true ),
                         [&]( const auto& a, const auto& b ){ return zdd_perm_product( a, b ); } );
   }
 #endif
@@ -381,7 +381,7 @@ public:
 
   int32_t zdd_sym_diff( std::vector<int32_t> const& vs )
   {
-    return std::reduce( vs.begin(), vs.end(), get_constant( false ),
+    return std::accumulate( vs.begin(), vs.end(), get_constant( false ),
                         [&]( const auto& a, const auto& b ){ return zdd_sym_diff( a, b ); } );
   }
 
