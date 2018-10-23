@@ -63,6 +63,89 @@ TEST_CASE( "Test SAT-solver state", "[sat]" )
   CHECK( solver.solve() == sat2::sat_solver::state::unsat );
 }
 
+TEST_CASE( "Test get model", "[sat]" )
+{
+  sat2::sat_solver_statistics stats;
+  sat2::sat_solver_params ps;
+  sat2::sat_solver solver( stats, ps );
+
+  int sid = 1;
+  solver.add_clause( { 1 } );
+
+  sat2::sat_solver::state result;
+  sat2::model m;
+
+  result = solver.solve();
+  CHECK( result == sat2::sat_solver::state::sat );
+
+  m = solver.get_model();
+  CHECK( m[1] == true );
+
+  solver.add_clause( { -2 } );
+  result = solver.solve();
+  CHECK( result == sat2::sat_solver::state::sat );
+
+  m = solver.get_model();
+  CHECK( m[2] == false );
+
+  solver.add_clause( { 2 } );
+  result = solver.solve();
+  CHECK( result == sat2::sat_solver::state::unsat );
+}
+
+TEST_CASE( "Test get core", "[sat]" )
+{
+  sat2::sat_solver_statistics stats;
+  sat2::sat_solver_params ps;
+  sat2::sat_solver solver( stats, ps );
+
+  int sid = 1;
+  solver.add_clause( { -4, 1,  -3 } );
+  solver.add_clause( { -5, 2 } );
+  solver.add_clause( { -6, -2,  3 } );
+  solver.add_clause( { -7, -2, -3 } );
+  solver.add_clause( { -8, 2, 3 } );
+  solver.add_clause( { -9, -1, 2, -3 } );
+
+  auto result = solver.solve( { 4, 5, 6, 7, 8, 9 } );
+  CHECK( result == sat2::sat_solver::state::unsat );
+
+  auto counter = 0;
+  sat2::core c = solver.get_core();
+  for ( const auto& l : std::vector<int>( c ) )
+  {
+    switch( counter++ )
+    {
+    case 0:
+      {
+        CHECK( l == 5 );
+      }
+      break;
+    case 1:
+      {
+        CHECK( l == 6 );
+      }
+      break;
+    case 2:
+      {
+        CHECK( l == 7 );
+      }
+      break;
+    default:
+      {
+        CHECK( false );
+      }
+      break;
+    }
+  }
+
+  result = solver.solve( { 5, 6, 7 } );
+  CHECK( result == sat2::sat_solver::state::unsat );
+
+  result = solver.solve( { 4, 8, 9 } );
+  CHECK( result == sat2::sat_solver::state::sat );
+}
+
 TEST_CASE( "Test SAT-solver with assumptions", "[sat]" )
 {
   sat2::sat_solver_statistics stats;
@@ -125,6 +208,8 @@ TEST_CASE( "Test unsat core extraction", "[sat]" )
   /* verify that it's an unsat core */
   CHECK( solver.solve( cs ) == sat2::sat_solver::state::unsat );
 }
+
+
 
 void read_clause_from_file( std::vector<std::vector<int>>& clauses, int& sid, const std::string& filename )
 {
