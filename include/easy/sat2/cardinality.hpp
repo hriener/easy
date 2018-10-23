@@ -25,9 +25,17 @@
 
 /*!
   \file cardinality.hpp
-  \brief Totalizer cardinality constraints
+  \brief Iterative totalizer cardinality constraints
 
   \author Heinz Riener
+
+  This implementation is based on the code of Antonio Morgado and
+  Alexey S. Ignatiev in [1]. For a seminal reference, see [2].
+
+  [1] https://github.com/pysathq/pysat/blob/master/cardenc/itot.hh.
+
+  [2] Ruben Martins, Saurabh Joshi, Vasco M. Manquinho, Inês Lynce:
+  Incremental Cardinality Constraints for MaxSAT. CP 2014: 531-548
 */
 
 #pragma once
