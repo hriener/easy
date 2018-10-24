@@ -93,7 +93,7 @@ public:
    *
    * Prints the model to os
    */
-  void print( std::ostream& os = std::cout )
+  void print( std::ostream& os = std::cout ) const
   {
     auto const size = _assignment.num_bits();
     for ( auto i = 0u; i < size; ++i )

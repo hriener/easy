@@ -25,11 +25,12 @@
 
 #pragma once
 
-#include <easy/esop/esop.hpp>
-#include <easy/sat/sat_solver.hpp>
-#include <easy/sat/xor_clauses_to_cnf.hpp>
-#include <easy/sat/cnf_writer.hpp>
-#include <kitty/constructors.hpp>
+#include <easy/sat2/sat_solver.hpp>
+#include <easy/sat2/cnf_from_xcnf.hpp>
+#include <easy/utils/dynamic_bitset.hpp>
+
+#include <map>
+#include <unordered_map>
 
 namespace easy::esop
 {
@@ -45,10 +46,10 @@ std::vector<uint32_t> compute_flips( uint32_t n )
 
   auto gray_number = 0u;
   auto temp = 0u;
-  for ( auto i = 0u; i < total_flips; ++i )
+  for ( auto i = 1u; i <= total_flips; ++i )
   {
     gray_number = i ^ ( i >> 1 );
-    flip_vec[i] = ffs( temp ^ gray_number ) - 1u;
+    flip_vec[total_flips-i] = ffs( temp ^ gray_number ) - 1u;
     temp = gray_number;
   }
 
@@ -58,9 +59,8 @@ std::vector<uint32_t> compute_flips( uint32_t n )
 std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_vars )
 {
   const auto flips = compute_flips( num_vars );
-  const auto size = 1u << num_vars;
 
-  std::vector<kitty::cube> impls = {c};
+  std::vector<kitty::cube> impls = { c };
   auto copy = c;
   for ( const auto& flip : flips )
   {
@@ -88,150 +88,196 @@ std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_
   return impls;
 }
 
-template<class Solver, typename TT>
-class helliwell_esop_synthesizer
+struct helliwell_decision_variables
 {
 public:
-  explicit helliwell_esop_synthesizer( const TT& tt_bits,  const TT& tt_care )
-    : tt_bits( tt_bits )
-    , tt_care( tt_care )
+  explicit helliwell_decision_variables( int& sid )
+    : _sid( sid )
+  {}
+
+  int lookup_g( const kitty::cube& c ) const
   {
-    assert( tt_bits.num_vars() == tt_care.num_vars() );
-  }
-
-  esop_t operator()( )
-  {
-    derive_xor_clauses( tt_bits, tt_care );
-
-    auto const max_impl_id = sid;
-
-    /* XOR-clauses to CNF */
-    sat::xor_clauses_to_cnf conv( sid );
-    conv.apply( constraints );
-
-    /* solve */
-    auto const sat = solver.solve( constraints );
-    assert( sat );
-
-    if ( sat )
-    {
-      return esop_from_model( sat.model, max_impl_id );
-    }
-    else
-    {
-      return esop_t();
-    }
-  }
-
-  int lookup_var( const kitty::cube& c ) const
-  {
-    return cube_to_var.at( c );
+    return cube_to_g.at( c );
   }
 
   const kitty::cube& lookup_cube( int v ) const
   {
-    return var_to_cube.at( v );
+    return g_to_cube.at( v );
+  }
+
+  int operator[]( const kitty::cube& c )
+  {
+    return get_or_create_variable( c );
+  }
+
+  std::map<int, kitty::cube>::const_iterator begin() const
+  {
+    return g_to_cube.begin();
+  }
+
+  std::map<int, kitty::cube>::const_iterator end() const
+  {
+    return g_to_cube.end();
+  }
+
+  uint64_t size() const
+  {
+    return g_to_cube.size() + 1;
   }
 
 protected:
-  esop_t esop_from_model( sat::sat_solver::model_t const& model, int max_impl_id )
+  int get_or_create_variable( const kitty::cube& c )
   {
-    esop_t esop;
-    for ( auto i = 0; i < max_impl_id-1; ++i )
+    auto it = cube_to_g.find( c );
+    if ( it == cube_to_g.end() )
     {
-      if ( model[i] == l_True )
-      {
-        esop.emplace_back( lookup_cube( i+1 ) );
-      }
-    }
-    return esop;
-  }
-
-  void derive_xor_clauses( TT const& tt_bits, TT const& tt_care )
-  {
-    assert( tt_bits.num_vars() == tt_care.num_vars() );
-
-    /* TODO: create a zero cube */
-    kitty::cube minterm;
-    for ( auto i = 0; i < tt_bits.num_vars(); ++i )
-    {
-      minterm.set_mask( i );
-    }
-
-    do
-    {
-      if ( kitty::get_bit( tt_care, minterm._bits ) )
-      {
-        sat::constraints::clause_t clause;
-        for ( const auto& impl : compute_implicants( minterm, tt_bits.num_vars() ) )
-        {
-          clause.push_back( get_or_create_var( impl ) );
-        }
-        constraints.add_xor_clause( clause, kitty::get_bit( tt_bits, minterm._bits ) );
-      }
-
-      ++minterm._bits;
-    } while( minterm._bits < ( 1u << tt_bits.num_vars() ) );
-  }
-
-  int get_or_create_var( const kitty::cube& c )
-  {
-    auto it = cube_to_var.find( c );
-    int variable;
-    if ( it == cube_to_var.end() )
-    {
-      variable = sid;
-      cube_to_var.emplace( c, variable );
-      var_to_cube.emplace( variable, c );
-      sid++;
+      int variable = _sid++;
+      cube_to_g.emplace( c, variable );
+      g_to_cube.emplace( variable, c );
+      return variable;
     }
     else
     {
-      variable = it->second;
+      return it->second;
     }
-    return variable;
   }
 
 protected:
-  const TT& tt_bits;
-  const TT& tt_care;
+  int& _sid;
 
-  Solver solver;
-  sat::constraints constraints;
+  std::unordered_map<kitty::cube, int, kitty::hash<kitty::cube>> cube_to_g;
+  std::map<int, kitty::cube> g_to_cube;
+}; /* helliwell_decision_variables */
 
-  int sid = 1;
-  std::unordered_map<kitty::cube, int, kitty::hash<kitty::cube>> cube_to_var;
-  std::unordered_map<int, kitty::cube> var_to_cube;
-}; /* helliwell_esop_synthesizer */
-} // namespace detail
-
-/*! \brief Computes ESOP from from an incompletely-specified Boolean function
- *
- * This algorithm solves the Helliwell decision problem using a SAT-solver.
- *
- * \param tt_bits Truth table of function
- * \param tt_care Truth table of care function
- */
 template<typename TT>
-inline esop_t esop_from_helliwell( const TT& tt_bits,  const TT& tt_care )
+void derive_xor_clauses( std::vector<std::vector<int>>& xor_clauses, helliwell_decision_variables& g, TT const& bits, TT const& care )
 {
-  return detail::helliwell_esop_synthesizer<sat::sat_solver,TT>( tt_bits, tt_care )();
+  assert( bits.num_vars() == care.num_vars() );
+
+  kitty::cube minterm;
+  for ( auto i = 0; i < bits.num_vars(); ++i )
+    minterm.set_mask( i );
+
+  do
+  {
+    if ( kitty::get_bit( care, minterm._bits ) )
+    {
+      std::vector<int> clause;
+      for ( const auto& impl : compute_implicants( minterm, bits.num_vars() ) )
+      {
+        clause.push_back( g[ impl ] );
+      }
+
+      /* flip the first bit of the xor-clause if the minterm is positive */
+      if ( !kitty::get_bit( bits, minterm._bits ) )
+      {
+        clause[0u] *= -1;
+      }
+
+      xor_clauses.emplace_back( clause );
+    }
+
+    ++minterm._bits;
+  } while ( minterm._bits < ( 1u << bits.num_vars() ) );
 }
 
-/*! \brief Computes ESOP from from an completely-specified Boolean function
- *
- * This algorithm solves the Helliwell decision problem using a SAT-solver.
- *
- * \param tt_bits Truth table of function
- */
-template<typename TT>
-inline esop_t esop_from_helliwell( const TT& tt_bits )
+esop_t esop_from_model( sat2::model const& m, helliwell_decision_variables const& g )
 {
-  auto const tt_care = kitty::create<TT>( tt_bits.num_vars() );
-  return esop_from_helliwell( tt_bits, ~tt_care );
+  esop_t esop;
+  for ( const auto& v : g )
+  {
+    if ( m[ v.first ] )
+    {
+      esop.emplace_back( v.second );
+    }
+  }
+  return esop;
 }
 
-} // easy::esop
+std::vector<std::vector<int>> translate_to_cnf( int& sid, std::vector<std::vector<int>> const& xcnf, uint32_t num_vars )
+{
+  return sat2::cnf_from_xcnf( sid, xcnf, num_vars ).get();
+}
+
+} /* detail */
+
+struct helliwell {};
+
+struct helliwell_statistics
+{
+};
+
+struct helliwell_params
+{
+};
+
+template<typename TT>
+class esop_from_tt<TT, helliwell>
+{
+public:
+  explicit esop_from_tt( helliwell_statistics& stats, helliwell_params& ps )
+    : _stats( stats )
+    , _ps( ps )
+    , _solver( _sat_stats, _sat_ps )
+  {}
+
+  /*! \brief Synthesizes an ESOP form from an incompletely-specified Boolean function
+   *
+   * \param bits Truth table of function
+   * \param care Truth table of care function
+   */
+  esop_t synthesize( TT const& bits, TT const& care )
+  {
+    assert( bits.num_vars() == care.num_vars() );
+
+    detail::helliwell_decision_variables g( _sid );
+
+    /* derive 2^n constraints in 3^n variables */
+    std::vector<std::vector<int>> xor_clauses;
+    detail::derive_xor_clauses( xor_clauses, g, bits, care );
+
+    /* apply gause algorithm to translate XOR-clauses to clauses */
+    for ( const auto& c : detail::translate_to_cnf( _sid, xor_clauses, g.size() ) )
+    {
+      _solver.add_clause( c );
+    }
+
+    /* extract the esop from the model */
+    auto const state = _solver.solve();
+    if ( state == sat2::sat_solver::state::sat )
+    {
+      auto const model = _solver.get_model();
+      assert( model.size() != 0 );
+      return detail::esop_from_model( model, g );
+    }
+    else
+    {
+      return {};
+    }
+  }
+
+  /*! \brief Synthesizes an ESOP form from a completely-specified Boolean function
+   *
+   * \param bits Truth table of function
+   */
+  esop_t synthesize( TT const& bits )
+  {
+    auto const care = kitty::create<TT>( bits.num_vars() );
+    return synthesize( bits, ~care );
+  }
+
+protected:
+  helliwell_statistics& _stats;
+  helliwell_params const& _ps;
+
+  sat2::sat_solver_statistics _sat_stats;
+  sat2::sat_solver_params _sat_ps;
+  sat2::sat_solver _solver;
+
+  int _sid = 1;
+}; /* esop_from_tt */
+
+} /* namespace easy::esop */
 
 // Local Variables:
 // c-basic-offset: 2

@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <easy/esop/constructors.hpp>
 #include <kitty/constructors.hpp>
+#include <iostream>
 
 using namespace easy;
 
@@ -16,7 +17,7 @@ template<int NumVars>
 kitty::static_truth_table<NumVars> from_cubes( esop::esop_t const& cubes )
 {
   kitty::static_truth_table<NumVars> tt;
-  kitty::create_from_cubes( tt, cubes );
+  kitty::create_from_cubes( tt, cubes, true );
   return tt;
 }
 
@@ -95,8 +96,10 @@ TEST_CASE( "Create PPRM from dynamic truth table", "[constructors]" )
 
 TEST_CASE( "Create ESOP from helliwell equation", "[constructors]" )
 {
-  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
-  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
-  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
-  CHECK( from_cubes<3>( esop::esop_from_helliwell( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
+  esop::helliwell_statistics stats;
+  esop::helliwell_params ps;
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
 }

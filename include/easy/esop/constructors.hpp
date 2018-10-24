@@ -32,8 +32,18 @@
 
 #pragma once
 
+#include <easy/esop/esop.hpp>
 #include <easy/esop/esop_from_pprm.hpp>
 #include <easy/esop/esop_from_pkrm.hpp>
+
+namespace easy::esop
+{
+
+template<typename TT, typename Policy>
+class esop_from_tt;
+
+} // easy::esop
+
 #include <easy/esop/helliwell.hpp>
 
 // Local Variables:
