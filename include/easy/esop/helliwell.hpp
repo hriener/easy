@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <easy/sat2/sat_solver.hpp>
+#include <easy/sat2/maxsat.hpp>
 #include <easy/sat2/cnf_from_xcnf.hpp>
 #include <easy/utils/dynamic_bitset.hpp>
 
@@ -218,7 +218,7 @@ public:
   explicit esop_from_tt( helliwell_statistics& stats, helliwell_params& ps )
     : _stats( stats )
     , _ps( ps )
-    , _solver( _sat_stats, _sat_ps )
+    , _solver( _maxsat_stats, _maxsat_ps, _sid )
   {}
 
   /*! \brief Synthesizes an ESOP form from an incompletely-specified Boolean function
@@ -242,6 +242,7 @@ public:
       _solver.add_clause( c );
     }
 
+#if 0
     /* extract the esop from the model */
     auto const state = _solver.solve();
     if ( state == sat2::sat_solver::state::sat )
@@ -249,6 +250,34 @@ public:
       auto const model = _solver.get_model();
       assert( model.size() != 0 );
       return detail::esop_from_model( model, g );
+    }
+    else
+    {
+      return {};
+    }
+#endif
+
+    std::map<int,int> soft_map;
+    for ( const auto& v : g )
+    {
+      int cid = _solver.add_soft_clause( { -v.first } );
+      soft_map.insert( std::make_pair( v.first, cid ) );
+    }
+
+    /* extract the esop from the model */
+    auto const result = _solver.solve();
+    if ( result.size() != 0 )
+    {
+      esop_t esop;
+      for ( const auto& v : g )
+      {
+        auto it = std::find( std::begin( result ), std::end( result ), soft_map.at( v.first ) );
+        if ( it == std::end( result ) )
+        {
+          esop.emplace_back( g.lookup_cube( v.first ) );
+        }
+      }
+      return esop;
     }
     else
     {
@@ -270,11 +299,11 @@ protected:
   helliwell_statistics& _stats;
   helliwell_params const& _ps;
 
-  sat2::sat_solver_statistics _sat_stats;
-  sat2::sat_solver_params _sat_ps;
-  sat2::sat_solver _solver;
-
   int _sid = 1;
+
+  sat2::maxsat_solver_statistics _maxsat_stats;
+  sat2::maxsat_solver_params _maxsat_ps;
+  sat2::maxsat_solver _solver;
 }; /* esop_from_tt */
 
 } /* namespace easy::esop */
