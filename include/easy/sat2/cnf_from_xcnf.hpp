@@ -41,16 +41,11 @@ public:
     , _xor_clauses( xor_clauses )
     , _num_vars( num_vars )
   {
-    // auto matrix = make_matrix( xor_clauses );
+    auto matrix = make_matrix( xor_clauses );
     // simplify_matrix( matrix );
-    // print_matrix( std::cout, matrix );
-    //
-    // std::cout << std::endl;
 
-    // cnf_from_matrix( _clauses, matrix );
-    // print_matrix( std::cout, matrix );
-
-    cnf_from_xor_clauses( _clauses, xor_clauses );
+    cnf_from_matrix( _clauses, matrix );
+    // cnf_from_xor_clauses( _clauses, xor_clauses );
   }
 
   std::vector<utils::dynamic_bitset<>> make_matrix( std::vector<std::vector<int>> const& xor_clauses )
@@ -110,8 +105,7 @@ public:
         // std::cout << "swap " << i << " and " << next_row << std::endl;
         for ( auto j = 0u; j < matrix[i].num_bits(); ++j )
         {
-          bool temp = matrix[i][j];
-
+          bool const temp = matrix[i][j];
           if ( matrix[next_row][j] )
             matrix[i].set_bit( j );
           else
@@ -127,16 +121,19 @@ public:
       /* add current row to all other rows */
       for ( auto k = i + 1; k < num_rows; ++k )
       {
-        if ( !matrix[k][index] )
-          continue;
+        if ( !matrix[k][index] ) continue;
 
-        /* std::cout << "add " << i << " to " << k << std::endl; */
+        // std::cout << "add " << i << " to " << k << std::endl;
         for ( auto j = 0u; j < matrix[k].num_bits(); ++j )
         {
-          if (  matrix[k][j] ^ matrix[i][j] )
+          if ( matrix[k][j] ^ matrix[i][j] )
+          {
             matrix[k].set_bit( j );
+          }
           else
+          {
             matrix[k].reset_bit( j );
+          }
         }
       }
 
