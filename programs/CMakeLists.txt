@@ -1,3 +1,8 @@
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2 -Wall -Wextra")
+
+add_executable(core core.cpp)
+target_link_libraries(core ${EXTERNAL_LIBRARIES} easy fmt glucose)
+
 add_executable(enum_esops enum_esops.cpp)
 target_link_libraries(enum_esops ${EXTERNAL_LIBRARIES} easy args kitty json fmt)
 
