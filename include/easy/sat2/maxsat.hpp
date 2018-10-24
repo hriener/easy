@@ -195,6 +195,7 @@ public:
     uint32_t k = _selectors.size() - 1u;
     std::vector<int> result;
 
+    /* perform linear search */
     for ( ;; )
     {
       // std::cout << "[i] try with k = " << k << std::endl;
@@ -212,7 +213,7 @@ public:
         return result;
       }
 
-      auto m = _solver.get_model();
+      auto const m = _solver.get_model();
 
       result.clear();
       for ( const auto& s : _selectors )
@@ -223,11 +224,8 @@ public:
         }
       }
 
-      auto num_disabled = 0u;
-      std::for_each( _selectors.begin(), _selectors.end(),
-                     [&m,&num_disabled]( auto const& s ){ if ( m[s] ) ++num_disabled; } );
-
-      k = num_disabled;
+      k = std::count_if( _selectors.begin(), _selectors.end(),
+                         [&m]( auto const& s ){ return m[s]; });
       if ( k == 0 )
       {
         return {};
