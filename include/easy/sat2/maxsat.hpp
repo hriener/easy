@@ -114,6 +114,9 @@ public:
    * \brief Naive maxsat procedure based on linear search and
    *        at-most-k cardinality constraint.
    *
+   * The implementation is based on Z3's MAX-SAT example [1].
+   * [1] https://github.com/Z3Prover/z3/blob/master/examples/maxsat/maxsat.c
+   *
    * Returns the activation variables of the soft clauses that can be
    * activated.  The return value is empty if the hard clauses cannot
    * be satisfied.
