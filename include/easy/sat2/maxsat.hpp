@@ -50,6 +50,14 @@ struct maxsat_solver_params
 class maxsat_solver
 {
 public:
+  enum class state
+  {
+    fresh = 0,
+    success = 1,
+    fail = 2,
+  }; /* state */
+
+public:
   /* \brief Constructor
    *
    * Constructs a MAXSAT-solver
@@ -121,20 +129,22 @@ public:
    * activated.  The return value is empty if the hard clauses cannot
    * be satisfied.
    */
-  std::vector<int> solve()
+  state solve()
   {
     if ( _solver.solve() == sat2::sat_solver::state::unsat )
     {
       /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
       std::cout << "[i] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
-      return {};
+      _state = state::fail;
+      return _state;
     }
 
     if ( _selectors.size() == 0u )
     {
       /* nothing to be done */
       std::cout << "[i] terminate: no soft clauses" << std::endl;
-      return {};
+      _state = state::fail;
+      return _state;
     }
 
 #if 0
@@ -148,7 +158,8 @@ public:
       if ( _solver.solve( assumptions ) != sat2::sat_solver::state::sat )
       {
         std::cout << "[i] terminate: the problem is not sat, even if all soft clauses are disabled" << std::endl;
-        return {};
+        _state = state::fail;
+        return _state;
       }
     }
 
@@ -162,7 +173,8 @@ public:
       if ( _solver.solve( assumptions ) != sat2::sat_solver::state::unsat )
       {
         std::cout << "[i] terminate: the problem is not unsat if all soft clauses are enabled" << std::endl;
-        return {};
+        _state = state::fail;
+        return _state;
       }
     }
 #endif
@@ -186,14 +198,14 @@ public:
       if ( _solver.solve( assumptions ) != sat2::sat_solver::state::sat )
       {
         std::cout << "[i] terminate: the problem is not sat, even when all soft clauses are disabled via cardinality assumptions" << std::endl;
-        return {};
+        _state = state::fail;
+        return _state;
       }
     }
 #endif
 
     /* enforce that at most k soft clauses are satisfied */
     uint32_t k = _selectors.size() - 1u;
-    std::vector<int> result;
 
     /* perform linear search */
     for ( ;; )
@@ -210,17 +222,24 @@ public:
       if ( _solver.solve( assumptions ) == sat2::sat_solver::state::unsat )
       {
         /* unsat */
-        return result;
+        _state = state::success;
+        return _state;
       }
 
       auto const m = _solver.get_model();
 
-      result.clear();
+      _enabled_clauses.clear();
+      _disabled_clauses.clear();
       for ( const auto& s : _selectors )
       {
-        if ( !m[s] )
+        /* add ones to result */
+        if ( m[s] )
         {
-          result.push_back( -s );
+          _enabled_clauses.push_back( -s );
+        }
+        else if ( !m[s] )
+        {
+          _disabled_clauses.push_back( -s );
         }
       }
 
@@ -228,13 +247,26 @@ public:
                          [&m]( auto const& s ){ return m[s]; });
       if ( k == 0 )
       {
-        return {};
+        _state = state::fail;
+        return _state;
       }
       --k;
     }
   }
 
+  std::vector<int> get_enabled_clauses() const
+  {
+    return _enabled_clauses;
+  }
+
+  std::vector<int> get_disabled_clauses() const
+  {
+    return _disabled_clauses;
+  }
+
 protected:
+  state _state = state::fresh;
+
   maxsat_solver_statistics& _stats;
   maxsat_solver_params const& _ps;
   int& _sid;
@@ -244,6 +276,9 @@ protected:
   sat_solver _solver;
 
   std::vector<int> _selectors;
+
+  std::vector<int> _enabled_clauses;
+  std::vector<int> _disabled_clauses;
 }; /* maxsat_solver */
 
 } /* easy::sat2 */

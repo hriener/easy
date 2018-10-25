@@ -257,25 +257,22 @@ public:
     }
 #endif
 
-    std::map<int,int> soft_map;
+    /* add soft clauses and remember how they map onto g */
+    std::unordered_map<int,int> soft_clause_map;
     for ( const auto& v : g )
     {
       int cid = _solver.add_soft_clause( { -v.first } );
-      soft_map.insert( std::make_pair( v.first, cid ) );
+      soft_clause_map.insert( std::make_pair( cid, v.first ) );
     }
 
     /* extract the esop from the model */
-    auto const result = _solver.solve();
-    if ( result.size() != 0 )
+    auto state = _solver.solve();
+    if ( state == sat2::maxsat_solver::state::success )
     {
       esop_t esop;
-      for ( const auto& v : g )
+      for ( const auto& c : _solver.get_enabled_clauses() )
       {
-        auto it = std::find( std::begin( result ), std::end( result ), soft_map.at( v.first ) );
-        if ( it == std::end( result ) )
-        {
-          esop.emplace_back( g.lookup_cube( v.first ) );
-        }
+        esop.push_back( g.lookup_cube( soft_clause_map.at( c ) ) );
       }
       return esop;
     }
