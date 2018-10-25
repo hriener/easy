@@ -60,13 +60,16 @@ TEST_CASE( "Create PPRM from random truth table", "[constructors]" )
   }
 }
 
-TEST_CASE( "Create ESOP corner cases", "[constructors]" )
+TEST_CASE( "Create PPRM ESOP corner cases", "[constructors]" )
 {
   CHECK( from_cubes<3>( esop::esop_from_pprm( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) );
   CHECK( from_cubes<3>( esop::esop_from_pprm( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) );
   CHECK( from_cubes<3>( esop::esop_from_pprm( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) );
   CHECK( from_cubes<3>( esop::esop_from_pprm( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) );
+}
 
+TEST_CASE( "Create PKRM ESOP corner cases", "[constructors]" )
+{
   CHECK( from_cubes<3>( esop::esop_from_optimum_pkrm( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) );
   CHECK( from_cubes<3>( esop::esop_from_optimum_pkrm( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) );
   CHECK( from_cubes<3>( esop::esop_from_optimum_pkrm( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) );
@@ -112,4 +115,22 @@ TEST_CASE( "Create ESOP from helliwell equation using MAXSAT", "[constructors]" 
   CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
   CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
   CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
+}
+
+TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
+{
+  static const int size = 4;
+  kitty::static_truth_table<size> tt;
+
+  esop::helliwell_maxsat_statistics stats;
+  esop::helliwell_maxsat_params ps;
+
+  for ( auto i = 0; i < 10; ++i )
+  {
+    kitty::create_random( tt );
+    auto const cubes = esop::esop_from_tt<kitty::static_truth_table<size>, esop::helliwell_maxsat>( stats, ps ).synthesize( tt );
+    auto tt_copy = tt.construct();
+    create_from_cubes( tt_copy, cubes, true );
+    CHECK( tt == tt_copy );
+  }
 }
