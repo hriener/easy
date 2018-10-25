@@ -272,21 +272,6 @@ public:
     {
       return {};
     }
-
-#if 0
-    /* extract the esop from the model */
-    auto const state = _solver.solve();
-    if ( state == sat2::sat_solver::state::sat )
-    {
-      auto const model = _solver.get_model();
-      assert( model.size() != 0 );
-      return detail::esop_from_model( model, g );
-    }
-    else
-    {
-      return {};
-    }
-#endif
   }
 
   /*! \brief Synthesizes an ESOP form from a completely-specified Boolean function
