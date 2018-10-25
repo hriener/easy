@@ -211,21 +211,21 @@ std::vector<std::vector<int>> translate_to_cnf( int& sid, std::vector<std::vecto
 
 } /* detail */
 
-struct helliwell {};
+struct helliwell_maxsat {};
 
-struct helliwell_statistics
+struct helliwell_maxsat_statistics
 {
 };
 
-struct helliwell_params
+struct helliwell_maxsat_params
 {
 };
 
 template<typename TT>
-class esop_from_tt<TT, helliwell>
+class esop_from_tt<TT, helliwell_maxsat>
 {
 public:
-  explicit esop_from_tt( helliwell_statistics& stats, helliwell_params& ps )
+  explicit esop_from_tt( helliwell_maxsat_statistics& stats, helliwell_maxsat_params& ps )
     : _stats( stats )
     , _ps( ps )
     , _solver( _maxsat_stats, _maxsat_ps, _sid )
@@ -300,14 +300,90 @@ public:
   }
 
 protected:
-  helliwell_statistics& _stats;
-  helliwell_params const& _ps;
+  helliwell_maxsat_statistics& _stats;
+  helliwell_maxsat_params const& _ps;
 
   int _sid = 1;
 
   sat2::maxsat_solver_statistics _maxsat_stats;
   sat2::maxsat_solver_params _maxsat_ps;
   sat2::maxsat_solver _solver;
+}; /* esop_from_tt */
+
+struct helliwell_sat {};
+
+struct helliwell_sat_statistics
+{
+};
+
+struct helliwell_sat_params
+{
+};
+
+template<typename TT>
+class esop_from_tt<TT, helliwell_sat>
+{
+public:
+  explicit esop_from_tt( helliwell_sat_statistics& stats, helliwell_sat_params& ps )
+    : _stats( stats )
+    , _ps( ps )
+    , _solver( _sat_stats, _sat_ps )
+  {}
+
+  /*! \brief Synthesizes an ESOP form from an incompletely-specified Boolean function
+   *
+   * \param bits Truth table of function
+   * \param care Truth table of care function
+   */
+  esop_t synthesize( TT const& bits, TT const& care )
+  {
+    assert( bits.num_vars() == care.num_vars() );
+
+    detail::helliwell_decision_variables g( _sid );
+
+    /* derive 2^n constraints in 3^n variables */
+    std::vector<std::vector<int>> xor_clauses;
+    detail::derive_xor_clauses( xor_clauses, g, bits, care );
+
+    /* apply gause algorithm to translate XOR-clauses to clauses */
+    for ( const auto& c : detail::translate_to_cnf( _sid, xor_clauses, g.size() ) )
+    {
+      _solver.add_clause( c );
+    }
+
+    /* extract the esop from the model */
+    auto const state = _solver.solve();
+    if ( state == sat2::sat_solver::state::sat )
+    {
+      auto const model = _solver.get_model();
+      assert( model.size() != 0 );
+      return detail::esop_from_model( model, g );
+    }
+    else
+    {
+      return {};
+    }
+  }
+
+  /*! \brief Synthesizes an ESOP form from a completely-specified Boolean function
+   *
+   * \param bits Truth table of function
+   */
+  esop_t synthesize( TT const& bits )
+  {
+    auto const care = kitty::create<TT>( bits.num_vars() );
+    return synthesize( bits, ~care );
+  }
+
+protected:
+  helliwell_sat_statistics& _stats;
+  helliwell_sat_params const& _ps;
+
+  int _sid = 1;
+
+  sat2::sat_solver_statistics _sat_stats;
+  sat2::sat_solver_params _sat_ps;
+  sat2::sat_solver _solver;
 }; /* esop_from_tt */
 
 } /* namespace easy::esop */

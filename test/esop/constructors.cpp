@@ -94,12 +94,22 @@ TEST_CASE( "Create PPRM from dynamic truth table", "[constructors]" )
   }
 }
 
-TEST_CASE( "Create ESOP from helliwell equation", "[constructors]" )
+TEST_CASE( "Create ESOP from helliwell equation using SAT", "[constructors]" )
 {
-  esop::helliwell_statistics stats;
-  esop::helliwell_params ps;
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell>( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
+  esop::helliwell_sat_statistics stats;
+  esop::helliwell_sat_params ps;
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
+}
+
+TEST_CASE( "Create ESOP from helliwell equation using MAXSAT", "[constructors]" )
+{
+  esop::helliwell_maxsat_statistics stats;
+  esop::helliwell_maxsat_params ps;
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
+  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
 }
