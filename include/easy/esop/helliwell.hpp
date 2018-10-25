@@ -194,6 +194,16 @@ esop_t esop_from_model( sat2::model const& m, helliwell_decision_variables const
   return esop;
 }
 
+esop_t esop_from_clause_selectors( std::vector<int> const& sels, helliwell_decision_variables const& g, std::unordered_map<int,int> soft_clause_map )
+{
+  esop_t esop;
+  for ( const auto& s : sels )
+  {
+    esop.push_back( g.lookup_cube( soft_clause_map.at( s ) ) );
+  }
+  return esop;
+}
+
 std::vector<std::vector<int>> translate_to_cnf( int& sid, std::vector<std::vector<int>> const& xcnf, uint32_t num_vars )
 {
   return sat2::cnf_from_xcnf( sid, xcnf, num_vars ).get();
@@ -242,6 +252,27 @@ public:
       _solver.add_clause( c );
     }
 
+    /* add soft clauses and remember how they map onto g */
+    std::unordered_map<int,int> soft_clause_map;
+    for ( const auto& v : g )
+    {
+      int cid = _solver.add_soft_clause( { -v.first } );
+      soft_clause_map.insert( std::make_pair( cid, v.first ) );
+    }
+
+    /* extract the esop from the model */
+    auto state = _solver.solve();
+    if ( state == sat2::maxsat_solver::state::success )
+    {
+      auto const clause_selectors = _solver.get_enabled_clauses();
+      assert( clause_selectors.size() != 0 );
+      return detail::esop_from_clause_selectors( clause_selectors, g, soft_clause_map );
+    }
+    else
+    {
+      return {};
+    }
+
 #if 0
     /* extract the esop from the model */
     auto const state = _solver.solve();
@@ -256,30 +287,6 @@ public:
       return {};
     }
 #endif
-
-    /* add soft clauses and remember how they map onto g */
-    std::unordered_map<int,int> soft_clause_map;
-    for ( const auto& v : g )
-    {
-      int cid = _solver.add_soft_clause( { -v.first } );
-      soft_clause_map.insert( std::make_pair( cid, v.first ) );
-    }
-
-    /* extract the esop from the model */
-    auto state = _solver.solve();
-    if ( state == sat2::maxsat_solver::state::success )
-    {
-      esop_t esop;
-      for ( const auto& c : _solver.get_enabled_clauses() )
-      {
-        esop.push_back( g.lookup_cube( soft_clause_map.at( c ) ) );
-      }
-      return esop;
-    }
-    else
-    {
-      return {};
-    }
   }
 
   /*! \brief Synthesizes an ESOP form from a completely-specified Boolean function
