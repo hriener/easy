@@ -40,6 +40,39 @@
 namespace easy::sat2
 {
 
+class clause_to_block_vars
+{
+public:
+  void insert( int clause_id , int var )
+  {
+    auto it = _map.find( clause_id );
+    if ( it == _map.end() )
+    {
+      _map.emplace( clause_id, std::vector<int>{ var } );
+    }
+    else
+    {
+      it->second.emplace_back( var );
+    }
+  }
+
+  std::vector<int> lookup( int clause_id ) const
+  {
+    auto const it = _map.find( clause_id );
+    if ( it != _map.end() )
+    {
+      return it->second;
+    }
+    else
+    {
+      return {};
+    }
+  }
+
+protected:
+  std::unordered_map<int, std::vector<int>> _map;
+}; /* clause_to_block_vars */
+
 struct maxsat_solver_statistics
 {
 }; /* maxsat_solver_statistics */
@@ -47,6 +80,7 @@ struct maxsat_solver_statistics
 struct maxsat_solver_params
 {
 }; /* maxsat_solver_params */
+
 
 class maxsat_solver
 {
@@ -157,7 +191,7 @@ public:
       add_clause( cl );
     }
 
-    std::unordered_map<int, int> clause_to_block_var;
+    clause_to_block_vars block_variables;
 
     auto iteration = 0;
     for ( ;; )
@@ -184,25 +218,26 @@ public:
 
         _disabled_clauses.clear();
         _enabled_clauses.clear();
+
         for ( auto i = 0; i < _selectors.size(); ++i )
         {
           std::cout << i << ' ' << ( -_selectors[i] ) << ' ' << m[ -_selectors[i] ] << std::endl;
 
           if ( m[ -_selectors[i] ] )
           {
-            /* check if clause has a block var */
-            auto it = clause_to_block_var.find( i );
-
-            /* if not, then clause is disabled */
-            if ( it == clause_to_block_var.end() )
+            /* evaluate block variables of the i-th clause */
+            auto is_blocked = false;
+            for ( const auto& v : block_variables.lookup( i ) )
             {
-              _enabled_clauses.push_back( i );
-              continue;
+              if ( m[ v ] )
+              {
+                is_blocked = true;
+                break;
+              }
             }
-            /* else, if block var is not set */
-            else if ( !m[ it->second ] )
+
+            if ( !is_blocked )
             {
-              /* then clause is also disabled */
               _enabled_clauses.push_back( i );
               continue;
             }
@@ -211,16 +246,6 @@ public:
           /* otherwise, the clause is enabled */
           _disabled_clauses.push_back( i );
         }
-
-        // std::cout << "disabled: ";
-        // for ( const auto& d : _disabled_clauses )
-        //   std::cout << d << ' ';
-        // std::cout << std::endl;
-        //
-        // std::cout << "enabled: ";
-        //  for ( const auto& d : _enabled_clauses )
-        //   std::cout << d << ' ';
-        // std::cout << std::endl;
 
         _state = state::success;
         return _state;
@@ -239,7 +264,6 @@ public:
         // std::cout << std::endl;
 
         std::vector<int> block_vars( core.size() );
-        clause_to_block_var.clear();
         for ( auto i = 0; i < core.size(); ++i )
         {
           int sel = _sid++;
@@ -253,7 +277,7 @@ public:
           selector_to_clause_id.emplace( sel, j );
 
           block_vars[i] = b;
-          clause_to_block_var.emplace( j, b );
+          block_variables.insert( j, b );
 
           std::vector<int> cl2( cl );
           cl2.emplace_back( -sel );
