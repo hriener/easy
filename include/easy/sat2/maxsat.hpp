@@ -232,14 +232,13 @@ public:
       _disabled_clauses.clear();
       for ( const auto& s : _selectors )
       {
-        /* add ones to result */
         if ( m[s] )
         {
-          _enabled_clauses.push_back( -s );
+          _disabled_clauses.push_back( -s );
         }
         else if ( !m[s] )
         {
-          _disabled_clauses.push_back( -s );
+          _enabled_clauses.push_back( -s );
         }
       }
 
