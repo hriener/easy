@@ -196,24 +196,17 @@ public:
     auto iteration = 0;
     for ( ;; )
     {
-      std::cout << "[i] iteration = " << iteration << std::endl;
-
       /* assume all soft-clauses are enabled, which causes the problem to UNSAT */
       std::vector<int> assumptions;
 
-      std::cout << "assumptions: ";
       for ( const auto& s : _selectors )
       {
         assumptions.emplace_back( -s );
-        std::cout << ( -s ) << ' ';
       }
-      std::cout << std::endl;
 
       auto const state = _solver.solve( assumptions );
       if ( state == sat2::sat_solver::state::sat )
       {
-        std::cout << "SAT" << std::endl;
-
         auto m = _solver.get_model();
 
         _disabled_clauses.clear();
@@ -221,8 +214,6 @@ public:
 
         for ( auto i = 0; i < _selectors.size(); ++i )
         {
-          std::cout << i << ' ' << ( -_selectors[i] ) << ' ' << m[ -_selectors[i] ] << std::endl;
-
           if ( m[ -_selectors[i] ] )
           {
             /* evaluate block variables of the i-th clause */
@@ -252,16 +243,7 @@ public:
       }
       else
       {
-        // std::cout << "UNSAT" << std::endl;
-
         auto const core = _solver.get_core();
-
-        // std::cout << "core: ";
-        // for ( auto i = 0; i < core.size(); ++i )
-        // {
-        //   std::cout << core[i] << ' ';
-        // }
-        // std::cout << std::endl;
 
         std::vector<int> block_vars( core.size() );
         for ( auto i = 0; i < core.size(); ++i )
@@ -285,7 +267,6 @@ public:
         }
 
         /* ensure that at-most-1 block vars is one */
-        // std::cout << "one hot" << std::endl;
         add_one_hot_clauses( block_vars );
       }
 
