@@ -131,6 +131,12 @@ public:
 
   void add_one_hot_clauses( std::vector<int> lits )
   {
+    if ( lits.size() == 1 )
+    {
+      add_clause( lits );
+      return;
+    }
+
     std::vector<std::vector<int>> clauses;
     auto at_most_1 = create_totalizer( clauses, _sid, lits, 2u );
     for ( const auto& c : clauses )
