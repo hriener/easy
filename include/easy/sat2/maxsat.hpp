@@ -156,6 +156,200 @@ public:
   }
 
   /*
+   * \brief RC2 MAXSAT procedure
+   *
+   * The implementation is based on pysat's RC2 example [1].
+   *
+   * [1] https://github.com/pysathq/pysat/blob/master/examples/rc2.py
+   */
+  state solve3()
+  {
+    /* TODO: special cases */
+
+    std::vector<int> sels;
+    std::vector<int> sums;
+    std::map<int, int> selector_to_clause;
+    int costs = 0;
+
+    /* add the soft clauses */
+    for ( auto i = 0; i < _soft_clauses.size(); ++i )
+    {
+      auto cl = _soft_clauses[i];
+
+      /* if clause is unit, selector variable is its literal */
+      int selector = cl[0u];
+
+      if ( _soft_clauses[i].size() > 1 )
+      {
+        selector = _sid++;
+        cl.push_back( -selector );
+        add_clause( cl );
+      }
+
+      sels.push_back( selector );
+      selector_to_clause.emplace( selector, i );
+    }
+
+    auto counter = 0;
+    for ( ;; )
+    {
+      std::cout << "[i] iteration " << counter++ << std::endl;
+
+      /* assume all soft-clauses are enabled, which causes the problem to UNSAT */
+      std::vector<int> assumptions;
+      for ( const auto& s : sels )
+      {
+        assumptions.emplace_back( s );
+      }
+
+      auto const state = _solver.solve( assumptions );
+      if ( state == sat2::sat_solver::state::sat )
+      {
+        std::cout << "[i] the problem was successfully solved" << std::endl;
+        std::cout << "[i] model extraction is not implemented" << std::endl;
+
+        for ( const auto& a : assumptions )
+        {
+          std::cout << a << ' ';
+        }
+        std::cout << std::endl;
+
+        return state::success;
+      }
+
+      std::cout << "unsat" << std::endl;
+      auto const core = _solver.get_core();
+
+      std::cout << "[i] core: "; core.print(); std::cout << std::endl;
+
+      /* divide core into sels and sums */
+      std::vector<int> core_sels;
+      std::vector<int> core_sums;
+      for ( auto i = 0; i < core.size(); ++i )
+      {
+        if ( std::find( std::begin( sels ), std::end( sels ), core[i] ) != std::end( sels ) )
+        {
+          core_sels.push_back( core[i] );
+          continue;
+        }
+
+        if ( std::find( std::begin( sels ), std::end( sels ), core[i] ) != std::end( sels ) )
+        {
+          core_sums.push_back( core[i] );
+          continue;
+        }
+      }
+
+      /* update costs */
+      int w_min = std::numeric_limits<int>::max();
+      for ( auto i = 0; i < core.size(); ++i )
+      {
+        auto const clause_id = selector_to_clause.at( core[i] );
+        auto const w = _weights[ clause_id ];
+        if ( w < w_min )
+          w_min = w;
+      }
+
+      std::cout << "[i] w_min = " << w_min << std::endl;
+
+      /* process core */
+      costs += w_min;
+      std::vector<int> garbage;
+      if ( core_sels.size() != 1 || core_sums.size() > 0 )
+      {
+        /* processs sels */
+        std::vector<int> rels;
+        for ( const auto& l : core_sels )
+        {
+          auto const clause_id = selector_to_clause.at( l );
+          auto& w = _weights[clause_id];
+          if ( w == w_min )
+          {
+            /* marking variables as being a part of the core, so that
+               next time it is not used as an assumption */
+            garbage.push_back( l );
+
+            /* reuse assumption variables as relaxation */
+            rels.push_back( -l );
+          }
+          else
+          {
+            /* do not remove this variable from assumptions since it
+               has a remaining non-zero weight */
+            w -= w_min;
+
+            /* it is an unrelaxed soft-clause, a new relaxed copy of
+               which we add to the solver */
+            auto sid = _sid++;
+            add_clause( { l, sid } );
+            rels.push_back( sid );
+          }
+        }
+
+        /* process sums */
+        for ( const auto& l : core_sums )
+        {
+          auto const clause_id = selector_to_clause.at( l );
+          auto& w = _weights[clause_id];
+          if ( w == w_min )
+          {
+            /* marking variable as being a part of the core so that
+               next time it is not used as an assumption */
+            garbage.push_back( l );
+          }
+          else
+          {
+            /* do not remove this variable from assumptions since it
+               has a remaining non-zero weight */
+            w -= w_min;
+          }
+
+          /* increase bound for the sum */
+          assert( false && "not implemented" );
+        }
+
+        if ( rels.size() > 1 )
+        {
+          /* create a new cardiality constraint */
+          std::vector<std::vector<int>> clauses;
+          auto totalizer_tree = create_totalizer( clauses, _sid, rels, 1u );
+          for ( const auto& c : clauses )
+          {
+            add_clause( c );
+          }
+
+          /* TODO: exhaust core */
+          auto b = 1;
+
+          /* save the info about this sum and add its assumption literal */
+          sums.push_back( -totalizer_tree->vars[ totalizer_tree->vars.size()-1u] );
+        }
+      }
+      else
+      {
+        assert( core_sels.size() == 1u );
+
+        /* special case: unit core */
+        add_clause( { -core_sels[0] } );
+        garbage.push_back( core_sels[0] );
+      }
+
+      /* cleanup garbage */
+      sels.erase( std::remove_if( std::begin( sels ), std::end( sels ),
+        [&garbage]( auto const &x ){
+          return std::find( std::begin( garbage ), std::end( garbage ), x) != std::end( garbage );
+        }), std::end( sels ) );
+      sums.erase( std::remove_if( std::begin( sums ), std::end( sums ),
+        [&garbage]( auto const &x ){
+          return std::find( std::begin( garbage ), std::end( garbage ), x) != std::end( garbage );
+        }), std::end( sums ) );
+      garbage.clear();
+    }
+
+    return state::fail;
+  }
+
+  /*
    * \brief Fu&Malik MAXSAT procedure using UNSAT core extraction and
    * the at-most-k cardinality constraint.
    *
