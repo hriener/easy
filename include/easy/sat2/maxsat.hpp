@@ -122,10 +122,11 @@ public:
    *
    * Returns the added activation variable.
    */
-  int add_soft_clause( std::vector<int> const &clause )
+  int add_soft_clause( std::vector<int> const &clause, int weight = 1 )
   {
     auto id = _soft_clauses.size();
     _soft_clauses.emplace_back( clause );
+    _weights.emplace_back( weight );
     return id;
   }
 
@@ -406,6 +407,7 @@ protected:
   std::vector<int> _disabled_clauses;
 
   std::vector<std::vector<int>> _soft_clauses;
+  std::vector<int> _weights;
 }; /* maxsat_solver */
 
 } /* easy::sat2 */
