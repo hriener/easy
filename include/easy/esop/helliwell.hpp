@@ -225,6 +225,9 @@ template<typename TT>
 class esop_from_tt<TT, helliwell_maxsat>
 {
 public:
+  using maxsat_solver_t = sat2::maxsat_solver<sat2::maxsat_linear>;
+
+public:
   explicit esop_from_tt( helliwell_maxsat_statistics& stats, helliwell_maxsat_params& ps )
     : _stats( stats )
     , _ps( ps )
@@ -262,7 +265,7 @@ public:
 
     /* extract the esop from the model */
     auto state = _solver.solve();
-    if ( state == sat2::maxsat_solver::state::success )
+    if ( state == maxsat_solver_t::state::success )
     {
       auto const clause_selectors = _solver.get_enabled_clauses();
       assert( clause_selectors.size() != 0 );
@@ -292,7 +295,7 @@ protected:
 
   sat2::maxsat_solver_statistics _maxsat_stats;
   sat2::maxsat_solver_params _maxsat_ps;
-  sat2::maxsat_solver _solver;
+  maxsat_solver_t _solver;
 }; /* esop_from_tt */
 
 struct helliwell_sat {};

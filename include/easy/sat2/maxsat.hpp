@@ -40,6 +40,13 @@
 namespace easy::sat2
 {
 
+struct maxsat_linear {};
+struct maxsat_uc {};
+struct maxsat_rc2 {};
+
+template<typename Algorithm>
+class maxsat_solver;
+
 class clause_to_block_vars
 {
 public:
@@ -81,8 +88,186 @@ struct maxsat_solver_params
 {
 }; /* maxsat_solver_params */
 
+template<>
+class maxsat_solver<maxsat_linear>
+{
+public:
+  enum class state
+  {
+    fresh = 0,
+    success = 1,
+    fail = 2,
+  }; /* state */
 
-class maxsat_solver
+public:
+  /* \brief Constructor
+   *
+   * Constructs a MAXSAT-solver
+   *
+   * \param stats Statistics
+   * \param ps Parameters
+   */
+  explicit maxsat_solver( maxsat_solver_statistics& stats, maxsat_solver_params& ps, int& sid )
+    : _stats( stats )
+    , _ps( ps )
+    , _sid( sid )
+    , _solver( _sat_stats, _sat_params )
+  {}
+
+  /* \brief Adds a hard clause to the solver
+   *
+   * \param clause Clause to be added
+   */
+  void add_clause( std::vector<int> const& clause )
+  {
+    _solver.add_clause( clause );
+  }
+
+  /* \brief Adds a soft clause to the solver
+   *
+   * \param clause Soft clause to be added
+   *
+   * Returns the added activation variable.
+   */
+  int add_soft_clause( std::vector<int> const &clause, int weight = 1 )
+  {
+    auto id = _soft_clauses.size();
+    _soft_clauses.emplace_back( clause );
+    _weights.emplace_back( weight );
+    return id;
+  }
+
+  /*
+   * \brief Naive maxsat procedure based on linear search and
+   *        at-most-k cardinality constraint.
+   *
+   * The implementation is based on Z3's MAX-SAT example [1].
+   * [1] https://github.com/Z3Prover/z3/blob/master/examples/maxsat/maxsat.c
+   *
+   * Returns the activation variables of the soft clauses that can be
+   * activated.  The return value is empty if the hard clauses cannot
+   * be satisfied.
+   */
+  state solve()
+  {
+    if ( _solver.solve() == sat2::sat_solver::state::unsat )
+    {
+      /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
+      std::cout << "[i] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
+      _state = state::fail;
+      return _state;
+    }
+
+    /* if the number of soft-clauses is empty */
+    if ( _soft_clauses.size() == 0u )
+    {
+      /* nothing to be done */
+      std::cout << "[i] terminate: no soft clauses" << std::endl;
+      _state = state::fail;
+      return _state;
+    }
+
+    /* add the soft clauses */
+    std::map<int,int> selector_to_clause_id;
+    for ( auto i = 0; i < _soft_clauses.size(); ++i )
+    {
+      int selector = _sid++;
+      selector_to_clause_id.emplace( selector, i );
+      _selectors.push_back( -selector );
+
+      auto& cl = _soft_clauses[i];
+      cl.emplace_back( -selector );
+      _solver.add_clause( cl );
+    }
+
+    std::vector<std::vector<int>> clauses;
+    auto at_most_k = create_totalizer( clauses, _sid, _selectors, _selectors.size() );
+    for ( const auto& c : clauses )
+    {
+      add_clause( c );
+    }
+
+    /* enforce that at most k soft clauses are satisfied */
+    uint32_t k = _selectors.size() - 1u;
+
+    /* perform linear search */
+    for ( ;; )
+    {
+      // std::cout << "[i] try with k = " << k << std::endl;
+
+      /* disable at-most k selectors */
+      std::vector<int> assumptions;
+      for ( auto i = 0; i < at_most_k->vars.size(); ++i )
+      {
+        assumptions.emplace_back( i < k ? at_most_k->vars[i] : -at_most_k->vars[i] );
+      }
+
+      if ( _solver.solve( assumptions ) == sat2::sat_solver::state::unsat )
+      {
+        /* unsat */
+        _state = state::success;
+        return _state;
+      }
+
+      auto const m = _solver.get_model();
+
+      _enabled_clauses.clear();
+      _disabled_clauses.clear();
+      for ( const auto& s : _selectors )
+      {
+        if ( m[s] )
+        {
+          _disabled_clauses.push_back( selector_to_clause_id.at( -s ) );
+        }
+        else if ( !m[s] )
+        {
+          _enabled_clauses.push_back( selector_to_clause_id.at( -s ) );
+        }
+      }
+
+      k = std::count_if( _selectors.begin(), _selectors.end(),
+                         [&m]( auto const& s ){ return m[s]; });
+      if ( k == 0 )
+      {
+        _state = state::fail;
+        return _state;
+      }
+      --k;
+    }
+  }
+
+  std::vector<int> get_enabled_clauses() const
+  {
+    return _enabled_clauses;
+  }
+
+  std::vector<int> get_disabled_clauses() const
+  {
+    return _disabled_clauses;
+  }
+
+protected:
+  state _state = state::fresh;
+
+  maxsat_solver_statistics& _stats;
+  maxsat_solver_params const& _ps;
+  int& _sid;
+
+  sat_solver_statistics _sat_stats;
+  sat_solver_params _sat_params;
+  sat_solver _solver;
+
+  std::vector<int> _selectors;
+
+  std::vector<int> _enabled_clauses;
+  std::vector<int> _disabled_clauses;
+
+  std::vector<std::vector<int>> _soft_clauses;
+  std::vector<int> _weights;
+}; /* maxsat_solver<maxsat_linear> */
+
+template<>
+class maxsat_solver<maxsat_uc>
 {
 public:
   enum class state
@@ -156,13 +341,222 @@ public:
   }
 
   /*
+   * \brief Fu&Malik MAXSAT procedure using UNSAT core extraction and
+   * the at-most-k cardinality constraint.
+   *
+   * The implementation is based on Z3's MAX-SAT example [1].  As
+   * seminal reference of the algorithm serves [2].
+   *
+   * [1] https://github.com/Z3Prover/z3/blob/master/examples/maxsat/maxsat.c
+   * [2] Zhaohui Fu, Sharad Malik: On Solving the Partial MAX-SAT
+   *    Problem. SAT 2006: 252-265
+   */
+  state solve()
+  {
+    if ( _solver.solve() == sat2::sat_solver::state::unsat )
+    {
+      /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
+      std::cout << "[i] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
+      _state = state::fail;
+      return _state;
+    }
+
+    /* if the number of soft-clauses is empty */
+    if ( _soft_clauses.size() == 0u )
+    {
+      /* nothing to be done */
+      std::cout << "[i] terminate: no soft clauses" << std::endl;
+      _state = state::fail;
+      return _state;
+    }
+
+    /* add the soft clauses */
+    std::map<int,int> selector_to_clause_id;
+    for ( auto i = 0; i < _soft_clauses.size(); ++i )
+    {
+      int selector = _sid++;
+      selector_to_clause_id.emplace( selector, i );
+      _selectors.push_back( -selector );
+
+      auto cl = _soft_clauses[i];
+      cl.emplace_back( -selector );
+      add_clause( cl );
+    }
+
+    clause_to_block_vars block_variables;
+
+    auto iteration = 0;
+    for ( ;; )
+    {
+      /* assume all soft-clauses are enabled, which causes the problem to UNSAT */
+      std::vector<int> assumptions;
+      for ( const auto& s : _selectors )
+      {
+        assumptions.emplace_back( -s );
+      }
+
+      auto const state = _solver.solve( assumptions );
+      if ( state == sat2::sat_solver::state::sat )
+      {
+        auto m = _solver.get_model();
+
+        _disabled_clauses.clear();
+        _enabled_clauses.clear();
+
+        for ( auto i = 0; i < _selectors.size(); ++i )
+        {
+          if ( m[ -_selectors[i] ] )
+          {
+            /* evaluate block variables of the i-th clause */
+            auto is_blocked = false;
+            for ( const auto& v : block_variables.lookup( i ) )
+            {
+              if ( m[ v ] )
+              {
+                is_blocked = true;
+                break;
+              }
+            }
+
+            if ( !is_blocked )
+            {
+              _enabled_clauses.push_back( i );
+              continue;
+            }
+          }
+
+          /* otherwise, the clause is enabled */
+          _disabled_clauses.push_back( i );
+        }
+
+        _state = state::success;
+        return _state;
+      }
+      else
+      {
+        auto const core = _solver.get_core();
+
+        std::vector<int> block_vars( core.size() );
+        for ( auto i = 0; i < core.size(); ++i )
+        {
+          int sel = _sid++;
+          int b = _sid++;
+
+          auto const j = selector_to_clause_id.at( core[i] );
+          auto& cl = _soft_clauses[j];
+          cl.emplace_back( b );
+
+          _selectors[j] = -sel;
+          selector_to_clause_id.emplace( sel, j );
+
+          block_vars[i] = b;
+          block_variables.insert( j, b );
+
+          std::vector<int> cl2( cl );
+          cl2.emplace_back( -sel );
+          add_clause( cl2 );
+        }
+
+        /* ensure that at-most-1 block vars is one */
+        add_one_hot_clauses( block_vars );
+      }
+
+      ++iteration;
+    }
+  }
+
+  std::vector<int> get_enabled_clauses() const
+  {
+    return _enabled_clauses;
+  }
+
+  std::vector<int> get_disabled_clauses() const
+  {
+    return _disabled_clauses;
+  }
+
+protected:
+  state _state = state::fresh;
+
+  maxsat_solver_statistics& _stats;
+  maxsat_solver_params const& _ps;
+  int& _sid;
+
+  sat_solver_statistics _sat_stats;
+  sat_solver_params _sat_params;
+  sat_solver _solver;
+
+  std::vector<int> _selectors;
+
+  std::vector<int> _enabled_clauses;
+  std::vector<int> _disabled_clauses;
+
+  std::vector<std::vector<int>> _soft_clauses;
+  std::vector<int> _weights;
+}; /* maxsat_solver<maxsat_uc> */
+
+template<>
+class maxsat_solver<maxsat_rc2>
+{
+public:
+  enum class state
+  {
+    fresh = 0,
+    success = 1,
+    fail = 2,
+  }; /* state */
+
+public:
+  /* \brief Constructor
+   *
+   * Constructs a MAXSAT-solver
+   *
+   * \param stats Statistics
+   * \param ps Parameters
+   */
+  explicit maxsat_solver( maxsat_solver_statistics& stats, maxsat_solver_params& ps, int& sid )
+    : _stats( stats )
+    , _ps( ps )
+    , _sid( sid )
+    , _solver( _sat_stats, _sat_params )
+  {}
+
+  /* \brief Adds a hard clause to the solver
+   *
+   * \param clause Clause to be added
+   */
+  void add_clause( std::vector<int> const& clause )
+  {
+    for ( const auto& l : clause )
+    {
+      std::cout << l << ' ';
+    }
+    std::cout << std::endl;
+    _solver.add_clause( clause );
+  }
+
+  /* \brief Adds a soft clause to the solver
+   *
+   * \param clause Soft clause to be added
+   *
+   * Returns the added activation variable.
+   */
+  int add_soft_clause( std::vector<int> const &clause, int weight = 1 )
+  {
+    auto id = _soft_clauses.size();
+    _soft_clauses.emplace_back( clause );
+    _weights.emplace_back( weight );
+    return id;
+  }
+  
+  /*
    * \brief RC2 MAXSAT procedure
    *
    * The implementation is based on pysat's RC2 example [1].
    *
    * [1] https://github.com/pysathq/pysat/blob/master/examples/rc2.py
    */
-  state solve3()
+  state solve()
   {
     /* TODO: special cases */
 
@@ -349,231 +743,6 @@ public:
     return state::fail;
   }
 
-  /*
-   * \brief Fu&Malik MAXSAT procedure using UNSAT core extraction and
-   * the at-most-k cardinality constraint.
-   *
-   * The implementation is based on Z3's MAX-SAT example [1].  As
-   * seminal reference of the algorithm serves [2].
-   *
-   * [1] https://github.com/Z3Prover/z3/blob/master/examples/maxsat/maxsat.c
-   * [2] Zhaohui Fu, Sharad Malik: On Solving the Partial MAX-SAT
-   *    Problem. SAT 2006: 252-265
-   */
-  state solve()
-  {
-    if ( _solver.solve() == sat2::sat_solver::state::unsat )
-    {
-      /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
-      std::cout << "[i] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
-      _state = state::fail;
-      return _state;
-    }
-
-    /* if the number of soft-clauses is empty */
-    if ( _soft_clauses.size() == 0u )
-    {
-      /* nothing to be done */
-      std::cout << "[i] terminate: no soft clauses" << std::endl;
-      _state = state::fail;
-      return _state;
-    }
-
-    /* add the soft clauses */
-    std::map<int,int> selector_to_clause_id;
-    for ( auto i = 0; i < _soft_clauses.size(); ++i )
-    {
-      int selector = _sid++;
-      selector_to_clause_id.emplace( selector, i );
-      _selectors.push_back( -selector );
-
-      auto cl = _soft_clauses[i];
-      cl.emplace_back( -selector );
-      add_clause( cl );
-    }
-
-    clause_to_block_vars block_variables;
-
-    auto iteration = 0;
-    for ( ;; )
-    {
-      /* assume all soft-clauses are enabled, which causes the problem to UNSAT */
-      std::vector<int> assumptions;
-
-      for ( const auto& s : _selectors )
-      {
-        assumptions.emplace_back( -s );
-      }
-
-      auto const state = _solver.solve( assumptions );
-      if ( state == sat2::sat_solver::state::sat )
-      {
-        auto m = _solver.get_model();
-
-        _disabled_clauses.clear();
-        _enabled_clauses.clear();
-
-        for ( auto i = 0; i < _selectors.size(); ++i )
-        {
-          if ( m[ -_selectors[i] ] )
-          {
-            /* evaluate block variables of the i-th clause */
-            auto is_blocked = false;
-            for ( const auto& v : block_variables.lookup( i ) )
-            {
-              if ( m[ v ] )
-              {
-                is_blocked = true;
-                break;
-              }
-            }
-
-            if ( !is_blocked )
-            {
-              _enabled_clauses.push_back( i );
-              continue;
-            }
-          }
-
-          /* otherwise, the clause is enabled */
-          _disabled_clauses.push_back( i );
-        }
-
-        _state = state::success;
-        return _state;
-      }
-      else
-      {
-        auto const core = _solver.get_core();
-
-        std::vector<int> block_vars( core.size() );
-        for ( auto i = 0; i < core.size(); ++i )
-        {
-          int sel = _sid++;
-          int b = _sid++;
-
-          auto const j = selector_to_clause_id.at( core[i] );
-          auto& cl = _soft_clauses[j];
-          cl.emplace_back( b );
-
-          _selectors[j] = -sel;
-          selector_to_clause_id.emplace( sel, j );
-
-          block_vars[i] = b;
-          block_variables.insert( j, b );
-
-          std::vector<int> cl2( cl );
-          cl2.emplace_back( -sel );
-          add_clause( cl2 );
-        }
-
-        /* ensure that at-most-1 block vars is one */
-        add_one_hot_clauses( block_vars );
-      }
-
-      ++iteration;
-    }
-  }
-
-  /*
-   * \brief Naive maxsat procedure based on linear search and
-   *        at-most-k cardinality constraint.
-   *
-   * The implementation is based on Z3's MAX-SAT example [1].
-   * [1] https://github.com/Z3Prover/z3/blob/master/examples/maxsat/maxsat.c
-   *
-   * Returns the activation variables of the soft clauses that can be
-   * activated.  The return value is empty if the hard clauses cannot
-   * be satisfied.
-   */
-  state solve2()
-  {
-    if ( _solver.solve() == sat2::sat_solver::state::unsat )
-    {
-      /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
-      std::cout << "[i] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
-      _state = state::fail;
-      return _state;
-    }
-
-    /* if the number of soft-clauses is empty */
-    if ( _soft_clauses.size() == 0u )
-    {
-      /* nothing to be done */
-      std::cout << "[i] terminate: no soft clauses" << std::endl;
-      _state = state::fail;
-      return _state;
-    }
-
-    /* add the soft clauses */
-    std::map<int,int> selector_to_clause_id;
-    for ( auto i = 0; i < _soft_clauses.size(); ++i )
-    {
-      int selector = _sid++;
-      selector_to_clause_id.emplace( selector, i );
-      _selectors.push_back( -selector );
-
-      auto& cl = _soft_clauses[i];
-      cl.emplace_back( -selector );
-      _solver.add_clause( cl );
-    }
-
-    std::vector<std::vector<int>> clauses;
-    auto at_most_k = create_totalizer( clauses, _sid, _selectors, _selectors.size() );
-    for ( const auto& c : clauses )
-    {
-      add_clause( c );
-    }
-
-    /* enforce that at most k soft clauses are satisfied */
-    uint32_t k = _selectors.size() - 1u;
-
-    /* perform linear search */
-    for ( ;; )
-    {
-      // std::cout << "[i] try with k = " << k << std::endl;
-
-      /* disable at-most k selectors */
-      std::vector<int> assumptions;
-      for ( auto i = 0; i < at_most_k->vars.size(); ++i )
-      {
-        assumptions.emplace_back( i < k ? at_most_k->vars[i] : -at_most_k->vars[i] );
-      }
-
-      if ( _solver.solve( assumptions ) == sat2::sat_solver::state::unsat )
-      {
-        /* unsat */
-        _state = state::success;
-        return _state;
-      }
-
-      auto const m = _solver.get_model();
-
-      _enabled_clauses.clear();
-      _disabled_clauses.clear();
-      for ( const auto& s : _selectors )
-      {
-        if ( m[s] )
-        {
-          _disabled_clauses.push_back( selector_to_clause_id.at( -s ) );
-        }
-        else if ( !m[s] )
-        {
-          _enabled_clauses.push_back( selector_to_clause_id.at( -s ) );
-        }
-      }
-
-      k = std::count_if( _selectors.begin(), _selectors.end(),
-                         [&m]( auto const& s ){ return m[s]; });
-      if ( k == 0 )
-      {
-        _state = state::fail;
-        return _state;
-      }
-      --k;
-    }
-  }
-
   std::vector<int> get_enabled_clauses() const
   {
     return _enabled_clauses;
@@ -602,6 +771,6 @@ protected:
 
   std::vector<std::vector<int>> _soft_clauses;
   std::vector<int> _weights;
-}; /* maxsat_solver */
+}; /* maxsat_solver<maxsat_rc2> */
 
 } /* easy::sat2 */

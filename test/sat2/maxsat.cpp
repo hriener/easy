@@ -9,7 +9,7 @@ TEST_CASE( "MAXSAT solver", "[sat]" )
 
   sat2::maxsat_solver_statistics stats;
   sat2::maxsat_solver_params ps;
-  sat2::maxsat_solver solver( stats, ps, sid );
+  sat2::maxsat_solver<sat2::maxsat_linear> solver( stats, ps, sid );
 
   /* allocate variables */
   std::vector<int> v;
@@ -27,7 +27,7 @@ TEST_CASE( "MAXSAT solver", "[sat]" )
   auto s5 = solver.add_soft_clause( { -v[0], v[1], -v[2] } );
 
   auto const result = solver.solve();
-  CHECK( result == sat2::maxsat_solver::state::success );
+  CHECK( result == sat2::maxsat_solver<sat2::maxsat_linear>::state::success );
 
   auto const enabled_clauses = solver.get_enabled_clauses();
   CHECK( enabled_clauses.size() == 5u );
@@ -51,7 +51,7 @@ TEST_CASE( "MAXSAT solver 2", "[sat]" )
 
   sat2::maxsat_solver_statistics stats;
   sat2::maxsat_solver_params ps;
-  sat2::maxsat_solver solver( stats, ps, sid );
+  sat2::maxsat_solver<sat2::maxsat_linear> solver( stats, ps, sid );
 
   /* allocate variables */
   std::vector<int> v;
@@ -70,5 +70,5 @@ TEST_CASE( "MAXSAT solver 2", "[sat]" )
   auto const c1 = solver.add_soft_clause( { v[1] } );
 
   auto const result = solver.solve();
-  CHECK( result == sat2::maxsat_solver::state::success );
+  CHECK( result == sat2::maxsat_solver<sat2::maxsat_linear>::state::success );
 }
