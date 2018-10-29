@@ -2,6 +2,7 @@
 #include <easy/esop/constructors.hpp>
 #include <kitty/constructors.hpp>
 #include <iostream>
+#include <numeric>
 
 using namespace easy;
 
@@ -120,17 +121,36 @@ TEST_CASE( "Create ESOP from helliwell equation using MAXSAT", "[constructors]" 
 TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
 {
   static const int size = 4;
+  static const int lb = 0;
+  static const int ub = std::numeric_limits<int>::max();
+  static const int repeat = 50;
+
   kitty::static_truth_table<size> tt;
 
   esop::helliwell_maxsat_statistics stats;
   esop::helliwell_maxsat_params ps;
 
-  for ( auto i = 0; i < 10; ++i )
+  std::default_random_engine rng( 2018 );
+  std::uniform_real_distribution<double> distr( lb, ub );
+
+  std::vector<int> num_cubes( repeat );
+  for ( auto i = 0; i < repeat; ++i )
   {
-    kitty::create_random( tt );
+    kitty::create_random( tt, distr(rng) );
     auto const cubes = esop::esop_from_tt<kitty::static_truth_table<size>, esop::helliwell_maxsat>( stats, ps ).synthesize( tt );
+
+    num_cubes[i] = cubes.size();
+    // kitty::print_binary( tt, size );
+    // for ( const auto& c : cubes )
+    // {
+    //   std::cout << ' ';
+    //   c.print( size );
+    // }
+    // std::cout << std::endl;
+
     auto tt_copy = tt.construct();
     create_from_cubes( tt_copy, cubes, true );
     CHECK( tt == tt_copy );
   }
+  CHECK( std::accumulate( std::begin( num_cubes ), std::end( num_cubes ), 0.0 ) / num_cubes.size() == 3.52 );
 }
