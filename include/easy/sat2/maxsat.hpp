@@ -528,11 +528,6 @@ public:
    */
   void add_clause( std::vector<int> const& clause )
   {
-    for ( const auto& l : clause )
-    {
-      std::cout << l << ' ';
-    }
-    std::cout << std::endl;
     _solver.add_clause( clause );
   }
 
@@ -549,7 +544,7 @@ public:
     _weights.emplace_back( weight );
     return id;
   }
-  
+
   /*
    * \brief RC2 MAXSAT procedure
    *
@@ -585,12 +580,15 @@ public:
       selector_to_clause.emplace( selector, i );
     }
 
+    /* make a copy of the selectors */
+    _selectors = sels;
+
     auto counter = 0;
     for ( ;; )
     {
       std::cout << "[i] iteration " << counter++ << std::endl;
 
-      /* assume all soft-clauses are enabled, which causes the problem to UNSAT */
+      /* assume all soft-clauses are enabled, which causes the problem to be UNSAT */
       std::vector<int> assumptions;
       for ( const auto& s : sels )
       {
@@ -600,15 +598,19 @@ public:
       auto const state = _solver.solve( assumptions );
       if ( state == sat2::sat_solver::state::sat )
       {
-        std::cout << "[i] the problem was successfully solved" << std::endl;
-        std::cout << "[i] model extraction is not implemented" << std::endl;
-
-        for ( const auto& a : assumptions )
+        auto const model = _solver.get_model();
+        for ( auto i = 0; i < _soft_clauses.size(); ++i )
         {
-          std::cout << a << ' ';
+          if ( model[_selectors[i]] )
+          {
+            _enabled_clauses.push_back( i );
+          }
+          else
+          {
+            _disabled_clauses.push_back( i );
+          }
         }
-        std::cout << std::endl;
-
+        assert( _disabled_clauses.size() == costs );
         return state::success;
       }
 
@@ -640,7 +642,7 @@ public:
       for ( auto i = 0; i < core.size(); ++i )
       {
         auto const clause_id = selector_to_clause.at( core[i] );
-        auto const w = _weights[ clause_id ];
+        auto const w = _weights[clause_id];
         if ( w < w_min )
           w_min = w;
       }
