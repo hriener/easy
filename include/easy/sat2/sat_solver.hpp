@@ -389,7 +389,7 @@ public:
     std::vector<int> lits( size );
     for ( auto i = 0u; i < size; ++i )
     {
-      lits[i] = ( Glucose::var( _glucose->conflict[i] )+1 ) * Glucose::sign( _glucose->conflict[i] );
+      lits[i] = Glucose::sign( _glucose->conflict[i] ) ? ( ( Glucose::var( _glucose->conflict[i] )+1 ) ) : -( Glucose::var( _glucose->conflict[i] )+1 );
     }
     return core( lits );
   }
