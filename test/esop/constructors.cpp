@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <easy/esop/constructors.hpp>
 #include <kitty/constructors.hpp>
+#include <kitty/print.hpp>
 #include <iostream>
 #include <numeric>
 
@@ -133,6 +134,7 @@ TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
   std::default_random_engine rng( 2018 );
   std::uniform_real_distribution<double> distr( lb, ub );
 
+  std::vector<int> results{3, 5, 4, 4, 4, 4, 3, 4, 4, 5, 4, 4, 2, 4, 3, 4, 3, 3, 4, 4, 3, 4, 3, 3, 4, 3, 4, 3, 3, 3, 3, 3, 3, 2, 4, 3, 4, 4, 3, 4, 3, 3, 4, 3, 4, 4, 3, 4, 3, 4};
   std::vector<int> num_cubes( repeat );
   for ( auto i = 0; i < repeat; ++i )
   {
@@ -140,17 +142,23 @@ TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
     auto const cubes = esop::esop_from_tt<kitty::static_truth_table<size>, esop::helliwell_maxsat>( stats, ps ).synthesize( tt );
 
     num_cubes[i] = cubes.size();
-    // kitty::print_binary( tt, size );
-    // for ( const auto& c : cubes )
-    // {
-    //   std::cout << ' ';
-    //   c.print( size );
-    // }
-    // std::cout << std::endl;
 
     auto tt_copy = tt.construct();
     create_from_cubes( tt_copy, cubes, true );
     CHECK( tt == tt_copy );
+
+    CHECK( cubes.size() == results[i] );
+    if ( cubes.size() != results[i] )
+    {
+      std::cout << i << ' ';
+      kitty::print_binary( tt );
+      for ( const auto& c : cubes )
+      {
+        std::cout << ' ';
+        c.print( size );
+      }
+      std::cout << std::endl;
+    }
   }
 
   CHECK( std::accumulate( std::begin( num_cubes ), std::end( num_cubes ), 0u ) == 176 );
