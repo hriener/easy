@@ -571,7 +571,6 @@ public:
       return _state;
     }
 
-    /* TODO: special cases */
     std::vector<int> sels;
     std::vector<int> sums;
     std::map<int, int> selector_to_clause;
@@ -599,11 +598,8 @@ public:
     /* make a copy of the selectors */
     _selectors = sels;
 
-    auto counter = 0;
     for ( ;; )
     {
-      // std::cout << "[i] iteration " << counter++ << std::endl;
-
       /* assume all soft-clauses are enabled, which causes the problem to be UNSAT */
       std::vector<int> assumptions;
       for ( const auto& s : sels )
@@ -626,7 +622,7 @@ public:
             _disabled_clauses.push_back( i );
           }
         }
-        assert( _disabled_clauses.size() == costs );
+        // assert( _disabled_clauses.size() == costs );
         return state::success;
       }
 
@@ -657,7 +653,7 @@ public:
       for ( auto i = 0; i < core.size(); ++i )
       {
         auto const clause_id = selector_to_clause.at( core[i] );
-        auto const w = _weights[clause_id];
+        auto const w = _weights.at( clause_id );
         if ( w < w_min )
           w_min = w;
       }
@@ -674,7 +670,7 @@ public:
         for ( const auto& l : core_sels )
         {
           auto const clause_id = selector_to_clause.at( l );
-          auto& w = _weights[clause_id];
+          auto& w = _weights.at( clause_id );
           if ( w == w_min )
           {
             /* marking variables as being a part of the core, so that
@@ -735,11 +731,6 @@ public:
 
           /* save the info about this sum and add its assumption literal */
           sums.push_back( -totalizer_tree->vars[ totalizer_tree->vars.size()-1u] );
-          // std::cout << "add a new sum: " << totalizer_tree->vars[ totalizer_tree->vars.size()-1u] << std::endl;
-          // for ( const auto& t : rels )
-          // {
-          //   std::cout << t << std::endl;
-          // }
         }
       }
       else
