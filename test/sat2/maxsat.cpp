@@ -93,10 +93,7 @@ TEST_CASE( "Test satisfiable soft-clauses", "[sat]" )
 
 TEST_CASE( "Test unsatisfiable soft-clauses", "[sat]" )
 {
-  std::cout << "[test] linear" << std::endl;
   unsat_test<sat2::maxsat_linear>();
-  std::cout << "[test] uc" << std::endl;
   unsat_test<sat2::maxsat_uc>();
-  std::cout << "[test] rc2" << std::endl;
   unsat_test<sat2::maxsat_rc2>();
 }

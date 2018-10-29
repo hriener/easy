@@ -555,7 +555,6 @@ public:
   state solve()
   {
     /* TODO: special cases */
-
     std::vector<int> sels;
     std::vector<int> sums;
     std::map<int, int> selector_to_clause;
@@ -586,7 +585,7 @@ public:
     auto counter = 0;
     for ( ;; )
     {
-      std::cout << "[i] iteration " << counter++ << std::endl;
+      // std::cout << "[i] iteration " << counter++ << std::endl;
 
       /* assume all soft-clauses are enabled, which causes the problem to be UNSAT */
       std::vector<int> assumptions;
@@ -614,10 +613,9 @@ public:
         return state::success;
       }
 
-      std::cout << "unsat" << std::endl;
       auto const core = _solver.get_core();
 
-      std::cout << "[i] core: "; core.print(); std::cout << std::endl;
+      // std::cout << "[i] core: "; core.print(); std::cout << std::endl;
 
       /* divide core into sels and sums */
       std::vector<int> core_sels;
@@ -647,7 +645,7 @@ public:
           w_min = w;
       }
 
-      std::cout << "[i] w_min = " << w_min << std::endl;
+      // std::cout << "[i] w_min = " << w_min << std::endl;
 
       /* process core */
       costs += w_min;
@@ -720,6 +718,11 @@ public:
 
           /* save the info about this sum and add its assumption literal */
           sums.push_back( -totalizer_tree->vars[ totalizer_tree->vars.size()-1u] );
+          // std::cout << "add a new sum: " << totalizer_tree->vars[ totalizer_tree->vars.size()-1u] << std::endl;
+          // for ( const auto& t : rels )
+          // {
+          //   std::cout << t << std::endl;
+          // }
         }
       }
       else
