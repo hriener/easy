@@ -267,7 +267,7 @@ public:
     auto state = _solver.solve();
     if ( state == maxsat_solver_t::state::success )
     {
-      auto const clause_selectors = _solver.get_enabled_clauses();
+      auto const clause_selectors = _solver.get_disabled_clauses();
       assert( clause_selectors.size() != 0 );
       return detail::esop_from_clause_selectors( clause_selectors, g, soft_clause_map );
     }
