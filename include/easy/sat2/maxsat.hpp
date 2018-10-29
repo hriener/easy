@@ -153,7 +153,7 @@ public:
     if ( _solver.solve() == sat2::sat_solver::state::unsat )
     {
       /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
-      std::cout << "[i] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
+      // std::cout << "[w] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
       _state = state::fail;
       return _state;
     }
@@ -162,7 +162,7 @@ public:
     if ( _soft_clauses.size() == 0u )
     {
       /* nothing to be done */
-      std::cout << "[i] terminate: no soft clauses" << std::endl;
+      // std::cout << "[w] terminate: no soft clauses" << std::endl;
       _state = state::fail;
       return _state;
     }
@@ -357,7 +357,7 @@ public:
     if ( _solver.solve() == sat2::sat_solver::state::unsat )
     {
       /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
-      std::cout << "[i] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
+      // std::cout << "[w] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
       _state = state::fail;
       return _state;
     }
@@ -366,7 +366,7 @@ public:
     if ( _soft_clauses.size() == 0u )
     {
       /* nothing to be done */
-      std::cout << "[i] terminate: no soft clauses" << std::endl;
+      // std::cout << "[w] terminate: no soft clauses" << std::endl;
       _state = state::fail;
       return _state;
     }
@@ -554,6 +554,23 @@ public:
    */
   state solve()
   {
+    if ( _solver.solve() == sat2::sat_solver::state::unsat )
+    {
+      /* it's not possible to satisfy the clauses even when ignoring all soft clauses */
+      // std::cout << "[w] terminate: it's not possible to satisfy the hard clauses, even when all soft clauses are ignored" << std::endl;
+      _state = state::fail;
+      return _state;
+    }
+
+    /* if the number of soft-clauses is empty */
+    if ( _soft_clauses.size() == 0u )
+    {
+      /* nothing to be done */
+      // std::cout << "[w] terminate: no soft clauses" << std::endl;
+      _state = state::fail;
+      return _state;
+    }
+
     /* TODO: special cases */
     std::vector<int> sels;
     std::vector<int> sums;
