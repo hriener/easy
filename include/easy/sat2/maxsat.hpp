@@ -178,6 +178,7 @@ public:
       auto& cl = _soft_clauses[i];
       cl.emplace_back( -selector );
       _solver.add_clause( cl );
+      _disabled_clauses.push_back( i );
     }
 
     std::vector<std::vector<int>> clauses;
