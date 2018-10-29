@@ -152,5 +152,6 @@ TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
     create_from_cubes( tt_copy, cubes, true );
     CHECK( tt == tt_copy );
   }
-  CHECK( std::accumulate( std::begin( num_cubes ), std::end( num_cubes ), 0.0 ) / num_cubes.size() == 3.52 );
+
+  CHECK( std::accumulate( std::begin( num_cubes ), std::end( num_cubes ), 0u ) == 176 );
 }
