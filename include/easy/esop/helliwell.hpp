@@ -225,7 +225,7 @@ template<typename TT>
 class esop_from_tt<TT, helliwell_maxsat>
 {
 public:
-  using maxsat_solver_t = sat2::maxsat_solver<sat2::maxsat_rc2>;
+  using maxsat_solver_t = sat2::maxsat_solver<sat2::maxsat_linear>;
 
 public:
   explicit esop_from_tt( helliwell_maxsat_statistics& stats, helliwell_maxsat_params& ps )
