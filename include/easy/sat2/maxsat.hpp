@@ -573,6 +573,8 @@ public:
 
     std::vector<int> sels;
     std::vector<int> sums;
+    std::map<int,std::shared_ptr<totalizer_tree>> t_objects;
+    std::map<int,int> bounds;
     std::map<int, int> selector_to_clause;
     int costs = 0;
 
@@ -606,6 +608,10 @@ public:
       {
         assumptions.emplace_back( s );
       }
+      for ( const auto& s : sums )
+      {
+        assumptions.emplace_back( s );
+      }
 
       auto const state = _solver.solve( assumptions );
       if ( state == sat2::sat_solver::state::sat )
@@ -622,12 +628,11 @@ public:
             _disabled_clauses.push_back( i );
           }
         }
-        // assert( _disabled_clauses.size() == costs );
+        assert( _disabled_clauses.size() == costs );
         return state::success;
       }
 
       auto const core = _solver.get_core();
-
       // std::cout << "[i] core: "; core.print(); std::cout << std::endl;
 
       /* divide core into sels and sums */
@@ -641,7 +646,7 @@ public:
           continue;
         }
 
-        if ( std::find( std::begin( sels ), std::end( sels ), core[i] ) != std::end( sels ) )
+        if ( std::find( std::begin( sums ), std::end( sums ), core[i] ) != std::end( sums ) )
         {
           core_sums.push_back( core[i] );
           continue;
@@ -713,7 +718,42 @@ public:
           }
 
           /* increase bound for the sum */
-          assert( false && "not implemented" );
+          auto& t = t_objects[l];
+          auto& b = bounds[l];
+
+          std::vector<std::vector<int>> clauses;
+          increase_totalizer( clauses, _sid, t, b+1 );
+          for ( const auto& c : clauses )
+          {
+            add_clause( c );
+          }
+
+          /* updating bounds and weights */
+          if ( b < t->vars.size() )
+          {
+            auto lnew = -t->vars[b];
+            if ( std::find( std::begin( garbage ), std::end( garbage ), lnew ) != std::end( garbage ) )
+            {
+              garbage.erase( std::remove( std::begin( garbage ), std::end( garbage ), lnew ) );
+              _weights[selector_to_clause[lnew]] = 0;
+            }
+
+            if ( selector_to_clause.find( lnew ) == selector_to_clause.end() )
+            {
+              /* invoke set bounds */
+              t_objects.emplace( -t->vars[t->vars.size()-1u], t );
+              bounds.emplace( -t->vars[t->vars.size()-1u], t->vars.size() );
+              sums.push_back( -t->vars[ t->vars.size()-1u] );
+              selector_to_clause.emplace( -t->vars[ t->vars.size()-1u], _weights.size() );
+              _weights.push_back( w_min );
+            }
+            else
+            {
+              _weights[selector_to_clause[lnew]] += w_min;
+            }
+          }
+
+          rels.push_back( -l );
         }
 
         if ( rels.size() > 1 )
@@ -728,9 +768,14 @@ public:
 
           /* TODO: exhaust core */
           auto b = 1;
+          /* invoke set bound */
 
           /* save the info about this sum and add its assumption literal */
+          t_objects.emplace( -totalizer_tree->vars[totalizer_tree->vars.size()-1u], totalizer_tree );
+          bounds.emplace( -totalizer_tree->vars[totalizer_tree->vars.size()-1u], totalizer_tree->vars.size() );
           sums.push_back( -totalizer_tree->vars[ totalizer_tree->vars.size()-1u] );
+          selector_to_clause.emplace( -totalizer_tree->vars[ totalizer_tree->vars.size()-1u], _weights.size() );
+          _weights.push_back( w_min );
         }
       }
       else
