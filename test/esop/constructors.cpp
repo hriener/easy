@@ -134,7 +134,11 @@ TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
   std::default_random_engine rng( 2018 );
   std::uniform_real_distribution<double> distr( lb, ub );
 
-  std::vector<int> results{3, 5, 4, 4, 4, 4, 3, 4, 4, 5, 4, 4, 2, 4, 3, 4, 3, 3, 4, 4, 3, 4, 3, 3, 4, 3, 4, 3, 3, 3, 3, 3, 3, 2, 4, 3, 4, 4, 3, 4, 3, 3, 4, 3, 4, 4, 3, 4, 3, 4};
+  std::vector<int> results{3, 5, 4, 4, 4, 4, 3, 4, 4, 5,
+                           4, 4, 2, 4, 3, 4, 3, 3, 4, 4,
+                           3, 4, 3, 3, 4, 3, 4, 3, 3, 3,
+                           3, 3, 3, 2, 4, 3, 4, 4, 3, 4,
+                           3, 3, 4, 3, 4, 4, 3, 4, 3, 4};
   std::vector<int> num_cubes( repeat );
   for ( auto i = 0; i < repeat; ++i )
   {
@@ -162,4 +166,5 @@ TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
   }
 
   CHECK( std::accumulate( std::begin( num_cubes ), std::end( num_cubes ), 0u ) == 176 );
+  CHECK( std::accumulate( std::begin( results ), std::end( results ), 0u ) == 176 );
 }
