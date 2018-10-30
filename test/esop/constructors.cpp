@@ -122,48 +122,88 @@ TEST_CASE( "Create ESOP from helliwell equation using MAXSAT", "[constructors]" 
 TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
 {
   static const int size = 4;
-  static const int lb = 0;
-  static const int ub = std::numeric_limits<int>::max();
-  static const int repeat = 50;
-
-  kitty::static_truth_table<size> tt;
-
   esop::helliwell_maxsat_statistics stats;
   esop::helliwell_maxsat_params ps;
 
-  std::default_random_engine rng( 2018 );
-  std::uniform_real_distribution<double> distr( lb, ub );
+  std::vector<std::string> tts{"0010011101010011",
+      "1100011001111101",
+      "0110010101011010",
+      "0000011100011001",
+      "0010011100111001",
+      "0100011101011000",
+      "0001011100011011",
+      "1000011100011000",
+      "1100100110000001",
+      "1101000010010001",
+      "0001011011100110",
+      "1111011101010110",
+      "1001111001000010",
+      "0101011111011110",
+      "0110011011100000",
+      "1100011010011100",
+      "0100001010011011",
+      "0010111111101011",
+      "1110000100000001",
+      "1110000100100001",
+      "1110011001100001",
+      "0010111000111111",
+      "1000001110011001",
+      "1111010111110110",
+      "0010000100101000",
+      "1000111110111110",
+      "1010110010110101",
+      "1010110010010101",
+      "0000100101110010",
+      "0011110010101000",
+      "1000111100010101",
+      "0010111001000000",
+      "1110010101011101",
+      "0100011010011011",
+      "0011011110101100",
+      "0000100000101110",
+      "1101011111011000",
+      "0111001010100010",
+      "0100011111101001",
+      "0100101111110011",
+      "1101110110110101",
+      "1111000001110000",
+      "0101000001001110",
+      "1010100000101101",
+      "1000100100101111",
+      "1000001011011001",
+      "1010101011101100",
+      "1010101011101100",
+      "0110110110011011",
+      "0110011011001010" };
 
-  std::vector<int> results{3, 5, 4, 4, 4, 4, 3, 4, 4, 5,
-                           4, 4, 2, 4, 3, 4, 3, 3, 4, 4,
-                           3, 4, 3, 3, 4, 3, 4, 3, 3, 3,
-                           3, 3, 3, 2, 4, 3, 4, 4, 3, 4,
-                           3, 3, 4, 3, 4, 4, 3, 4, 3, 4};
-  std::vector<int> num_cubes( repeat );
-  for ( auto i = 0; i < repeat; ++i )
+  std::vector<int> results{4, 4, 3, 3, 4, 4, 3, 4, 4, 3,
+                           4, 4, 4, 4, 4, 3, 4, 4, 3, 3,
+                           5, 3, 4, 3, 3, 4, 4, 4, 4, 4,
+                           4, 3, 4, 4, 4, 3, 3, 3, 4, 4,
+                           4, 2, 3, 4, 4, 4, 3, 3, 5, 4};
+
+  std::vector<int> num_cubes( tts.size() );
+
+  auto counter = 0;
+  for ( const auto& tt : tts )
   {
-    kitty::create_random( tt, distr(rng) );
-    auto const cubes = esop::esop_from_tt<kitty::static_truth_table<size>, esop::helliwell_maxsat>( stats, ps ).synthesize( tt );
+    kitty::static_truth_table<size> bits;
+    kitty::create_from_binary_string( bits, tt );
 
-    num_cubes[i] = cubes.size();
+    auto const cubes = esop::esop_from_tt<kitty::static_truth_table<size>, esop::helliwell_maxsat>( stats, ps ).synthesize( bits );
+    num_cubes[counter] = cubes.size();
 
-    auto tt_copy = tt.construct();
-    create_from_cubes( tt_copy, cubes, true );
-    CHECK( tt == tt_copy );
+    // verify correctness
+    auto bits_copy = bits.construct();
+    create_from_cubes( bits_copy, cubes, true );
+    CHECK( bits == bits_copy );
 
-    CHECK( cubes.size() == results[i] );
-    if ( cubes.size() != results[i] )
-    {
-      std::cout << i << ' ';
-      kitty::print_binary( tt );
-      for ( const auto& c : cubes )
-      {
-        std::cout << ' ';
-        c.print( size );
-      }
-      std::cout << std::endl;
-    }
+    // verify minimality
+    CHECK( cubes.size() == results[counter] );
+    counter++;
   }
+}
+
 
   CHECK( std::accumulate( std::begin( num_cubes ), std::end( num_cubes ), 0u ) == 176 );
   CHECK( std::accumulate( std::begin( results ), std::end( results ), 0u ) == 176 );
