@@ -203,8 +203,3 @@ TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
     counter++;
   }
 }
-
-
-  CHECK( std::accumulate( std::begin( num_cubes ), std::end( num_cubes ), 0u ) == 176 );
-  CHECK( std::accumulate( std::begin( results ), std::end( results ), 0u ) == 176 );
-}
