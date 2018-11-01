@@ -161,9 +161,9 @@ inline std::shared_ptr<totalizer_tree> create_totalizer( std::vector<std::vector
   return queue.front();
 }
 
-inline void increase_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree> const& t, uint32_t rhs )
+inline void increase_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree>& t, uint32_t rhs )
 {
-  uint32_t const kmin = std::min( rhs, t->num_inputs );
+  uint32_t const kmin = std::min( rhs+1, t->num_inputs );
   if ( kmin <= t->vars.size() )
     return;
 
@@ -172,7 +172,7 @@ inline void increase_totalizer( std::vector<std::vector<int>>& dest, int& sid, s
   detail::increase_totalizer_internal( dest, sid, t->vars, kmin, t->left->vars, t->right->vars );
 }
 
-inline std::shared_ptr<totalizer_tree> merge_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree> const& ta, std::shared_ptr<totalizer_tree> const& tb, uint32_t rhs )
+inline std::shared_ptr<totalizer_tree> merge_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree>& ta, std::shared_ptr<totalizer_tree>& tb, uint32_t rhs )
 {
   increase_totalizer( dest, sid, ta, rhs );
   increase_totalizer( dest, sid, tb, rhs );
@@ -195,9 +195,9 @@ inline std::shared_ptr<totalizer_tree> merge_totalizer( std::vector<std::vector<
   return t;
 }
 
-inline std::shared_ptr<totalizer_tree> extend_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree> const& ta, std::vector<int> const& lhs, uint32_t rhs )
+inline std::shared_ptr<totalizer_tree> extend_totalizer( std::vector<std::vector<int>>& dest, int& sid, std::shared_ptr<totalizer_tree>& ta, std::vector<int> const& lhs, uint32_t rhs )
 {
-  auto const tb = create_totalizer( dest, sid, lhs, rhs );
+  auto tb = create_totalizer( dest, sid, lhs, rhs );
   return merge_totalizer( dest, sid, ta, tb, rhs );
 }
 

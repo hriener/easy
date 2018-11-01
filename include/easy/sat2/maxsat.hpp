@@ -600,6 +600,7 @@ public:
     /* make a copy of the selectors */
     _selectors = sels;
 
+    auto iteration = 0;
     for ( ;; )
     {
       /* assume all soft-clauses are enabled, which causes the problem to be UNSAT */
@@ -628,7 +629,7 @@ public:
             _disabled_clauses.push_back( i );
           }
         }
-        assert( _disabled_clauses.size() == costs );
+        // assert( _disabled_clauses.size() <= costs );
         return state::success;
       }
 
@@ -719,10 +720,10 @@ public:
 
           /* increase bound for the sum */
           auto& t = t_objects[l];
-          auto& b = bounds[l];
+          auto b = bounds[l]+1;
 
           std::vector<std::vector<int>> clauses;
-          increase_totalizer( clauses, _sid, t, b+1 );
+          increase_totalizer( clauses, _sid, t, b );
           for ( const auto& c : clauses )
           {
             add_clause( c );
@@ -741,11 +742,12 @@ public:
             if ( selector_to_clause.find( lnew ) == selector_to_clause.end() )
             {
               /* invoke set bounds */
-              t_objects.emplace( -t->vars[t->vars.size()-1u], t );
-              bounds.emplace( -t->vars[t->vars.size()-1u], t->vars.size() );
-              sums.push_back( -t->vars[ t->vars.size()-1u] );
-              selector_to_clause.emplace( -t->vars[ t->vars.size()-1u], _weights.size() );
+              t_objects.emplace( -t->vars[b], t );
+              bounds.emplace( -t->vars[b], b );
+              selector_to_clause.emplace( -t->vars[b], _weights.size() );
               _weights.push_back( w_min );
+
+              sums.push_back( -t->vars[b] );
             }
             else
             {
@@ -771,11 +773,12 @@ public:
           /* invoke set bound */
 
           /* save the info about this sum and add its assumption literal */
-          t_objects.emplace( -totalizer_tree->vars[totalizer_tree->vars.size()-1u], totalizer_tree );
-          bounds.emplace( -totalizer_tree->vars[totalizer_tree->vars.size()-1u], totalizer_tree->vars.size() );
-          sums.push_back( -totalizer_tree->vars[ totalizer_tree->vars.size()-1u] );
-          selector_to_clause.emplace( -totalizer_tree->vars[ totalizer_tree->vars.size()-1u], _weights.size() );
+          t_objects.emplace( -totalizer_tree->vars[b], totalizer_tree );
+          bounds.emplace( -totalizer_tree->vars[b], b );
+          selector_to_clause.emplace( -totalizer_tree->vars[b], _weights.size() );
           _weights.push_back( w_min );
+
+          sums.push_back( -totalizer_tree->vars[b] );
         }
       }
       else
@@ -797,6 +800,13 @@ public:
           return std::find( std::begin( garbage ), std::end( garbage ), x) != std::end( garbage );
         }), std::end( sums ) );
       garbage.clear();
+
+      // std::cout << "c cost: " << costs << ' ';
+      // std::cout << "core sz: " << core.size() << ' ';
+      // std::cout << "soft sz: " << ( sums.size() + sels.size() ) << ' ';
+      // std::cout << std::endl;
+
+      ++iteration;
     }
 
     return state::fail;

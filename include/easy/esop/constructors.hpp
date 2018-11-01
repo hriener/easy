@@ -39,7 +39,7 @@
 namespace easy::esop
 {
 
-template<typename TT, typename Policy>
+template<typename TT, typename Solver, typename Policy>
 class esop_from_tt;
 
 } // easy::esop

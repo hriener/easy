@@ -221,11 +221,11 @@ struct helliwell_maxsat_params
 {
 };
 
-template<typename TT>
-class esop_from_tt<TT, helliwell_maxsat>
+template<typename TT, typename Solver>
+class esop_from_tt<TT, Solver, helliwell_maxsat>
 {
 public:
-  using maxsat_solver_t = sat2::maxsat_solver<sat2::maxsat_linear>;
+  using maxsat_solver_t = sat2::maxsat_solver<Solver>;
 
 public:
   explicit esop_from_tt( helliwell_maxsat_statistics& stats, helliwell_maxsat_params& ps )
@@ -239,7 +239,7 @@ public:
    * \param bits Truth table of function
    * \param care Truth table of care function
    */
-  esop_t synthesize( TT const& bits, TT const& care )
+  esop_t synthesize( TT const& bits, TT const& care, std::function<int(kitty::cube)> const& cost_fn = []( kitty::cube const& cube ){ return 1; } )
   {
     assert( bits.num_vars() == care.num_vars() );
 
@@ -259,12 +259,12 @@ public:
     std::unordered_map<int,int> soft_clause_map;
     for ( const auto& v : g )
     {
-      int cid = _solver.add_soft_clause( { -v.first } );
+      int cid = _solver.add_soft_clause( { -v.first }, cost_fn( v.second ) );
       soft_clause_map.insert( std::make_pair( cid, v.first ) );
     }
 
     /* extract the esop from the model */
-    auto state = _solver.solve();
+    auto const state = _solver.solve();
     if ( state == maxsat_solver_t::state::success )
     {
       auto const clause_selectors = _solver.get_disabled_clauses();
@@ -280,10 +280,10 @@ public:
    *
    * \param bits Truth table of function
    */
-  esop_t synthesize( TT const& bits )
+  esop_t synthesize( TT const& bits, std::function<int(kitty::cube)> const& cost_fn = []( kitty::cube const& cube ){ return 1; }  )
   {
     auto const care = kitty::create<TT>( bits.num_vars() );
-    return synthesize( bits, ~care );
+    return synthesize( bits, ~care, cost_fn );
   }
 
 protected:
@@ -299,16 +299,12 @@ protected:
 
 struct helliwell_sat {};
 
-struct helliwell_sat_statistics
-{
-};
+struct helliwell_sat_statistics {};
 
-struct helliwell_sat_params
-{
-};
+struct helliwell_sat_params {};
 
-template<typename TT>
-class esop_from_tt<TT, helliwell_sat>
+template<typename TT, typename Solver>
+class esop_from_tt<TT, Solver, helliwell_sat>
 {
 public:
   explicit esop_from_tt( helliwell_sat_statistics& stats, helliwell_sat_params& ps )
