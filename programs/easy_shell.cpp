@@ -71,8 +71,8 @@ ALICE_READ_FILE( esop_storee, pla, filename, cmd )
 
   lorina::diagnostic_engine diag;
   esop::esop_t esop;
-  unsigned number_of_inputs;
-  unsigned number_of_outputs;
+  uint32_t number_of_inputs = 0;
+  uint32_t number_of_outputs = 0;
   auto parsing_result = lorina::read_pla( filename, easy::esop_storage_reader( esop, number_of_inputs ), &diag );
   if ( parsing_result != lorina::return_code::success )
   {
@@ -84,6 +84,8 @@ ALICE_READ_FILE( esop_storee, pla, filename, cmd )
 
 ALICE_WRITE_FILE( esop_storee, pla, element, filename, cmd )
 {
+  (void)cmd;
+
   std::ofstream os( filename.c_str(), std::ofstream::out );
   easy::write_esop( os, element.esop, element.number_of_inputs );
   os.close();
