@@ -98,7 +98,7 @@ public:
   bool operator[]( int lit ) const
   {
     assert( lit != 0 );
-    auto const var = abs( lit ) - 1;
+    uint32_t const var = abs( lit ) - 1;
     assert( var < _assignment.num_bits() && "Index out-of-bounds access" );
     return lit > 0 ? _assignment[var] : !_assignment[var];
   }
@@ -302,7 +302,7 @@ public:
     {
       for ( const auto& l : assumptions )
       {
-        const auto v = abs( l ) - 1;
+        const uint32_t v = abs( l ) - 1;
         while ( _num_variables <= v )
         {
           _glucose->newVar();
@@ -336,7 +336,7 @@ public:
     {
       for ( const auto& l : assumptions )
       {
-        const auto v = abs( l ) - 1;
+        const uint32_t v = abs( l ) - 1;
         while ( _num_variables <= v )
         {
           _glucose->newVar();
@@ -347,7 +347,7 @@ public:
     }
 
     auto const result = _glucose->solveLimited( ass );
-    if ( result == l_Undef || _glucose->conflicts >= _ps.budget )
+    if ( result == l_Undef || int32_t(_glucose->conflicts) >= _ps.budget )
     {
       return ( _state = state::dirty );
     }
@@ -371,7 +371,7 @@ public:
     Glucose::vec<Glucose::Lit> cl;
     for ( const auto& l : clause )
     {
-      const auto v = abs( l ) - 1;
+      const uint32_t v = abs( l ) - 1;
       while ( _num_variables <= v )
       {
         _glucose->newVar();
@@ -387,7 +387,7 @@ public:
   {
     assert( is_sat() );
 
-    auto const size = _glucose->model.size();
+    const uint32_t size = _glucose->model.size();
     utils::dynamic_bitset<> m;
     for ( auto i = 0u; i < size; ++i )
     {
@@ -401,7 +401,7 @@ public:
   {
     assert( is_unsat() );
 
-    auto const size = _glucose->conflict.size();
+    const uint32_t size = _glucose->conflict.size();
     std::vector<int> lits( size );
     for ( auto i = 0u; i < size; ++i )
     {

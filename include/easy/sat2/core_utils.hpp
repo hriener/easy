@@ -73,7 +73,7 @@ inline core<> trim_core_copy( sat_solver& solver, core<> const& cs, uint32_t num
 {
   auto current = cs;
 
-  int32_t counter = 0;
+  uint32_t counter = 0;
   while ( counter++ < num_tries && solver.solve( current ) == sat_solver::state::unsat )
   {
     auto const new_core = solver.get_core();
@@ -123,7 +123,7 @@ inline core<> minimize_core_copy( sat_solver& solver, core<> const& cs, int64_t 
 {
   solver.set_budget( budget );
 
-  auto pos = 0;
+  auto pos = 0u;
   auto current = cs;
 
   while ( pos < current.size() )
