@@ -30,7 +30,6 @@
 #include <easy/sat/sat_solver.hpp>
 #include <easy/sat/gauss.hpp>
 #include <easy/sat/xor_clauses_to_cnf.hpp>
-#include <easy/sat/cnf_symmetry_breaking.hpp>
 #include <easy/sat/cnf_writer.hpp>
 #include <easy/utils/string_utils.hpp>
 #include <json/json.hpp>
@@ -135,7 +134,6 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
 
     sat::gauss_elimination().apply( constraints );
     sat::xor_clauses_to_cnf( sid ).apply( constraints );
-    sat::cnf_symmetry_breaking( sid ).apply( constraints );
 
     if ( dump )
     {

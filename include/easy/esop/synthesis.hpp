@@ -29,7 +29,6 @@
 #include <easy/esop/exact_synthesis.hpp>
 #include <easy/sat/gauss.hpp>
 #include <easy/sat/xor_clauses_to_cnf.hpp>
-#include <easy/sat/cnf_symmetry_breaking.hpp>
 #include <json/json.hpp>
 
 namespace easy::esop
@@ -267,7 +266,6 @@ public:
 
     sat::gauss_elimination().apply( constraints );
     sat::xor_clauses_to_cnf( sid ).apply( constraints );
-    // sat::cnf_symmetry_breaking( sid ).apply( constraints );
 
     const auto sat = solver.solve( constraints );
     if ( sat.is_undef() )
