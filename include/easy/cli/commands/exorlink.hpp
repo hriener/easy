@@ -71,7 +71,7 @@ protected:
     {
       const auto size = k_size[d];
       const auto incr = k_incr[d];
-      for ( auto k = 0; k < size; k += incr )
+      for ( auto k = 0u; k < size; k += incr )
       {
         const auto cubes = easy::esop::exorlink( cube0, cube1, d, cube_groups[d] + k );
         for ( const auto& c : cubes )

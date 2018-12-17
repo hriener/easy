@@ -84,7 +84,7 @@ protected:
         easy::esop::minimum_synthesizer_params params;
         params.conflict_limit = number_of_conflicts;
         params.begin = number_of_terms;
-        params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
+        params.next = [&]( uint32_t& i, easy::sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
 
         easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
@@ -94,7 +94,7 @@ protected:
         easy::esop::minimum_synthesizer_params params;
         params.conflict_limit = number_of_conflicts;
         params.begin = 1;
-        params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
+        params.next = [&]( uint32_t& i, easy::sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
 
         easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
         synthesis_result = synthesizer.synthesize( params );
@@ -129,7 +129,7 @@ protected:
     }
     else
     {
-      for ( auto i = 0; i < function_store_size; ++i )
+      for ( auto i = 0u; i < function_store_size; ++i )
       {
         ++counter;
 
@@ -157,7 +157,7 @@ protected:
           easy::esop::minimum_synthesizer_params params;
           params.conflict_limit = number_of_conflicts;
           params.begin = number_of_terms;
-          params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
+          params.next = [&]( uint32_t& i, easy::sat::sat_solver::result sat ) { if ( i <= 1 || sat.is_unsat() ) return false; --i; return true; };
 
           easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );
@@ -167,7 +167,7 @@ protected:
           easy::esop::minimum_synthesizer_params params;
           params.conflict_limit = number_of_conflicts;
           params.begin = 1;
-          params.next = [&]( int& i, easy::sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
+          params.next = [&]( uint32_t& i, easy::sat::sat_solver::result sat ) { if ( i >= number_of_terms || sat.is_sat() ) return false; ++i; return true; };
 
           easy::esop::minimum_synthesizer synthesizer( easy::esop::spec{bits, care} );
           synthesis_result = synthesizer.synthesize( params );

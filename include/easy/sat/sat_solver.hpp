@@ -145,7 +145,7 @@ inline sat_solver::result sat_solver::solve( constraints& constraints, const ass
   else
   {
     const auto solver_result = _solver->solveLimited( assume );
-    if ( solver_result == l_Undef || _solver->conflicts >= _conflict_limit )
+    if ( solver_result == l_Undef || int32_t(_solver->conflicts) >= _conflict_limit )
     {
       return result( l_Undef );
     }
@@ -159,7 +159,7 @@ inline sat_solver::result sat_solver::solve( constraints& constraints, const ass
   if ( sat )
   {
     std::vector<Glucose::lbool> model( _num_vars );
-    for ( auto i = 0; i < _num_vars; ++i )
+    for ( auto i = 0u; i < _num_vars; ++i )
     {
       model[i] = _solver->modelValue( i );
     }

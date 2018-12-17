@@ -46,7 +46,7 @@ inline esop_t esop_from_model( const sat::sat_solver::model_t& model, unsigned n
   {
     kitty::cube c;
     bool cancel_cube = false;
-    for ( auto l = 0; l < num_vars; ++l )
+    for ( auto l = 0u; l < num_vars; ++l )
     {
       const auto p_value = model[j * num_vars + l] == l_True;
       const auto q_value = model[num_vars * num_terms + j * num_vars + l] == l_True;
@@ -125,10 +125,9 @@ inline esop_t esop_cover( const spec& spec )
   assert( spec.bits.size() == spec.care.size() );
 
   const auto size = spec.bits.size();
-  const int num_vars = log2( size );
 
   esop_t cover;
-  for ( auto i = 0; i < size; ++i )
+  for ( auto i = 0u; i < size; ++i )
   {
     if ( spec.care[i] == '1' && spec.bits[i] == '1' )
     {
@@ -174,7 +173,7 @@ public:
    */
   result synthesize( const simple_synthesizer_params& params )
   {
-    const int num_vars = log2( _spec.bits.size() );
+    const uint32_t num_vars = log2( _spec.bits.size() );
     assert( _spec.bits.size() == ( 1ull << num_vars ) && "bit-width of bits is not a power of 2" );
     assert( _spec.care.size() == ( 1ull << num_vars ) && "bit-width of care is not a power of 2" );
     assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
@@ -205,9 +204,9 @@ public:
       }
 
       std::vector<int> z_vars( num_terms, 0u );
-      for ( auto j = 0; j < num_terms; ++j )
+      for ( auto j = 0u; j < num_terms; ++j )
       {
-        assert( sid == 1 + 2 * num_vars * num_terms + sample_counter * num_terms + j );
+        assert( uint32_t(sid) == 1 + 2 * num_vars * num_terms + sample_counter * num_terms + j );
         z_vars[j] = sid++;
       }
 
@@ -216,7 +215,7 @@ public:
         const int z = z_vars[j];
 
         // positive
-        for ( auto l = 0; l < num_vars; ++l )
+        for ( auto l = 0u; l < num_vars; ++l )
         {
           if ( minterm.get_bit( l ) )
           {
@@ -243,7 +242,7 @@ public:
 
         // negative
         std::vector<int> clause = {z};
-        for ( auto l = 0; l < num_vars; ++l )
+        for ( auto l = 0u; l < num_vars; ++l )
         {
           if ( minterm.get_bit( l ) )
           {
@@ -320,12 +319,12 @@ private:
  * Example: (upwards search)
  *   minimum_synthesizer_params params;
  *   params.begin = 0;
- *   params.next = [&]( int i ){ if ( i >= max_k || sat ) return false; ++i; return true; }
+ *   params.next = [&]( uint32_t i ){ if ( i >= max_k || sat ) return false; ++i; return true; }
  *
  * Example: (downwards search)
  *   minimum_synthesizer_params params;
  *   params.begin = max_k;
- *   params.next = [&]( int i ){ if ( i <= 0 || !sat ) return false; --i; return true; }
+ *   params.next = [&]( uint32_t i ){ if ( i <= 0 || !sat ) return false; --i; return true; }
  *
  */
 struct minimum_synthesizer_params
@@ -334,7 +333,7 @@ struct minimum_synthesizer_params
   int begin;
   /*! A function that evaluates the current value and satisfiability result, decides whether to
       terminate, and updates the value */
-  std::function<bool( int&, sat::sat_solver::result )> next;
+  std::function<bool( uint32_t&, sat::sat_solver::result )> next;
   int conflict_limit = -1;
 }; /* minimum_synthesizer_params */
 
@@ -366,7 +365,7 @@ public:
    */
   result synthesize( const minimum_synthesizer_params& params )
   {
-    const int num_vars = log2( _spec.bits.size() );
+    const uint32_t num_vars = log2( _spec.bits.size() );
     assert( _spec.bits.size() == ( 1ull << num_vars ) && "bit-width of bits is not a power of 2" );
     assert( _spec.care.size() == ( 1ull << num_vars ) && "bit-width of care is not a power of 2" );
     assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
@@ -375,7 +374,7 @@ public:
     sat::sat_solver::result result;
     bool all_unsat = true;
 
-    auto k = params.begin;
+    uint32_t k = params.begin;
     do
     {
       assert( k != 0 && "synthesis of constants not supported" );
@@ -403,9 +402,9 @@ public:
         }
 
         std::vector<int> z_vars( k, 0u );
-        for ( auto j = 0; j < k; ++j )
+        for ( auto j = 0u; j < k; ++j )
         {
-          assert( sid == 1 + 2 * num_vars * k + sample_counter * k + j );
+          assert( uint32_t(sid) == 1 + 2 * num_vars * k + sample_counter * k + j );
           z_vars[j] = sid++;
         }
 
@@ -414,7 +413,7 @@ public:
           const int z = z_vars[j];
 
           // positive
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             if ( minterm.get_bit( l ) )
             {
@@ -441,7 +440,7 @@ public:
 
           // negative
           std::vector<int> clause = {z};
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             if ( minterm.get_bit( l ) )
             {
@@ -542,7 +541,7 @@ struct minimum_all_synthesizer_params
   int begin;
   /*! A function that evaluates the current value and satisfiability result, decides whether to
       terminate, and updates the value */
-  std::function<bool( int&, sat::sat_solver::result )> next;
+  std::function<bool( uint32_t&, sat::sat_solver::result )> next;
   int conflict_limit = -1;
 }; /* minimum_all_synthesizer_params */
 
@@ -574,7 +573,7 @@ public:
    */
   esops_t synthesize( const minimum_all_synthesizer_params& params )
   {
-    const int num_vars = log2( _spec.bits.size() );
+    const uint32_t num_vars = log2( _spec.bits.size() );
     assert( _spec.bits.size() == ( 1ull << num_vars ) && "bit-width of bits is not a power of 2" );
     assert( _spec.care.size() == ( 1ull << num_vars ) && "bit-width of care is not a power of 2" );
     assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
@@ -585,7 +584,7 @@ public:
     std::unique_ptr<sat::constraints> constraints;
     std::unique_ptr<sat::sat_solver> solver;
 
-    auto k = params.begin;
+    uint32_t k = params.begin;
     do
     {
       int sid = 1 + 2 * num_vars * k;
@@ -607,9 +606,9 @@ public:
         }
 
         std::vector<int> z_vars( k, 0u );
-        for ( auto j = 0; j < k; ++j )
+        for ( auto j = 0u; j < k; ++j )
         {
-          assert( sid == 1 + 2 * num_vars * k + sample_counter * k + j );
+          assert( uint32_t(sid) == 1 + 2 * num_vars * k + sample_counter * k + j );
           z_vars[j] = sid++;
         }
 
@@ -618,7 +617,7 @@ public:
           const int z = z_vars[j];
 
           // positive
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             if ( minterm.get_bit( l ) )
             {
@@ -645,7 +644,7 @@ public:
 
           // negative
           std::vector<int> clause = {z};
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             if ( minterm.get_bit( l ) )
             {
@@ -670,7 +669,7 @@ public:
       sat::xor_clauses_to_cnf( sid ).apply( *constraints );
       // sat::cnf_symmetry_breaking( sid ).apply( *constraints );
 
-      if ( result = solver->solve( *constraints ) )
+      if ( ( result = solver->solve( *constraints ) ) )
       {
         esop = make_esop( result.model, k, num_vars );
       }
@@ -700,9 +699,9 @@ public:
         }
 
         std::vector<int> z_vars( k, 0u );
-        for ( auto j = 0; j < k; ++j )
+        for ( auto j = 0u; j < k; ++j )
         {
-          assert( sid == 1 + 2 * num_vars * k + sample_counter * k + j );
+          assert( uint32_t(sid) == 1 + 2 * num_vars * k + sample_counter * k + j );
           z_vars[j] = sid++;
         }
 
@@ -711,7 +710,7 @@ public:
           const int z = z_vars[j];
 
           // positive
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             if ( minterm.get_bit( l ) )
             {
@@ -738,7 +737,7 @@ public:
 
           // negative
           std::vector<int> clause = {z};
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             if ( minterm.get_bit( l ) )
             {
@@ -786,7 +785,7 @@ public:
         std::vector<int> blocking_clause;
         for ( auto j = 0u; j < vs.size(); ++j )
         {
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             const auto p_value = result.model[j * num_vars + l] == l_True;
             const auto q_value = result.model[num_vars * k + j * num_vars + l] == l_True;

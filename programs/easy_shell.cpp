@@ -28,11 +28,13 @@
 #ifdef __clang__ // CLANG compiler
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #include <alice/alice.hpp>
 #pragma clang diagnostic pop
 #elif __GNUC__ // GCC compiler
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <alice/alice.hpp>
 #pragma GCC diagnostic pop
 #else // other compilers

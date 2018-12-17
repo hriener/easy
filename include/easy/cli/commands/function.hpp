@@ -74,7 +74,7 @@ protected:
         }
       }
 
-      for ( auto j = 0; j < num; ++j )
+      for ( auto j = 0u; j < num; ++j )
       {
         env->store<function_storee>().extend() = function_storee{bits, care, number_of_variables};
       }
@@ -87,7 +87,7 @@ protected:
       std::uniform_int_distribution<> dist( 0, 100 );
 
       const auto len = 1ul << variables;
-      for ( auto j = 0; j < num; ++j )
+      for ( auto j = 0u; j < num; ++j )
       {
         kitty::dynamic_truth_table bits( variables );
         kitty::dynamic_truth_table care( variables );

@@ -45,7 +45,7 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
   const auto dump = ( config.count( "dump_cnf" ) > 0u ? bool( config["dump_cnf"] ) : false );
   const auto one_esop = ( config.count( "one_esop" ) > 0u ? bool( config["one_esop"] ) : true );
 
-  const int num_vars = log2( bits.size() );
+  const uint32_t num_vars = log2( bits.size() );
   assert( bits.size() == ( 1ull << num_vars ) && "bit-width of bits is not a power of 2" );
   assert( care.size() == ( 1ull << num_vars ) && "bit-width of care is not a power of 2" );
   assert( num_vars <= 32 && "cube data structure cannot store more than 32 variables" );
@@ -73,9 +73,9 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
       }
 
       std::vector<int> z_vars( k, 0u );
-      for ( auto j = 0; j < k; ++j )
+      for ( auto j = 0u; j < k; ++j )
       {
-        assert( sid == 1 + 2 * num_vars * k + sample_counter * k + j );
+        assert( uint32_t(sid) == 1 + 2 * num_vars * k + sample_counter * k + j );
         z_vars[j] = sid++;
       }
 
@@ -84,7 +84,7 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
         const int z = z_vars[j];
 
         // positive
-        for ( auto l = 0; l < num_vars; ++l )
+        for ( auto l = 0u; l < num_vars; ++l )
         {
           if ( minterm.get_bit( l ) )
           {
@@ -111,7 +111,7 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
 
         // negative
         std::vector<int> clause = {z};
-        for ( auto l = 0; l < num_vars; ++l )
+        for ( auto l = 0u; l < num_vars; ++l )
         {
           if ( minterm.get_bit( l ) )
           {
@@ -165,7 +165,7 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
       {
         kitty::cube c;
         bool cancel_cube = false;
-        for ( auto l = 0; l < num_vars; ++l )
+        for ( auto l = 0u; l < num_vars; ++l )
         {
           const auto p_value = result.model[j * num_vars + l] == l_True;
           const auto q_value = result.model[num_vars * k + j * num_vars + l] == l_True;
@@ -213,7 +213,7 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
         std::vector<int> blocking_clause;
         for ( auto j = 0u; j < vs.size(); ++j )
         {
-          for ( auto l = 0; l < num_vars; ++l )
+          for ( auto l = 0u; l < num_vars; ++l )
           {
             const auto p_value = result.model[j * num_vars + l] == l_True;
             const auto q_value = result.model[num_vars * k + j * num_vars + l] == l_True;

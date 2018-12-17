@@ -44,7 +44,7 @@ protected:
   {
     rules rules;
 
-    rules.push_back( {[this]() { return index == -1 || index < store<esop_storee>().size(); }, "index out of bounds"} );
+    rules.push_back( {[this]() { return index == -1 || uint32_t(index) < store<esop_storee>().size(); }, "index out of bounds"} );
 
     return rules;
   }

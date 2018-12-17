@@ -46,7 +46,7 @@ protected:
   {
     rules rules;
 
-    rules.push_back( {[this]() { return i < store<function_storee>().size() || i == -1 && store<function_storee>().size() > 0; }, "first index out of bounds"} );
+    rules.push_back( {[this]() { return uint32_t(i) < store<function_storee>().size() || ( i == -1 && store<function_storee>().size() > 0 ); }, "first index out of bounds"} );
 
     return rules;
   }
@@ -57,7 +57,7 @@ protected:
 
     easy::esop::spec spec;
     assert( elm.bits.num_bits() == elm.care.num_bits() );
-    for ( auto i = 0; i < elm.bits.num_bits(); ++i )
+    for ( auto i = 0u; i < elm.bits.num_bits(); ++i )
     {
       spec.bits.append( 1, kitty::get_bit( elm.bits, i ) ? '1' : '0' );
       spec.care.append( 1, kitty::get_bit( elm.care, i ) ? '1' : '0' );

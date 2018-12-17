@@ -148,7 +148,7 @@ inline std::vector<std::vector<kitty::cube>> combinations( const std::vector<kit
 inline bool ternary_count_next( std::string& digits )
 {
   auto lsb = digits.size();
-  for ( auto i = 0; i < digits.size(); ++i )
+  for ( auto i = 0u; i < digits.size(); ++i )
   {
     if ( digits[i] == '-' || digits[i] == '0' )
     {

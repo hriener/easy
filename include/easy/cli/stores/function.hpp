@@ -39,7 +39,7 @@ struct function_storee
   {
     const auto len = 1ull << number_of_variables;
     std::string s( len, '0' );
-    for ( auto i = 0; i < len; ++i )
+    for ( auto i = 0u; i < len; ++i )
     {
       if ( !get_bit( care, i ) )
       {
