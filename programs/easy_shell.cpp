@@ -25,7 +25,20 @@
 
 #define READLINE_USE_READLINE 1
 
+#ifdef __clang__ // CLANG compiler
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
 #include <alice/alice.hpp>
+#pragma clang diagnostic pop
+#elif __GNUC__ // GCC compiler
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#include <alice/alice.hpp>
+#pragma GCC diagnostic pop
+#else // other compilers
+#include <alice/alice.hpp>
+#endif
+
 #include <easy/cli/stores/esop.hpp>
 #include <easy/cli/stores/function.hpp>
 #include <easy/cli/commands/cover.hpp>
@@ -54,6 +67,8 @@ ALICE_ADD_FILE_TYPE( pla, "PLA" )
 
 ALICE_READ_FILE( esop_storee, pla, filename, cmd )
 {
+  (void)cmd;
+
   lorina::diagnostic_engine diag;
   esop::esop_t esop;
   unsigned number_of_inputs;
