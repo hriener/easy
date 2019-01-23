@@ -1,7 +1,9 @@
 #include <catch.hpp>
+
 #include <easy/esop/constructors.hpp>
 #include <kitty/constructors.hpp>
 #include <kitty/print.hpp>
+
 #include <iostream>
 #include <numeric>
 
@@ -34,6 +36,20 @@ TEST_CASE( "Create ESOP from small truth table", "[constructors]" )
   CHECK( tt == tt_copy );
 }
 
+TEST_CASE( "Create PPRM from random truth table", "[constructors]" )
+{
+  kitty::static_truth_table<10> tt;
+
+  for ( auto i = 0; i < 100; ++i )
+  {
+    kitty::create_random( tt );
+    auto const cubes = esop::esop_from_pprm( tt );
+    auto tt_copy = tt.construct();
+    create_from_cubes( tt_copy, cubes, true );
+    CHECK( tt == tt_copy );
+  }
+}
+
 TEST_CASE( "Create PKRM from random truth table", "[constructors]" )
 {
   kitty::static_truth_table<10> tt;
@@ -48,14 +64,38 @@ TEST_CASE( "Create PKRM from random truth table", "[constructors]" )
   }
 }
 
-TEST_CASE( "Create PPRM from random truth table", "[constructors]" )
+TEST_CASE( "Create ESOP using Helliwell-SAT from random truth table", "[constructors]" )
 {
-  kitty::static_truth_table<10> tt;
+  using tt_t = kitty::static_truth_table<5>;
+  using synthesizer_t = esop::esop_from_tt<tt_t, sat2::maxsat_rc2, esop::helliwell_sat>;
+  tt_t tt;
 
   for ( auto i = 0; i < 100; ++i )
   {
     kitty::create_random( tt );
-    auto const cubes = esop::esop_from_pprm( tt );
+    esop::helliwell_sat_statistics stats;
+    esop::helliwell_sat_params ps;
+    synthesizer_t synth( stats, ps );
+    auto const cubes = synth.synthesize( tt );
+    auto tt_copy = tt.construct();
+    create_from_cubes( tt_copy, cubes, true );
+    CHECK( tt == tt_copy );
+  }
+}
+
+TEST_CASE( "Create ESOP using Helliwell-MAXSAT from random truth table", "[constructors]" )
+{
+  using tt_t = kitty::static_truth_table<4>;
+  using synthesizer_t = esop::esop_from_tt<tt_t, sat2::maxsat_rc2, esop::helliwell_maxsat>;
+  tt_t tt;
+
+  for ( auto i = 0; i < 100; ++i )
+  {
+    kitty::create_random( tt );
+    esop::helliwell_maxsat_statistics stats;
+    esop::helliwell_maxsat_params ps;
+    synthesizer_t synth( stats, ps );
+    auto const cubes = synth.synthesize( tt );
     auto tt_copy = tt.construct();
     create_from_cubes( tt_copy, cubes, true );
     CHECK( tt == tt_copy );
@@ -76,6 +116,30 @@ TEST_CASE( "Create PKRM ESOP corner cases", "[constructors]" )
   CHECK( from_cubes<3>( esop::esop_from_optimum_pkrm( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) );
   CHECK( from_cubes<3>( esop::esop_from_optimum_pkrm( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) );
   CHECK( from_cubes<3>( esop::esop_from_optimum_pkrm( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) );
+}
+
+TEST_CASE( "Create ESOP using Helliwell-SAT corner cases", "[constructors]" )
+{
+  using tt_t = kitty::static_truth_table<3>;
+  using synthesizer_t = esop::esop_from_tt<tt_t, sat2::maxsat_rc2, esop::helliwell_sat>;
+  esop::helliwell_sat_statistics stats;
+  esop::helliwell_sat_params ps;
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) );
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) );
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) );
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) );
+}
+
+TEST_CASE( "Create ESOP using Helliwell-MAXSAT corner cases", "[constructors]" )
+{
+  using tt_t = kitty::static_truth_table<3>;
+  using synthesizer_t = esop::esop_from_tt<tt_t, sat2::maxsat_rc2, esop::helliwell_maxsat>;
+  esop::helliwell_maxsat_statistics stats;
+  esop::helliwell_maxsat_params ps;
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) );
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) );
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) );
+  CHECK( from_cubes<3>( synthesizer_t( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) );
 }
 
 TEST_CASE( "Create PPRM from dynamic truth table", "[constructors]" )
@@ -99,29 +163,12 @@ TEST_CASE( "Create PPRM from dynamic truth table", "[constructors]" )
   }
 }
 
-TEST_CASE( "Create ESOP from helliwell equation using SAT", "[constructors]" )
-{
-  esop::helliwell_sat_statistics stats;
-  esop::helliwell_sat_params ps;
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_sat>( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
-}
-
-TEST_CASE( "Create ESOP from helliwell equation using MAXSAT", "[constructors]" )
-{
-  esop::helliwell_maxsat_statistics stats;
-  esop::helliwell_maxsat_params ps;
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "00" ) ) ) == from_hex<3>( "00" ) ); // false
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "80" ) ) ) == from_hex<3>( "80" ) ); // and
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "fe" ) ) ) == from_hex<3>( "fe" ) ); // or
-  CHECK( from_cubes<3>( esop::esop_from_tt<kitty::static_truth_table<3>, sat2::maxsat_rc2, esop::helliwell_maxsat>( stats, ps ).synthesize( from_hex<3>( "ff" ) ) ) == from_hex<3>( "ff" ) ); // true
-}
-
 TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
 {
   static const int size = 4;
+  using tt_t = kitty::static_truth_table<size>;
+  using synthesizer_t = esop::esop_from_tt<tt_t, sat2::maxsat_rc2, esop::helliwell_maxsat>;
+
   esop::helliwell_maxsat_statistics stats;
   esop::helliwell_maxsat_params ps;
 
@@ -187,10 +234,10 @@ TEST_CASE( "Create optimum ESOP from random truth table", "[constructors]" )
   auto counter = 0;
   for ( const auto& tt : tts )
   {
-    kitty::static_truth_table<size> bits;
+    tt_t bits;
     kitty::create_from_binary_string( bits, tt );
 
-    auto const cubes = esop::esop_from_tt<kitty::static_truth_table<size>, sat2::maxsat_rc2, esop::helliwell_maxsat>( stats, ps ).synthesize( bits );
+    auto const cubes = synthesizer_t( stats, ps ).synthesize( bits );
     num_cubes[counter] = cubes.size();
 
     // verify correctness
