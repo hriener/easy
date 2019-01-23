@@ -39,6 +39,9 @@
 namespace easy::esop
 {
 
+namespace detail
+{
+
 inline esops_t exact_synthesis_from_binary_string( const std::string& bits, const std::string& care, const nlohmann::json& config )
 {
   const auto max_number_of_cubes = ( config.count( "maximum_cubes" ) > 0u ? unsigned( config["maximum_cubes"] ) : 10 );
@@ -131,6 +134,8 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
       ++sample_counter;
       ++minterm._bits;
     } while ( minterm._bits < ( 1 << num_vars ) );
+
+    assert( sample_counter > 0 );
 
     sat::gauss_elimination().apply( constraints );
     sat::xor_clauses_to_cnf( sid ).apply( constraints );
@@ -234,6 +239,25 @@ inline esops_t exact_synthesis_from_binary_string( const std::string& bits, cons
   }
 
   return esops;
+}
+
+} /* detail */
+
+template<typename TT>
+esops_t exact_esop( TT const& bits )
+{
+  auto const size = 1u << bits.num_vars();
+  std::string bs( size, '-' );
+  std::string cs( size, '-' );
+  for ( auto i = 0; i < size; ++i )
+  {
+    bs[i] = kitty::get_bit( bits, i ) ? '1' : '0';
+    cs[i] = '1';
+  }
+
+  nlohmann::json config;
+  config["one_esop"] = false;
+  return detail::exact_synthesis_from_binary_string( bs, cs, config );
 }
 
 } /* namespace easy::esop */

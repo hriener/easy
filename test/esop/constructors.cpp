@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include <easy/esop/constructors.hpp>
+#include <easy/esop/exact_synthesis.hpp>
 #include <kitty/constructors.hpp>
 #include <kitty/print.hpp>
 
@@ -61,6 +62,22 @@ TEST_CASE( "Create PKRM from random truth table", "[constructors]" )
     auto tt_copy = tt.construct();
     create_from_cubes( tt_copy, cubes, true );
     CHECK( tt == tt_copy );
+  }
+}
+
+TEST_CASE( "Create ESOP using Boolean learning from random truth table", "[constructors]" )
+{
+  kitty::static_truth_table<4> tt;
+
+  for ( auto i = 0; i < 100; ++i )
+  {
+    kitty::create_random( tt );
+    for ( auto const& cubes : esop::exact_esop( tt ) )
+    {
+      auto tt_copy = tt.construct();
+      create_from_cubes( tt_copy, cubes, true );
+      CHECK( tt == tt_copy );
+    }
   }
 }
 
