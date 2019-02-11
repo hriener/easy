@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 # Options
 option(EASY_BENCH    "Build benchmarks" OFF)
 option(EASY_TEST     "Build tests"      OFF)
-option(EASY_PROGRAMS "Build programs"   ON)
+option(EASY_PROGRAMS "Build programs"   OFF)
+option(EASY_EXAMPLES "Build examples"   ON)
 
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
   set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -Wextra")
@@ -48,4 +49,8 @@ endif()
 
 if(EASY_TEST)
   add_subdirectory(test)
+endif()
+
+if(EASY_EXAMPLES)
+  add_subdirectory(examples)
 endif()
