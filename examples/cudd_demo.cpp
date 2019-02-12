@@ -110,6 +110,9 @@ std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_
 void add_neighbors( std::vector<kitty::cube>& cover, uint32_t num_vars, uint32_t limit )
 {
   auto count_new_cubes = 0u;
+  if ( count_new_cubes >= limit )
+    return;
+
   for ( const auto& c : cover )
   {
     for ( auto i = 0u; i < num_vars; ++i )
@@ -304,7 +307,7 @@ void example3()
       43046721,
     }; // 3^n
 
-  const uint32_t num_vars = 5u;
+  const uint32_t num_vars = 3u;
   assert( num_vars <= 16 ); /* we support at most 16 variables for now */
 
   Cudd mgr( 0, 2 );
@@ -318,7 +321,7 @@ void example3()
     g[i] = mgr.bddVar();
 
   kitty::static_truth_table<num_vars> tt;
-  create_from_expression( tt, "<<a!bc>[de]e>" );
+  create_from_expression( tt, "(abc)" );
 
   auto pkrm_cover = kitty::esop_from_optimum_pkrm( tt );
   auto cover = pkrm_cover;
@@ -330,7 +333,7 @@ void example3()
   }
   std::cout << "} size = " << cover.size() << std::endl;
 
-  magic::add_neighbors( cover, num_vars, 10 ); // try: 22
+  // magic::add_neighbors( cover, num_vars, 0 ); // try: 22
 
   std::cout << "tt = " << tt << std::endl;
 
@@ -401,6 +404,23 @@ void example3()
         {
           optimized_cover.emplace_back( index_to_cube.at( i ) );
         }
+      }
+
+      /* verification */
+      kitty::static_truth_table<num_vars> tt_opt;
+      kitty::create_from_cubes( tt_opt, optimized_cover, true );
+      if ( tt_opt == tt )
+      {
+        std::cout << "SUCCESS" << std::endl;
+      }
+      else
+      {
+        print_cover( optimized_cover, num_vars );
+        print_cover( pkrm_cover, num_vars );
+        std::cout << "FAILED" << std::endl;
+        kitty::print_binary( tt ); std::cout << std::endl;
+        kitty::print_binary( tt_opt ); std::cout << std::endl;
+        continue;
       }
 
       auto const T_cost = easy::esop::T_count( optimized_cover, num_vars );
