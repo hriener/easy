@@ -1,5 +1,6 @@
 #include "util/util.h"
 #include "cudd/cudd.h"
+#include "cudd/cuddInt.h"
 #include "cplusplus/cuddObj.hh"
 #undef fail
 
@@ -7,6 +8,7 @@
 #include <kitty/static_truth_table.hpp>
 #include <kitty/print.hpp>
 #include <kitty/esop.hpp>
+#include <easy/esop/cost.hpp>
 #include <fmt/format.h>
 
 #include <iostream>
@@ -105,7 +107,177 @@ std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_
   return impls;
 }
 
+void add_neighbors( std::vector<kitty::cube>& cover, uint32_t num_vars, uint32_t limit )
+{
+  auto count_new_cubes = 0u;
+  for ( const auto& c : cover )
+  {
+    for ( auto i = 0u; i < num_vars; ++i )
+    {
+      kitty::cube copy( c );
+      copy.set_bit( i );
+      copy.set_mask( i );
+      if ( std::find( cover.begin(), cover.end(), copy ) == cover.end() )
+      {
+        cover.emplace_back( copy );
+        ++count_new_cubes;
+        if ( count_new_cubes >= limit )
+          return;
+      }
+
+      copy.clear_bit( i );
+      if ( std::find( cover.begin(), cover.end(), copy ) == cover.end() )
+      {
+        cover.emplace_back( copy );
+        ++count_new_cubes;
+        if ( count_new_cubes >= limit )
+          return;
+      }
+
+      copy.clear_mask( i );
+      if ( std::find( cover.begin(), cover.end(), copy ) == cover.end() )
+      {
+        cover.emplace_back( copy );
+        ++count_new_cubes;
+        if ( count_new_cubes >= limit )
+          return;
+      }
+    }
+  }
+}
+
 } /* magic */
+
+class ExtractAssignments
+{
+public:
+  explicit ExtractAssignments( Cudd const& mgr )
+    : mgr( mgr )
+  {}
+
+  std::vector<std::vector<int>> extract( BDD const& node )
+  {
+    int *list = ALLOC( int, mgr.getManager()->size );
+    if ( list == NULL )
+    {
+      mgr.getManager()->errorCode = CUDD_MEMORY_OUT;
+      assert( false );
+      std::cout << "ERROR: extracting assignments out-of-memory" << std::endl;
+      return {};
+    }
+
+    for ( auto i = 0; i < mgr.getManager()->size; ++i )
+      list[i] = 2;
+    extract_recur( node.getNode(), list );
+    FREE( list );
+
+    return get_assignments();
+  }
+
+  std::vector<std::vector<int>> get_assignments() const
+  {
+    return assignments;
+  }
+
+protected:
+  void extract_recur( DdNode* node, int *list )
+  {
+    DdNode *N = Cudd_Regular( node );
+    if ( cuddIsConstant( N ) )
+    {
+      if ( node != Cudd_Not( mgr.getManager()->one ) )
+      {
+        for ( auto i = 0; i < mgr.getManager()->size; ++i )
+        {
+          int v = list[i];
+          if ( v == 0 )
+            current_assignment.emplace_back( -i );
+          else if ( v == 1 )
+            current_assignment.emplace_back( i );
+        }
+        if ( current_assignment.size() > 0 )
+        {
+          assignments.emplace_back( current_assignment );
+          current_assignment.clear();
+        }
+      }
+    }
+    else
+    {
+      DdNode *Nv  = cuddT( N );
+      DdNode *Nnv = cuddE( N );
+      if ( Cudd_IsComplement( node ) )
+      {
+        Nv  = Cudd_Not( Nv );
+        Nnv = Cudd_Not( Nnv );
+      }
+      uint32_t index = N->index;
+      list[index] = 0;
+      extract_recur( Nnv, list );
+      list[index] = 1;
+      extract_recur( Nv, list );
+      list[index] = 2;
+    }
+  }
+
+protected:
+  Cudd const& mgr;
+  std::vector<int> current_assignment;
+  std::vector<std::vector<int>> assignments;
+}; /* ExtractAssignments */
+
+void PrintBDDRecur( Cudd const& mgr, DdNode* node, int *list )
+{
+  DdNode *N = Cudd_Regular( node );
+  if ( cuddIsConstant( N ) )
+  {
+    /* Terminal case: Print one cube based on the current
+       recursion path, unless we have reached the backgrounnd value
+       (ADDs) or the logical zero (BDDs). */
+    if ( node != Cudd_Not( mgr.getManager()->one ) )
+    {
+      for ( auto i = 0; i < mgr.getManager()->size; ++i )
+      {
+        int v = list[i];
+        if ( v == 0 )
+          std::cout << "0";
+        else if ( v == 1 )
+          std::cout << "1";
+        else
+          std::cout << "-";
+      }
+      std::cout << cuddV( node ) << "\n";
+    }
+  }
+  else
+  {
+    DdNode *Nv  = cuddT( N );
+    DdNode *Nnv = cuddE( N );
+    if ( Cudd_IsComplement( node ) )
+    {
+      Nv  = Cudd_Not( Nv );
+      Nnv = Cudd_Not( Nnv );
+    }
+    uint32_t index = N->index;
+    list[index] = 0;
+    PrintBDDRecur( mgr, Nnv, list );
+    list[index] = 1;
+    PrintBDDRecur( mgr, Nv, list );
+    list[index] = 2;
+  }
+}
+
+void print_cover( std::vector<kitty::cube> const& cubes, uint32_t num_vars )
+{
+  std::cout << "{ ";
+  for ( const auto& c : cubes )
+  {
+    c.print( num_vars );
+    std::cout << ' ';
+  }
+  std::cout << "} size = " << cubes.size() << " T-cost = " << easy::esop::T_count( cubes, num_vars ) << std::endl;
+}
+
 
 void example3()
 {
@@ -141,15 +313,15 @@ void example3()
   mgr.EnableGarbageCollection();
   // mgr.DisableGarbageCollection();
 
-  std::cout << pow3[5] << std::endl;
   std::vector<BDD> g( pow3[num_vars] );
   for ( uint64_t i = 0ul; i < g.size(); ++i )
     g[i] = mgr.bddVar();
 
   kitty::static_truth_table<num_vars> tt;
-  create_from_expression( tt, "<<abc>de>" );
+  create_from_expression( tt, "<<a!bc>[de]e>" );
 
-  const auto cover = kitty::esop_from_optimum_pkrm( tt );
+  auto pkrm_cover = kitty::esop_from_optimum_pkrm( tt );
+  auto cover = pkrm_cover;
   std::cout << "COVER: { ";
   for ( const auto& c : cover )
   {
@@ -157,6 +329,8 @@ void example3()
     std::cout << ' ';
   }
   std::cout << "} size = " << cover.size() << std::endl;
+
+  magic::add_neighbors( cover, num_vars, 10 ); // try: 22
 
   std::cout << "tt = " << tt << std::endl;
 
@@ -180,7 +354,6 @@ void example3()
     for ( const auto& subcube : magic::compute_implicants( minterm, num_vars ) )
     {
       // subcube.print( num_vars ); std::cout << ' ';
-
       if ( std::find( cover.begin(), cover.end(), subcube ) == cover.end() )
         continue;
 
@@ -200,7 +373,8 @@ void example3()
 
     helliwell *= term;
 
-    std::cout << "BDD size = " << mgr.ReadNodeCount() << std::endl;
+    // std::cout << "BDD size = " << mgr.ReadNodeCount() << std::endl;
+    std::cout << "BDD size = " << helliwell.nodeCount() << std::endl;
 
     ++minterm._bits;
   }
@@ -212,6 +386,45 @@ void example3()
   else
   {
     std::cout << "SATISFIABLE" << std::endl;
+    // helliwell.PrintMinterm();
+
+    uint64_t best_Tcount = std::numeric_limits<uint64_t>::max();
+
+    ExtractAssignments ext( mgr );
+    auto const assignments = ext.extract( helliwell );
+    for ( const auto& a : assignments )
+    {
+      std::vector<kitty::cube> optimized_cover;
+      for ( const auto& i : a )
+      {
+        if ( i > 0 )
+        {
+          optimized_cover.emplace_back( index_to_cube.at( i ) );
+        }
+      }
+
+      auto const T_cost = easy::esop::T_count( optimized_cover, num_vars );
+      // std::cout << "OPTIMIZED COVER: { ";
+      // for ( const auto& c : optimized_cover )
+      // {
+      //   c.print( num_vars );
+      //   std::cout << ' ';
+      // }
+      // std::cout << "} size = " << optimized_cover.size() << " T-cost = " << T_cost << std::endl;
+
+      if ( best_Tcount > T_cost )
+      {
+        best_Tcount = T_cost;
+      }
+    }
+
+    print_cover( pkrm_cover, num_vars );
+    print_cover( cover, num_vars );
+
+    std::cout << "T-cost of PKRM cover: " << easy::esop::T_count( pkrm_cover, num_vars ) << std::endl;
+    std::cout << "T-cost of opt. cover: " << best_Tcount << std::endl;
+
+#if 0
     uint32_t size = mgr.ReadSize();
     char *buffer = new char[size];
     helliwell.PickOneCube( buffer );
@@ -236,6 +449,7 @@ void example3()
       std::cout << ' ';
     }
     std::cout << "} size = " << optimized_cover.size() << std::endl;
+#endif
   }
 }
 
