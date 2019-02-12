@@ -194,9 +194,9 @@ protected:
         {
           int v = list[i];
           if ( v == 0 )
-            current_assignment.emplace_back( -i );
+            current_assignment.emplace_back( -(i+1) );
           else if ( v == 1 )
-            current_assignment.emplace_back( i );
+            current_assignment.emplace_back( (i+1) );
         }
         if ( current_assignment.size() > 0 )
         {
@@ -281,8 +281,8 @@ void print_cover( std::vector<kitty::cube> const& cubes, uint32_t num_vars )
   std::cout << "} size = " << cubes.size() << " T-cost = " << easy::esop::T_count( cubes, num_vars ) << std::endl;
 }
 
-
-void example3()
+template<int num_vars>
+void example3( std::string const& expr, uint32_t extra_cubes = 0 )
 {
   std::cout << "=========================[    Example #3    ]=========================" << std::endl;
 
@@ -307,33 +307,30 @@ void example3()
       43046721,
     }; // 3^n
 
-  const uint32_t num_vars = 3u;
+  // const uint32_t num_vars = 3u;
   assert( num_vars <= 16 ); /* we support at most 16 variables for now */
 
   Cudd mgr( 0, 2 );
   // mgr.AutodynEnable();
   mgr.AutodynDisable();
-  mgr.EnableGarbageCollection();
-  // mgr.DisableGarbageCollection();
+  // mgr.EnableGarbageCollection();
+  mgr.DisableGarbageCollection();
+  mgr.SetMaxReorderings( 0 );
 
   std::vector<BDD> g( pow3[num_vars] );
   for ( uint64_t i = 0ul; i < g.size(); ++i )
     g[i] = mgr.bddVar();
 
   kitty::static_truth_table<num_vars> tt;
-  create_from_expression( tt, "(abc)" );
+  create_from_expression( tt, expr );
 
   auto pkrm_cover = kitty::esop_from_optimum_pkrm( tt );
   auto cover = pkrm_cover;
-  std::cout << "COVER: { ";
-  for ( const auto& c : cover )
-  {
-    c.print( num_vars );
-    std::cout << ' ';
-  }
-  std::cout << "} size = " << cover.size() << std::endl;
+  std::cout << "COVER: ";
+  print_cover( cover, num_vars );
+  std::cout << std::endl;
 
-  // magic::add_neighbors( cover, num_vars, 0 ); // try: 22
+  magic::add_neighbors( cover, num_vars, extra_cubes );
 
   std::cout << "tt = " << tt << std::endl;
 
@@ -354,11 +351,17 @@ void example3()
     std::cout << fmt::format( "{:8d}. {:1d}\n", i, m );
 
     BDD term = mgr.bddOne() ^ ( m ? mgr.bddOne() : mgr.bddZero() );
+
+    auto count = 0;
+
+    // std::cout << "constraint: 1 XOR " << m << ' ';
     for ( const auto& subcube : magic::compute_implicants( minterm, num_vars ) )
     {
-      // subcube.print( num_vars ); std::cout << ' ';
       if ( std::find( cover.begin(), cover.end(), subcube ) == cover.end() )
         continue;
+
+      // std::cout << "XOR "; subcube.print( num_vars ); std::cout << ' ';
+      count++;
 
       auto it = cube_to_index.find( subcube );
       if ( it == cube_to_index.end() )
@@ -369,9 +372,11 @@ void example3()
       }
 
       // std::cout << "[i] index access: " << cube_to_index.at( subcube ) << std::endl;
-      BDD const& gv = g.at( cube_to_index.at( subcube ) );
+      auto const index = cube_to_index.at( subcube );
+      BDD const& gv = g.at( index );
       term ^= gv;
     }
+
     // std::cout << std::endl;
 
     helliwell *= term;
@@ -402,18 +407,14 @@ void example3()
       {
         if ( i > 0 )
         {
-          optimized_cover.emplace_back( index_to_cube.at( i ) );
+          optimized_cover.emplace_back( index_to_cube.at( i-1 ) );
         }
       }
 
       /* verification */
       kitty::static_truth_table<num_vars> tt_opt;
       kitty::create_from_cubes( tt_opt, optimized_cover, true );
-      if ( tt_opt == tt )
-      {
-        std::cout << "SUCCESS" << std::endl;
-      }
-      else
+      if ( tt_opt != tt )
       {
         print_cover( optimized_cover, num_vars );
         print_cover( pkrm_cover, num_vars );
@@ -424,13 +425,9 @@ void example3()
       }
 
       auto const T_cost = easy::esop::T_count( optimized_cover, num_vars );
-      // std::cout << "OPTIMIZED COVER: { ";
-      // for ( const auto& c : optimized_cover )
-      // {
-      //   c.print( num_vars );
-      //   std::cout << ' ';
-      // }
-      // std::cout << "} size = " << optimized_cover.size() << " T-cost = " << T_cost << std::endl;
+      // std::cout << "OPTIMIZED COVER: ";
+      // print_cover( optimized_cover, num_vars );
+      // std::cout << std::endl;
 
       if ( best_Tcount > T_cost )
       {
@@ -475,9 +472,8 @@ void example3()
 
 int main()
 {
-  example1();
-  example2();
-  example3();
-
+  // example1();
+  // example2();
+  example3<5>( "{abcde}", 34 );
   return 0;
 }
