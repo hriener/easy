@@ -467,5 +467,6 @@ int main()
     auto cover = example3<num_vars>( tt, i );
     print_cover( cover, num_vars );
   }
+  
   return 0;
 }

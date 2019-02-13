@@ -39,7 +39,7 @@ uint64_t pow3[] = {
   /* 15 */ 14348907,
   /* 16 */ 43046721,
 }; /* 3^n */
- 
+
 std::vector<uint32_t> compute_flips( uint32_t n )
 {
   auto const size = ( 1u << n );
@@ -90,6 +90,28 @@ std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_
   return impls;
 }
 
+std::vector<kitty::cube> compute_distance_one_cube( const kitty::cube& c, uint32_t num_vars )
+{
+  std::vector<kitty::cube> cubes;
+  for ( auto i = 0u; i < num_vars; ++i )
+  {
+    kitty::cube copy{c};
+    copy.set_mask( i );
+    copy.set_bit( i );
+    if ( c != copy )
+      cubes.emplace_back( copy );
+
+    copy.clear_bit( i );
+    if ( c != copy )
+      cubes.emplace_back( copy );
+
+    copy.clear_mask( i );
+    if ( c != copy )
+      cubes.emplace_back( copy );
+  }
+  return cubes;
+}
+
 class ExtractAssignments
 {
 public:
@@ -124,6 +146,9 @@ public:
 protected:
   void extract_recur( DdNode* node, int *list )
   {
+    if ( assignments.size() > 300 )
+      return;
+
     DdNode *N = Cudd_Regular( node );
     if ( cuddIsConstant( N ) )
     {
@@ -141,6 +166,8 @@ protected:
         {
           assignments.emplace_back( current_assignment );
           current_assignment.clear();
+          if ( assignments.size() > 300 )
+            return;
         }
       }
     }
@@ -228,6 +255,78 @@ void add_neighbors( std::vector<kitty::cube>& cover, uint32_t num_vars, uint32_t
 
 } /* magic */
 
+struct vertex
+{
+  explicit vertex( kitty::cube const& minterm )
+    : minterm( minterm )
+  {}
+
+  void add_adjacent( uint32_t const& a )
+  {
+    if ( std::find( adjacent.begin(), adjacent.end(), a ) == adjacent.end() )
+    {
+      adjacent.emplace_back( a );
+    }
+  }
+
+  kitty::cube minterm;
+  bool covered{false};
+  std::vector<uint32_t> adjacent;
+}; /* vertex */
+
+class graph
+{
+public:
+  explicit graph()
+  {}
+
+  uint64_t num_vertices() const
+  {
+    return vertices.size();
+  }
+
+  uint32_t get_vertex( kitty::cube const& minterm )
+  {
+    auto const it = cube_to_index.find( minterm );
+    if ( it != cube_to_index.end() )
+      return it->second;
+
+    auto const index = vertices.size();
+    vertices.emplace_back( vertex{minterm} );
+    cube_to_index.emplace( minterm, index );
+    return index;
+  }
+
+  void add_edge( kitty::cube const& a, kitty::cube const& b )
+  {
+    auto const index_a = cube_to_index.at( a );
+    auto const index_b = cube_to_index.at( b );
+    vertices.at( index_a ).add_adjacent( index_b );
+    vertices.at( index_b ).add_adjacent( index_a );
+  }
+
+  std::vector<kitty::cube> get_sorted_cubes() const
+  {
+    std::vector<vertex> vvv( vertices );
+    std::sort( vvv.begin(), vvv.end(),
+               [&]( vertex const& a, vertex const& b ){
+                 return ( ( a.adjacent.size() < b.adjacent.size() ) ||
+                          ( a.adjacent.size() == b.adjacent.size() && a.minterm._value < b.minterm._value ) ); } );
+    std::reverse( vvv.begin(), vvv.end() );
+
+    std::vector<kitty::cube> cubes;
+    for ( const auto& v : vvv )
+    {
+      cubes.emplace_back( v.minterm );
+    }
+    return cubes;
+  }
+
+protected:
+  std::vector<vertex> vertices;
+  std::unordered_map<kitty::cube, uint64_t, kitty::hash<kitty::cube>> cube_to_index;
+}; /* graph */
+
 template<typename TT>
 class esop_synthesizer
 {
@@ -237,13 +336,51 @@ public:
     , _tt( tt )
     , _num_vars( tt.num_vars() )
     , _cover( cover )
-    , _cubes( cover )
     , _last_result( cover )
   {
     /* no reordering */
     _mgr.AutodynDisable();
     /* no garbage collection */
     _mgr.DisableGarbageCollection();
+
+    /* add edges by following distannce-k subcubes */
+    std::vector<kitty::cube> cubes{_cover};
+    for ( auto i = 0u; i < 5u; ++i )
+    {
+      std::vector<kitty::cube> new_cubes;
+      for ( const auto& c : cubes )
+      {
+        _dg.get_vertex( c );
+        for ( const auto& subcube : magic::compute_distance_one_cube( c, _num_vars ) )
+        {
+          auto size = _dg.num_vertices();
+          _dg.get_vertex( subcube );
+          auto size_prime = _dg.num_vertices();
+          if ( size_prime > size )
+          {
+            _dg.add_edge( c, subcube );
+            new_cubes.emplace_back( subcube );
+          }
+        }
+      }
+      cubes = new_cubes;
+    }
+
+    /* create the remaining nodes */
+    kitty::cube minterm;
+    for ( uint32_t i = 0u; i < _num_vars; ++i )
+      minterm.set_mask( i );
+
+    for ( uint64_t i = 0ul; i < ( 1ul << _num_vars ); ++i )
+    {
+      for ( const auto& subcube : magic::compute_implicants( minterm, _num_vars ) )
+      {
+        _dg.get_vertex( subcube );
+      }
+      ++minterm._bits;
+    }
+
+    assert( _dg.num_vertices() == magic::pow3[_num_vars] );
   }
 
   std::vector<kitty::cube> run( uint32_t limit = 0 )
@@ -254,8 +391,9 @@ public:
       g[i] = _mgr.bddVar( i );
 
     /* add cubes by distance */
-    magic::add_neighbors( _cubes, _tt.num_vars(), limit );
-    
+    auto const sorted_cubes = _dg.get_sorted_cubes();
+    std::vector<kitty::cube> cubes( sorted_cubes.begin(), sorted_cubes.begin() + limit );
+
     /* construct the decision problem */
     kitty::cube minterm;
     for ( uint32_t i = 0u; i < _num_vars; ++i )
@@ -265,12 +403,12 @@ public:
     for ( uint64_t i = 0ul; i < ( 1ul << _num_vars ); ++i )
     {
       auto const m = kitty::get_bit( _tt, i );
-      
+
       BDD term = m ? _mgr.bddZero() : _mgr.bddOne(); /* == _mgr.bddOne() ^ ( m ? _mgr.bddOne() : _mgr.bddZero() ); */
       for ( const auto& subcube : magic::compute_implicants( minterm, _num_vars ) )
       {
         /* lazy abstraction */
-        if ( std::find( _cubes.begin(), _cubes.end(), subcube ) == _cubes.end() )
+        if ( std::find( cubes.begin(), cubes.end(), subcube ) == cubes.end() )
           continue;
 
         /* make constraints */
@@ -281,11 +419,11 @@ public:
           cube_to_index.emplace( subcube, id );
           index_to_cube.emplace( id, subcube );
         }
-        
+
         auto const index = cube_to_index.at( subcube );
         term ^= g.at( index );
 
-        if ( dp.nodeCount() > 300 )
+        if ( dp.nodeCount() > 5000 )
         {
           _terminated = true;
           return _last_result;
@@ -295,7 +433,7 @@ public:
       dp *= term;
       ++minterm._bits;
     }
-    
+
     /* extract 1-paths of the BDD */
     magic::ExtractAssignments aux( _mgr );
     auto const assignments = aux.extract( dp );
@@ -323,7 +461,7 @@ public:
   {
     return _terminated;
   }
-  
+
 protected:
   std::vector<kitty::cube> assignment_to_cover( std::vector<int> const& assignment ) const
   {
@@ -354,12 +492,14 @@ public:
 
   bool _terminated{false};
   std::vector<kitty::cube> _last_result;
-  
+
   uint32_t last_used_index{0u};
   std::unordered_map<kitty::cube, uint32_t, kitty::hash<kitty::cube>> cube_to_index;
   std::unordered_map<uint32_t, kitty::cube> index_to_cube;
 
   bool verify{true};
+
+  graph _dg;
 }; /* exact_synthesizer */
 
 template<typename TT>
@@ -370,11 +510,13 @@ std::vector<kitty::cube> esop_from_underapprox( TT const& tt )
   if ( tt == const0 )
     return {};
 
+  auto const pkrm = kitty::esop_from_optimum_pkrm( tt );
   std::vector<kitty::cube> cover;
-  esop_synthesizer<TT> synth( tt, kitty::esop_from_optimum_pkrm( tt ) );
+  esop_synthesizer<TT> synth( tt, pkrm );
+  auto i = 1;
   while ( !synth.terminated() )
   {
-    cover = synth.run( 1 );
+    cover = synth.run( i++ );
   }
   return cover;
 }
@@ -391,7 +533,7 @@ int main()
   {
     std::cout << "ERROR" << std::endl;
   }
-  
+
   return 0;
 }
 #endif
@@ -399,14 +541,14 @@ int main()
 int main()
 {
   int const num_vars = 4u;
-  
+
   /* truth table type in this example */
   using truth_table = kitty::static_truth_table<num_vars>;
 
   /* set to store all NPN representatives */
   std::unordered_set<truth_table, kitty::hash<truth_table>> classes;
   std::vector<truth_table> sorted_classes;
-    
+
   /* initialize truth table (constant 0) */
   truth_table tt;
 
@@ -415,7 +557,7 @@ int main()
     /* apply NPN canonization and add resulting representative to set */
     const auto res = kitty::exact_npn_canonization( tt );
     classes.insert( std::get<0>( res ) );
-    
+
     /* increment truth table */
     kitty::next_inplace( tt );
   } while ( !kitty::is_const0( tt ) );
@@ -427,7 +569,10 @@ int main()
   for ( const auto& c : classes )
     sorted_classes.emplace_back( c );
   std::sort( sorted_classes.begin(), sorted_classes.end() );
-  
+
+  auto total_size = 0u;
+  auto total_t_count = 0u;
+
   for ( const auto& c : sorted_classes )
   {
     kitty::print_binary( c );
@@ -436,7 +581,14 @@ int main()
     auto const cover = esop_from_underapprox( c );
     std::cout << cover.size() << ' ' ;
     std::cout << easy::esop::T_count( cover, num_vars ) << std::endl;
+
+    total_size += cover.size();
+    total_t_count += easy::esop::T_count( cover, num_vars );
   }
+
+  std::cout << fmt::format( "[i] avg size / avg T-count: {:5.2f} / {:5.2f}\n",
+                            ( double(total_size)/classes.size() ),
+                            ( double(total_t_count)/classes.size() ) );
 
   return 0;
 }
