@@ -113,40 +113,56 @@ void add_neighbors( std::vector<kitty::cube>& cover, uint32_t num_vars, uint32_t
   if ( count_new_cubes >= limit )
     return;
 
+  std::vector<kitty::cube> new_cubes{cover};
   for ( const auto& c : cover )
   {
+    // c.print( num_vars );
+    // std::cout << std::endl;
+
     for ( auto i = 0u; i < num_vars; ++i )
     {
       kitty::cube copy( c );
       copy.set_bit( i );
       copy.set_mask( i );
-      if ( std::find( cover.begin(), cover.end(), copy ) == cover.end() )
+
+      if ( std::find( new_cubes.begin(), new_cubes.end(), copy ) == new_cubes.end() )
       {
-        cover.emplace_back( copy );
+        new_cubes.emplace_back( copy );
         ++count_new_cubes;
         if ( count_new_cubes >= limit )
+        {
+          cover = new_cubes;
           return;
+        }
       }
 
       copy.clear_bit( i );
-      if ( std::find( cover.begin(), cover.end(), copy ) == cover.end() )
+      if ( std::find( new_cubes.begin(), new_cubes.end(), copy ) == new_cubes.end() )
       {
-        cover.emplace_back( copy );
+        new_cubes.emplace_back( copy );
         ++count_new_cubes;
         if ( count_new_cubes >= limit )
+        {
+          cover = new_cubes;
           return;
+        }
       }
 
       copy.clear_mask( i );
-      if ( std::find( cover.begin(), cover.end(), copy ) == cover.end() )
+      if ( std::find( new_cubes.begin(), new_cubes.end(), copy ) == new_cubes.end() )
       {
-        cover.emplace_back( copy );
+        new_cubes.emplace_back( copy );
         ++count_new_cubes;
         if ( count_new_cubes >= limit )
+        {
+          cover = new_cubes;
           return;
+        }
       }
     }
   }
+
+  cover = new_cubes;
 }
 
 } /* magic */
@@ -229,47 +245,6 @@ protected:
   std::vector<std::vector<int>> assignments;
 }; /* ExtractAssignments */
 
-void PrintBDDRecur( Cudd const& mgr, DdNode* node, int *list )
-{
-  DdNode *N = Cudd_Regular( node );
-  if ( cuddIsConstant( N ) )
-  {
-    /* Terminal case: Print one cube based on the current
-       recursion path, unless we have reached the backgrounnd value
-       (ADDs) or the logical zero (BDDs). */
-    if ( node != Cudd_Not( mgr.getManager()->one ) )
-    {
-      for ( auto i = 0; i < mgr.getManager()->size; ++i )
-      {
-        int v = list[i];
-        if ( v == 0 )
-          std::cout << "0";
-        else if ( v == 1 )
-          std::cout << "1";
-        else
-          std::cout << "-";
-      }
-      std::cout << cuddV( node ) << "\n";
-    }
-  }
-  else
-  {
-    DdNode *Nv  = cuddT( N );
-    DdNode *Nnv = cuddE( N );
-    if ( Cudd_IsComplement( node ) )
-    {
-      Nv  = Cudd_Not( Nv );
-      Nnv = Cudd_Not( Nnv );
-    }
-    uint32_t index = N->index;
-    list[index] = 0;
-    PrintBDDRecur( mgr, Nnv, list );
-    list[index] = 1;
-    PrintBDDRecur( mgr, Nv, list );
-    list[index] = 2;
-  }
-}
-
 void print_cover( std::vector<kitty::cube> const& cubes, uint32_t num_vars )
 {
   std::cout << "{ ";
@@ -310,29 +285,33 @@ void example3( std::string const& expr, uint32_t extra_cubes = 0 )
   // const uint32_t num_vars = 3u;
   assert( num_vars <= 16 ); /* we support at most 16 variables for now */
 
-  Cudd mgr( 0, 2 );
+  Cudd mgr( pow3[num_vars], 0 );
   // mgr.AutodynEnable();
   mgr.AutodynDisable();
   // mgr.EnableGarbageCollection();
   mgr.DisableGarbageCollection();
   mgr.SetMaxReorderings( 0 );
+  Cudd_ReduceHeap( mgr.getManager(), CUDD_REORDER_NONE, 0 );
 
   std::vector<BDD> g( pow3[num_vars] );
   for ( uint64_t i = 0ul; i < g.size(); ++i )
-    g[i] = mgr.bddVar();
+    g[i] = mgr.bddVar( i );
 
   kitty::static_truth_table<num_vars> tt;
   create_from_expression( tt, expr );
 
   auto pkrm_cover = kitty::esop_from_optimum_pkrm( tt );
   auto cover = pkrm_cover;
-  std::cout << "COVER: ";
-  print_cover( cover, num_vars );
-  std::cout << std::endl;
+  // std::cout << "COVER: ";
+  // print_cover( cover, num_vars );
+  // std::cout << std::endl;
 
   magic::add_neighbors( cover, num_vars, extra_cubes );
+  // std::cout << "NEIGHBORS: ";
+  // print_cover( cover, num_vars );
+  // std::cout << std::endl;
 
-  std::cout << "tt = " << tt << std::endl;
+  // std::cout << "tt = " << tt << std::endl;
 
   kitty::cube minterm;
   for ( uint32_t i = 0u; i < num_vars; ++i )
@@ -347,8 +326,8 @@ void example3( std::string const& expr, uint32_t extra_cubes = 0 )
   {
     auto const m = kitty::get_bit( tt, i );
 
-    minterm.print( num_vars );
-    std::cout << fmt::format( "{:8d}. {:1d}\n", i, m );
+    // minterm.print( num_vars );
+    // std::cout << fmt::format( "{:8d}. {:1d}\n", i, m );
 
     BDD term = mgr.bddOne() ^ ( m ? mgr.bddOne() : mgr.bddZero() );
 
@@ -382,18 +361,18 @@ void example3( std::string const& expr, uint32_t extra_cubes = 0 )
     helliwell *= term;
 
     // std::cout << "BDD size = " << mgr.ReadNodeCount() << std::endl;
-    std::cout << "BDD size = " << helliwell.nodeCount() << std::endl;
+    // std::cout << "BDD size = " << helliwell.nodeCount() << std::endl;
 
     ++minterm._bits;
   }
 
   if ( helliwell == mgr.bddZero() )
   {
-    std::cout << "UNSATISFIABLE" << std::endl;
+    // std::cout << "UNSATISFIABLE" << std::endl;
   }
   else
   {
-    std::cout << "SATISFIABLE" << std::endl;
+    // std::cout << "SATISFIABLE" << std::endl;
     // helliwell.PrintMinterm();
 
     uint64_t best_Tcount = std::numeric_limits<uint64_t>::max();
@@ -474,6 +453,6 @@ int main()
 {
   // example1();
   // example2();
-  example3<5>( "{abcde}", 34 );
+  example3<5>( "{abcde}", 30 );
   return 0;
 }
