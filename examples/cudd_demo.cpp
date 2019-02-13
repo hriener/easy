@@ -257,9 +257,9 @@ void print_cover( std::vector<kitty::cube> const& cubes, uint32_t num_vars )
 }
 
 template<int num_vars>
-void example3( std::string const& expr, uint32_t extra_cubes = 0 )
+std::vector<kitty::cube> example3( kitty::static_truth_table<num_vars> const& tt, uint32_t extra_cubes = 0 )
 {
-  std::cout << "=========================[    Example #3    ]=========================" << std::endl;
+  // std::cout << "=========================[    Example #3    ]=========================" << std::endl;
 
   uint64_t pow3[] =
     {
@@ -296,9 +296,6 @@ void example3( std::string const& expr, uint32_t extra_cubes = 0 )
   std::vector<BDD> g( pow3[num_vars] );
   for ( uint64_t i = 0ul; i < g.size(); ++i )
     g[i] = mgr.bddVar( i );
-
-  kitty::static_truth_table<num_vars> tt;
-  create_from_expression( tt, expr );
 
   auto pkrm_cover = kitty::esop_from_optimum_pkrm( tt );
   auto cover = pkrm_cover;
@@ -369,6 +366,7 @@ void example3( std::string const& expr, uint32_t extra_cubes = 0 )
   if ( helliwell == mgr.bddZero() )
   {
     // std::cout << "UNSATISFIABLE" << std::endl;
+    return pkrm_cover;
   }
   else
   {
@@ -376,7 +374,8 @@ void example3( std::string const& expr, uint32_t extra_cubes = 0 )
     // helliwell.PrintMinterm();
 
     uint64_t best_Tcount = std::numeric_limits<uint64_t>::max();
-
+    std::vector<kitty::cube> best_esop;
+    
     ExtractAssignments ext( mgr );
     auto const assignments = ext.extract( helliwell );
     for ( const auto& a : assignments )
@@ -411,15 +410,17 @@ void example3( std::string const& expr, uint32_t extra_cubes = 0 )
       if ( best_Tcount > T_cost )
       {
         best_Tcount = T_cost;
+        best_esop = optimized_cover;
       }
     }
 
-    print_cover( pkrm_cover, num_vars );
-    print_cover( cover, num_vars );
+    // print_cover( pkrm_cover, num_vars );
+    // print_cover( cover, num_vars );
 
-    std::cout << "T-cost of PKRM cover: " << easy::esop::T_count( pkrm_cover, num_vars ) << std::endl;
-    std::cout << "T-cost of opt. cover: " << best_Tcount << std::endl;
-
+    // std::cout << "T-cost of PKRM cover: " << easy::esop::T_count( pkrm_cover, num_vars ) << std::endl;
+    std::cout << "T-cost of opt. cover: " << best_Tcount << " (" << best_esop.size() << ")" << std::endl;
+    return best_esop;
+    
 #if 0
     uint32_t size = mgr.ReadSize();
     char *buffer = new char[size];
@@ -453,6 +454,18 @@ int main()
 {
   // example1();
   // example2();
-  example3<5>( "{abcde}", 30 );
+
+  const int num_vars = 8;
+  kitty::static_truth_table<num_vars> tt;
+  kitty::create_from_hex_string( tt, "fafeafffaffeaffffaffaffeaffeaffecafeaffffffeafffcaffaffeaffeaffe" );
+
+  auto pkrm = kitty::esop_from_optimum_pkrm( tt );
+  
+  for ( auto i = 0u; i < 50; ++i )
+  {
+    std::cout << i << ' ';
+    auto cover = example3<num_vars>( tt, i );
+    print_cover( cover, num_vars );
+  }
   return 0;
 }
