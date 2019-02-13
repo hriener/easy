@@ -6,6 +6,7 @@
 
 #include <kitty/kitty.hpp>
 #include <easy/esop/cost.hpp>
+#include <easy/io/write_esop.hpp>
 #include <fmt/format.h>
 
 #include <iostream>
@@ -146,9 +147,6 @@ public:
 protected:
   void extract_recur( DdNode* node, int *list )
   {
-    if ( assignments.size() > 300 )
-      return;
-
     DdNode *N = Cudd_Regular( node );
     if ( cuddIsConstant( N ) )
     {
@@ -166,8 +164,6 @@ protected:
         {
           assignments.emplace_back( current_assignment );
           current_assignment.clear();
-          if ( assignments.size() > 300 )
-            return;
         }
       }
     }
@@ -336,7 +332,8 @@ public:
     , _tt( tt )
     , _num_vars( tt.num_vars() )
     , _cover( cover )
-    , _last_result( cover )
+    , _best_cover( cover )
+    , _best_cost( easy::esop::T_count( cover, tt.num_vars() ) )
   {
     /* no reordering */
     _mgr.AutodynDisable();
@@ -381,6 +378,8 @@ public:
     }
 
     assert( _dg.num_vertices() == magic::pow3[_num_vars] );
+
+    _sorted_cubes = _dg.get_sorted_cubes();    
   }
 
   std::vector<kitty::cube> run( uint32_t limit = 0 )
@@ -391,8 +390,7 @@ public:
       g[i] = _mgr.bddVar( i );
 
     /* add cubes by distance */
-    auto const sorted_cubes = _dg.get_sorted_cubes();
-    std::vector<kitty::cube> cubes( sorted_cubes.begin(), sorted_cubes.begin() + limit );
+    std::vector<kitty::cube> cubes( _sorted_cubes.begin(), _sorted_cubes.begin() + limit );
 
     /* construct the decision problem */
     kitty::cube minterm;
@@ -423,10 +421,10 @@ public:
         auto const index = cube_to_index.at( subcube );
         term ^= g.at( index );
 
-        if ( dp.nodeCount() > 5000 )
+        if ( dp.nodeCount() > 100000 ) // 5000
         {
           _terminated = true;
-          return _last_result;
+          return _best_cover;
         }
       }
 
@@ -438,8 +436,6 @@ public:
     magic::ExtractAssignments aux( _mgr );
     auto const assignments = aux.extract( dp );
 
-    std::vector<kitty::cube> best_cover{_cover};
-    uint32_t best_cost = easy::esop::T_count( _cover, _num_vars );
     for ( const auto& a : assignments )
     {
       auto const cover_opt = assignment_to_cover( a );
@@ -447,14 +443,14 @@ public:
         return {}; // error
 
       auto const T_cost = easy::esop::T_count( cover_opt, _num_vars );
-      if ( T_cost < best_cost )
+      if ( T_cost < _best_cost )
       {
-        best_cover = cover_opt;
+        _best_cover = cover_opt;
+        _best_cost = T_cost;
       }
     }
 
-    _last_result = best_cover;
-    return best_cover;
+    return _best_cover;
   }
 
   bool terminated() const
@@ -488,10 +484,12 @@ public:
   TT const& _tt;
   uint32_t _num_vars;
   std::vector<kitty::cube> _cover;
-  std::vector<kitty::cube> _cubes;
+  std::vector<kitty::cube> _sorted_cubes;
 
   bool _terminated{false};
-  std::vector<kitty::cube> _last_result;
+
+  std::vector<kitty::cube> _best_cover;
+  uint32_t _best_cost;
 
   uint32_t last_used_index{0u};
   std::unordered_map<kitty::cube, uint32_t, kitty::hash<kitty::cube>> cube_to_index;
@@ -502,8 +500,40 @@ public:
   graph _dg;
 }; /* exact_synthesizer */
 
+class esop_reader : public lorina::pla_reader
+{
+public:
+  esop_reader( std::vector<kitty::cube>& esop, uint32_t& num_vars )
+      : _esop( esop ), _num_vars( num_vars )
+  {
+  }
+
+  void on_number_of_inputs( std::size_t i ) const override
+  {
+    _num_vars = i;
+  }
+
+  void on_term( const std::string& term, const std::string& out ) const override
+  {
+    assert( out == "1" );
+    _esop.emplace_back( term );
+  }
+
+  bool on_keyword( const std::string& keyword, const std::string& value ) const override
+  {
+    if ( keyword == "type" && value == "esop" )
+    {
+      return true;
+    }
+    return false;
+  }
+
+  std::vector<kitty::cube>& _esop;
+  unsigned& _num_vars;
+}; /* esop_reader */
+
 template<typename TT>
-std::vector<kitty::cube> esop_from_underapprox( TT const& tt )
+std::vector<kitty::cube> esop_from_exorcism( TT const& tt )
 {
   /* special case */
   TT const0;
@@ -511,33 +541,73 @@ std::vector<kitty::cube> esop_from_underapprox( TT const& tt )
     return {};
 
   auto const pkrm = kitty::esop_from_optimum_pkrm( tt );
-  std::vector<kitty::cube> cover;
-  esop_synthesizer<TT> synth( tt, pkrm );
-  auto i = 1;
-  while ( !synth.terminated() )
+  easy::write_esop( "/tmp/esop.pla", pkrm, tt.num_vars() );  
+  system( "abc -c \"&exorcism -q /tmp/esop.pla /tmp/esop_exorcised.pla\" &> /dev/null" );
+  
+  std::vector<kitty::cube> exorcised_pkrm;
+  uint32_t exorcised_num_vars;
+  auto result = lorina::read_pla( "/tmp/esop_exorcised.pla", esop_reader( exorcised_pkrm, exorcised_num_vars ) );
+  if ( result != lorina::return_code::success || exorcised_num_vars != tt.num_vars() )
   {
-    cover = synth.run( i++ );
+    std::cout << "FAILED" << std::endl;
   }
+  return exorcised_pkrm;
+}
+
+template<typename TT>
+std::vector<kitty::cube> esop_from_underapprox( TT const& tt )
+{
+  auto const exorcised_pkrm = esop_from_exorcism( tt );
+  
+  std::vector<kitty::cube> cover;
+  esop_synthesizer<TT> synth( tt, exorcised_pkrm );
+  auto i = 1;
+  auto not_improved = 0;
+  while ( !synth.terminated() && not_improved < 100 ) // 11
+  {
+    auto const new_cover = synth.run( i++ );
+    if ( easy::esop::T_count( cover, tt.num_vars() ) == easy::esop::T_count( new_cover, tt.num_vars() ) )
+      ++not_improved;
+    else
+      not_improved = 0;
+    cover = new_cover;
+
+    std::cout << "cover = " << i << ' ' << cover.size() << ' ' << easy::esop::T_count( cover, tt.num_vars() ) << std::endl;
+  }
+
   return cover;
 }
 
-#if 0
+#if 1
 int main()
 {
-  kitty::static_truth_table<5> tt1;
-  kitty::create_from_expression( tt1, "{abcde}" );
+  const int num_vars = 9;
+  kitty::static_truth_table<num_vars> tt1;
+  kitty::create_from_hex_string( tt1, "baafaffefafeaffefa0faceefffeaffefaffaff8fafeafeefa9faceefffeafeebaafaf9efcfeafcef70fa7eeeef7affffa7ffffefafea7eefaefaceefffeafee" );
+  // kitty::create_from_expression( tt1, "{abcde}" );
 
-  kitty::static_truth_table<5> tt2;
-  kitty::create_from_cubes( tt2, esop_from_underapprox( tt1 ), true );
+  auto cover = esop_from_underapprox( tt1 );
+  kitty::static_truth_table<num_vars> tt2;
+  kitty::create_from_cubes( tt2, cover, true );
   if ( tt1 != tt2 )
   {
     std::cout << "ERROR" << std::endl;
   }
 
+  auto exorcised = esop_from_exorcism( tt1 );
+
+  std::cout << fmt::format( "[i] EXACT size / T-count: {:5d} / {:5d}\n"
+                            "[i] EXORC size / T-count: {:5d} / {:5d}\n",
+                            ( cover.size() ),
+                            ( easy::esop::T_count( cover, tt1.num_vars() ) ),
+                            ( exorcised.size() ),
+                            ( easy::esop::T_count( exorcised, tt1.num_vars() ) ) );
+  
   return 0;
 }
 #endif
 
+#if 0
 int main()
 {
   int const num_vars = 4u;
@@ -572,23 +642,34 @@ int main()
 
   auto total_size = 0u;
   auto total_t_count = 0u;
-
+  auto total_prev_size = 0u;
+  auto total_prev_t_count = 0u;
   for ( const auto& c : sorted_classes )
   {
     kitty::print_binary( c );
     std::cout << ' ';
 
     auto const cover = esop_from_underapprox( c );
+    auto const exorcised_cover = esop_from_exorcism( c );
+
     std::cout << cover.size() << ' ' ;
-    std::cout << easy::esop::T_count( cover, num_vars ) << std::endl;
+    std::cout << easy::esop::T_count( cover, num_vars ) << ' ';
+
+    std::cout << exorcised_cover.size() << ' ' ;    
+    std::cout << easy::esop::T_count( exorcised_cover, num_vars ) << std::endl;
 
     total_size += cover.size();
     total_t_count += easy::esop::T_count( cover, num_vars );
+    total_prev_size += exorcised_cover.size();
+    total_prev_t_count += easy::esop::T_count( exorcised_cover, num_vars );
   }
 
-  std::cout << fmt::format( "[i] avg size / avg T-count: {:5.2f} / {:5.2f}\n",
+  std::cout << fmt::format( "[i] EXACT avg size / avg T-count: {:5.2f} / {:5.2f}\n"
+                            "[i] BASEL avg size / avg T-count: {:5.2f} / {:5.2f}\n",
                             ( double(total_size)/classes.size() ),
-                            ( double(total_t_count)/classes.size() ) );
-
+                            ( double(total_t_count)/classes.size() ),
+                            ( double(total_prev_size)/classes.size() ),
+                            ( double(total_prev_t_count)/classes.size() ) );
   return 0;
 }
+#endif
