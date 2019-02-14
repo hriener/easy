@@ -342,7 +342,7 @@ public:
 
     /* add edges by following distannce-k subcubes */
     std::vector<kitty::cube> cubes{_cover};
-    for ( auto i = 0u; i < 5u; ++i )
+    for ( auto i = 0u; i < 8u; ++i )
     {
       std::vector<kitty::cube> new_cubes;
       for ( const auto& c : cubes )
@@ -421,7 +421,7 @@ public:
         auto const index = cube_to_index.at( subcube );
         term ^= g.at( index );
 
-        if ( dp.nodeCount() > 100000 ) // 5000
+        if ( dp.nodeCount() > 30000 ) // 5000
         {
           _terminated = true;
           return _best_cover;
@@ -563,7 +563,7 @@ std::vector<kitty::cube> esop_from_underapprox( TT const& tt )
   esop_synthesizer<TT> synth( tt, exorcised_pkrm );
   auto i = 1;
   auto not_improved = 0;
-  while ( !synth.terminated() && not_improved < 100 ) // 11
+  while ( !synth.terminated() && not_improved < 3*exorcised_pkrm.size() ) // 11
   {
     auto const new_cover = synth.run( i++ );
     if ( easy::esop::T_count( cover, tt.num_vars() ) == easy::esop::T_count( new_cover, tt.num_vars() ) )
@@ -578,7 +578,7 @@ std::vector<kitty::cube> esop_from_underapprox( TT const& tt )
   return cover;
 }
 
-#if 1
+#if 0
 int main()
 {
   const int num_vars = 9;
@@ -607,7 +607,7 @@ int main()
 }
 #endif
 
-#if 0
+#if 1
 int main()
 {
   int const num_vars = 4u;
