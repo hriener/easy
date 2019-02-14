@@ -25,8 +25,9 @@
 
 #pragma once
 
-#include "esop/esop.hpp"
-#include "esop/exorlink.hpp"
+namespace easy
+{
+} // namespace easy
 
 // Local Variables:
 // c-basic-offset: 2
