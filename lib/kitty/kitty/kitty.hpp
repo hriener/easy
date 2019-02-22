@@ -1,5 +1,5 @@
-/* easy: C++ ESOP library
- * Copyright (C) 2018  EPFL
+/* kitty: C++ truth table library
+ * Copyright (C) 2017-2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -23,13 +23,43 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/*!
+  \file kitty.hpp
+  \brief Main header for kitty
+
+  \author Mathias Soeken
+*/
+
 #pragma once
 
-#include <easy/esop_from_pprm.hpp>
-#include <easy/esop_from_pkrm.hpp>
+#include "static_truth_table.hpp"
+#include "dynamic_truth_table.hpp"
 
-// Local Variables:
-// c-basic-offset: 2
-// eval: (c-set-offset 'substatement-open 0)
-// eval: (c-set-offset 'innamespace 0)
-// End:
+#include "affine.hpp"
+#include "algorithm.hpp"
+#include "bit_operations.hpp"
+#include "cnf.hpp"
+#include "constructors.hpp"
+#include "cube.hpp"
+#include "enumeration.hpp"
+#include "hash.hpp"
+#include "implicant.hpp"
+#include "isop.hpp"
+#include "npn.hpp"
+#include "operations.hpp"
+#include "operators.hpp"
+#include "permutation.hpp"
+#include "print.hpp"
+#include "properties.hpp"
+#include "spectral.hpp"
+#include "traits.hpp"
+
+/*
+         /\___/\
+        (  o o  )
+        /   *   \
+        \__\_/__/
+          /   \
+         / ___ \
+         \/___\/
+*/

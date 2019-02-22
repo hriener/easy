@@ -1,5 +1,5 @@
-/* easy: C++ ESOP library
- * Copyright (C) 2018  EPFL
+/* kitty: C++ truth table library
+ * Copyright (C) 2017-2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -23,13 +23,21 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/*!
+  \file traits.hpp
+  \brief Type traits for truth tables
+
+  \author Mathias Soeken
+*/
+
 #pragma once
 
-#include <easy/esop_from_pprm.hpp>
-#include <easy/esop_from_pkrm.hpp>
+#include <type_traits>
 
-// Local Variables:
-// c-basic-offset: 2
-// eval: (c-set-offset 'substatement-open 0)
-// eval: (c-set-offset 'innamespace 0)
-// End:
+namespace kitty
+{
+
+template<class TT>
+struct is_truth_table : std::false_type {};
+
+}
