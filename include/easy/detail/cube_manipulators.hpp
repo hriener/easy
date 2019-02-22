@@ -1,5 +1,5 @@
 /* easy: C++ ESOP library
- * Copyright (C) 2018  EPFL
+ * Copyright (C) 2018-2019  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -74,5 +74,5 @@ inline kitty::cube with_literal( const kitty::cube& c, uint8_t var_index, bool p
   copy.add_literal( var_index, polarity );
   return copy;
 }
-  
+
 } // namespace easy::detail
