@@ -24,7 +24,7 @@
  */
 
 /*!
-  \file constructors.hpp
+  \file esop_from_pkrm.hpp
   \brief Implements constructors for exclusive-or sum-of-product forms.
 
   \author Mathias Soeken
@@ -167,7 +167,7 @@ inline std::vector<kitty::cube> esop_from_optimum_pkrm( const TT& tt )
   return std::vector<kitty::cube>( cubes.begin(), cubes.end() );
 }
 
-} /* namespace easy::esop */
+} /* namespace easy */
 
 // Local Variables:
 // c-basic-offset: 2
