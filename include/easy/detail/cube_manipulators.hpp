@@ -29,6 +29,7 @@
 
   \author Mathias Soeken
   \author Winston Haaswijk
+  \author Heinz Riener
 */
 
 #pragma once
@@ -73,6 +74,123 @@ inline kitty::cube with_literal( const kitty::cube& c, uint8_t var_index, bool p
   auto copy = c;
   copy.add_literal( var_index, polarity );
   return copy;
+}
+
+/*! \brief Increment cube
+
+  Increment cube for tenerary counting, e.g.,
+    ...00 -> ...01 -> ...0- -> ...10 -> ...1- -> ...-0 -> ...-1 -> ...--
+
+  \param m Cube
+  \param num_vars Number of variables
+*/
+inline void incr_cube( kitty::cube& m, uint32_t num_vars )
+{
+  auto carry = false;
+  for ( auto i = 0u; i < num_vars; ++i )
+  {
+    auto const pos = num_vars - i - 1;
+    auto const mask = m.get_mask( pos );
+    auto const bit = m.get_bit( pos );
+    if ( mask )
+    {
+      if ( !bit )
+      {
+        m.set_bit( pos );
+      }
+      else
+      {
+        m.clear_bit( pos );
+        m.clear_mask( pos );
+      }
+
+      if ( !carry )
+      {
+        break;
+      }
+      else
+      {
+        carry = false;
+        continue;
+      }
+    }
+    else
+    {
+      assert( !mask && !bit && "unsupported case treated as don't care" );
+      m.clear_bit( pos );
+      m.set_mask( pos );
+      carry = true;
+      continue;
+    }
+  }
+}
+
+/*! \brief Greater equal for ternary cubes.
+
+  Compares two cubes bit-wise wrt. binary relation R = { (0,0), (1,1),
+  (-,-), (-,0), (-,1) }.
+
+  \param a Cube
+  \param b Cube
+  \param num_vars Number of variables
+*/
+inline bool compare( kitty::cube const& a, kitty::cube const& b, uint32_t num_vars )
+{
+  for ( auto i = 0u; i < num_vars; ++i )
+  {
+    auto const mask_a = a.get_mask( num_vars - i - 1 );
+    auto const mask_b = b.get_mask( num_vars - i - 1 );
+    if ( !mask_a )
+      continue;
+
+    auto const value_a = a.get_bit( num_vars - i - 1 );
+    auto const value_b = b.get_bit( num_vars - i - 1 );
+    if ( mask_b && ( value_a == value_b ) )
+      continue;
+
+    return false;
+  }
+  return true;
+}
+
+/*! \brief Combine partitioned cubes
+
+  Combines two partitioned cubes of (n-r)-variables and a r-variables
+  into an n-variable cube.
+
+  \param a Cube
+  \param b Cube
+  \param n Integer
+  \param r Integer
+  \param num_vars Number of variables
+*/
+inline kitty::cube combine( kitty::cube const& a, kitty::cube const& b, uint32_t n, uint32_t r )
+{
+  kitty::cube combined( a );
+  for ( auto i = 0u; i < r; ++i )
+  {
+    auto const v = b.get_bit( i );
+    auto const m = b.get_mask( i );
+    if ( m )
+    {
+      if ( v )
+      {
+        combined.set_bit( n - r + i );
+        combined.set_mask( n - r + i );
+      }
+      else
+      {
+        combined.clear_bit( n - r + i );
+        combined.set_mask( n - r + i );
+      }
+    }
+    else
+    {
+      combined.clear_bit( n - r + i );
+      combined.clear_mask( n - r + i );
+    }
+  }
+  return combined;
 }
 
 } // namespace easy::detail
