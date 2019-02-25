@@ -36,6 +36,7 @@
 
 #include <kitty/cube.hpp>
 #include <unordered_set>
+#include <cassert>
 
 namespace easy::detail
 {
