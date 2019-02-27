@@ -137,8 +137,8 @@ class vec {
     int cap;
 
     // Don't allow copying (error prone):
-    vec<T>&  operator = (vec<T>& other) { assert(0); return *this; }
-             vec        (vec<T>& other) { assert(0); }
+    vec<T>&  operator = (vec<T>& other) { (void)other; assert(0); return *this; }
+             vec        (vec<T>& other) { (void)other; assert(0); }
              
     // Helpers for calculating next capacity:
     static inline int  imax   (int x, int y) { int mask = (y-x) >> (sizeof(int)*8-1); return (x&mask) + (y&(~mask)); }
@@ -704,8 +704,8 @@ class Map {
     int        size;
 
     // Don't allow copying (error prone):
-    Map<K,D,H,E>&  operator = (Map<K,D,H,E>& other) { assert(0); }
-                   Map        (Map<K,D,H,E>& other) { assert(0); }
+    Map<K,D,H,E>&  operator = (Map<K,D,H,E>& other) { (void)other; assert(0); }
+                   Map        (Map<K,D,H,E>& other) { (void)other; assert(0); }
 
     bool    checkCap(int new_size) const { return new_size > cap; }
 
@@ -1057,8 +1057,8 @@ class vecThreads {
     int nbusers;
 
     // Don't allow copying (error prone):
-    vecThreads<T>&  operator = (vecThreads<T>& other) { assert(0); return *this; }
-             vecThreads        (vecThreads<T>& other) { assert(0); }
+    vecThreads<T>&  operator = (vecThreads<T>& other) { (void)other; assert(0); return *this; }
+             vecThreads        (vecThreads<T>& other) { (void)other; assert(0); }
              
     // Helpers for calculating next capacity:
     static inline int  imax   (int x, int y) { int mask = (y-x) >> (sizeof(int)*8-1); return (x&mask) + (y&(~mask)); }
@@ -3882,6 +3882,7 @@ inline bool Solver::satisfied(const Clause &c) const {
  *************************************************************/
 
 template <typename T>inline unsigned int Solver::computeLBD(const T &lits, int end) {
+    (void)end;
     int nblevels = 0;
     MYFLAG++;
 #ifdef INCREMENTAL
@@ -4865,7 +4866,7 @@ inline lbool Solver::search(int nof_conflicts) {
                 stats[nbUn]++;
                 parallelExportUnaryClause(learnt_clause[0]);
             } else {
-                CRef cr;
+                CRef cr;                
                 if(chanseokStrategy && nblevels <= coLBDBound) {
                     cr = ca.alloc(learnt_clause, false);
                     permanentLearnts.push(cr);
@@ -5041,7 +5042,8 @@ inline double Solver::luby(double y, int x) {
 
 inline lbool Solver::solve_(bool do_simp, bool turn_off_simp) // Parameters are useless in core but useful for SimpSolver....
 {
-
+    (void)do_simp;
+    (void)turn_off_simp;
     if(incremental && certifiedUNSAT) {
         printf("Can not use incremental and certified unsat in the same time\n");
         exit(-1);
@@ -5182,6 +5184,7 @@ inline void Solver::toDimacs(const char *file, const vec <Lit> &assumps) {
 
 
 inline void Solver::toDimacs(FILE *f, const vec <Lit> &assumps) {
+    (void) assumps;
     // Handle case when solver is in contradictory state:
     if(!ok) {
         fprintf(f, "p cnf 1 2\n1 0\n-1 0\n");
@@ -5307,10 +5310,12 @@ inline bool Solver::parallelImportClauses() {
 
 
 inline void Solver::parallelExportUnaryClause(Lit p) {
+  (void)p;
 }
 
 
 inline void Solver::parallelExportClauseDuringSearch(Clause &c) {
+  (void)c;
 }
 
 inline bool Solver::parallelJobIsFinished() {
@@ -5320,5 +5325,7 @@ inline bool Solver::parallelJobIsFinished() {
 
 
 inline void Solver::parallelImportClauseDuringConflictAnalysis(Clause &c, CRef confl) {
+  (void)c;
+  (void)confl;
 }
 } // using namespace Glucose
