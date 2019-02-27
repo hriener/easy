@@ -27,6 +27,7 @@
 
 #include <easy/esop_from_pprm.hpp>
 #include <easy/esop_from_pkrm.hpp>
+#include <easy/esop_from_rcf.hpp>
 
 // Local Variables:
 // c-basic-offset: 2
