@@ -4079,7 +4079,7 @@ inline void Solver::analyze(CRef confl, vec <Lit> &out_learnt, vec <Lit> &select
                     // seems to be interesting : keep it for the next round
                     c.setCanBeDel(false);
                 }
-                if(chanseokStrategy && nblevels <= coLBDBound) {
+                if(chanseokStrategy && int(nblevels) <= coLBDBound) {
                     c.nolearnt();
                     learnts.remove(confl);
                     permanentLearnts.push(confl);
@@ -4721,7 +4721,7 @@ inline void Solver::adaptSolver() {
         int i, j;
         for(i = j = 0; i < learnts.size(); i++) {
             Clause &c = ca[learnts[i]];
-            if(c.lbd() <= coLBDBound) {
+            if(int(c.lbd()) <= coLBDBound) {
                 permanentLearnts.push(learnts[i]);
                 moved++;
             }
@@ -4867,7 +4867,7 @@ inline lbool Solver::search(int nof_conflicts) {
                 parallelExportUnaryClause(learnt_clause[0]);
             } else {
                 CRef cr;                
-                if(chanseokStrategy && nblevels <= coLBDBound) {
+                if(chanseokStrategy && int(nblevels) <= coLBDBound) {
                     cr = ca.alloc(learnt_clause, false);
                     permanentLearnts.push(cr);
                     stats[nbPermanentLearnts]++;
