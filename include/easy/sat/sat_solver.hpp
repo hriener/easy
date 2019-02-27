@@ -352,6 +352,8 @@ public:
   /*! \brief Add a clause to the SAT-solver */
   void add_clause( std::vector<int> const& clause )
   {
+    assert( !clause.empty() && "clause must not be empty" );
+
     /* update state */
     _state = state::dirty;
 
