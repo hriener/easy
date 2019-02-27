@@ -87,12 +87,12 @@ inline kitty::cube with_literal( const kitty::cube& c, uint8_t var_index, bool p
 */
 inline void incr_cube( kitty::cube& m, uint32_t num_vars )
 {
-  auto carry = false;
   for ( auto i = 0u; i < num_vars; ++i )
   {
     auto const pos = num_vars - i - 1;
-    auto const mask = m.get_mask( pos );
     auto const bit = m.get_bit( pos );
+    auto const mask = m.get_mask( pos );
+
     if ( mask )
     {
       if ( !bit )
@@ -104,23 +104,13 @@ inline void incr_cube( kitty::cube& m, uint32_t num_vars )
         m.clear_bit( pos );
         m.clear_mask( pos );
       }
-
-      if ( !carry )
-      {
-        break;
-      }
-      else
-      {
-        carry = false;
-        continue;
-      }
+      break;
     }
     else
     {
       assert( !mask && !bit && "unsupported case treated as don't care" );
       m.clear_bit( pos );
       m.set_mask( pos );
-      carry = true;
       continue;
     }
   }
