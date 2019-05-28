@@ -63,4 +63,4 @@ matrix:
     before_install:
       - brew update
       - brew install gcc@8
-    env: COMPILER=/usr/local/opt/gcc@7/bin/g++-8
+    env: COMPILER=/usr/local/opt/gcc@8/bin/g++-8
