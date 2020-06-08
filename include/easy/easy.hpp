@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "algorithms/lp.hpp"
 #include "algorithms/kronecker_decomposition.hpp"
 #include "esop/esop.hpp"
 #include "esop/exorlink.hpp"
