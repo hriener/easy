@@ -4,8 +4,6 @@ Change Log
 v0.1 (Not yet released)
 -----------------------
 
-* ``easy_shell``: ``exorlink`` (distance 2 to 6), ``read_pla``, ``write_pla``, ``ec``, ``sort``, ``cover``, ``function``, ``synth``.
-* ``esop_storage_reader``.
-* ``write_esop``.
-
-* Initial release
+* Algorithms:
+    - Kronecker decomposition (`kronecker_decomposition`)
+    - LP characteristic vector (`lp_characteristic_vector`)
