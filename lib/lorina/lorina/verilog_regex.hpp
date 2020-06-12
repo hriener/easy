@@ -1,5 +1,5 @@
-/* easy: C++ ESOP library
- * Copyright (C) 2017-2018  EPFL
+/* lorina: C++ parsing library
+ * Copyright (C) 2018  EPFL
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -23,55 +23,28 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/*!
+  \file verilog_regex.hpp
+  \brief Regular expressions used by the Verilog parser.
+
+  \author Heinz Riener
+*/
+
 #pragma once
 
-#include <easy/esop/esop.hpp>
-#include <lorina/pla.hpp>
+#include <regex>
 
-namespace easy
+namespace lorina
 {
 
-/*! \brief lorina reader callback for PLA files
- *
- * Reads a PLA file and stores the terms as esop_t.
- *
- */
-class esop_storage_reader : public lorina::pla_reader
+namespace verilog_regex
 {
-public:
-  esop_storage_reader( esop::esop_t& esop, unsigned& num_vars )
-      : _esop( esop ), _num_vars( num_vars )
-  {
-  }
+static std::regex immediate_assign( R"(^(~)?\(?([[:alnum:]\[\]_']+)\)?$)" );
+static std::regex binary_expression( R"(^(~)?([[:alnum:]\[\]_']+)([&|^])(~)?([[:alnum:]\[\]_']+)$)" );
+static std::regex ternary_expression( R"(^(~)?([[:alnum:]\[\]_']+)([&|^])(~)?([[:alnum:]\[\]_']+)([&|^])(~)?([[:alnum:]\[\]_']+)$)" );
+static std::regex maj3_expression( R"(^\((~)?([[:alnum:]\[\]_']+)&(~)?([[:alnum:]\[\]_']+)\)\|\((~)?([[:alnum:]\[\]_']+)&(~)?([[:alnum:]\[\]_']+)\)\|\((~)?([[:alnum:]\[\]_']+)&(~)?([[:alnum:]\[\]_']+)\)$)" );
+static std::regex negated_binary_expression( R"(^~\((~)?([[:alnum:]\[\]_']+)([&|^])(~)?([[:alnum:]\[\]_']+)\)$)" );
+static std::regex const_size_range( R"(^(\d+):(\d+)$)" );
+} // namespace verilog_regex
 
-  void on_number_of_inputs( uint64_t i ) const override
-  {
-    _num_vars = i;
-  }
-
-  void on_term( const std::string& term, const std::string& out ) const override
-  {
-    assert( out == "1" );
-    _esop.emplace_back( term );
-  }
-
-  bool on_keyword( const std::string& keyword, const std::string& value ) const override
-  {
-    if ( keyword == "type" && value == "esop" )
-    {
-      return true;
-    }
-    return false;
-  }
-
-  esop::esop_t& _esop;
-  unsigned& _num_vars;
-}; /* esop_storage_reader */
-
-} /* namespace easy */
-
-// Local Variables:
-// c-basic-offset: 2
-// eval: (c-set-offset 'substatement-open 0)
-// eval: (c-set-offset 'innamespace 0)
-// End:
+} // namespace lorina
