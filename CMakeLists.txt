@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Options
 option(EASY_EXAMPLES "Build examples"   ON)
-option(EASY_BENCH    "Build benchmarks" OFF)
 option(EASY_TEST     "Build tests"      OFF)
 
 if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
@@ -40,10 +39,6 @@ target_include_directories(easy INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 if(EASY_EXAMPLES)
   add_subdirectory(examples)
-endif()
-
-if(EASY_BENCH)
-  add_subdirectory(bench)
 endif()
 
 if(EASY_TEST)
