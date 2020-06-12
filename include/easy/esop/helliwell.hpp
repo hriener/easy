@@ -31,6 +31,7 @@
 
 #include <map>
 #include <unordered_map>
+#include <cstdlib>
 
 namespace easy::esop
 {
@@ -38,7 +39,23 @@ namespace easy::esop
 namespace detail
 {
 
-#if 0
+inline int32_t get_lowest_set_bit( int32_t num )
+{
+#if WIN32
+  uint32_t mask = 1;
+  for ( int32_t counter = 1; counter <= 32; counter++, mask <<= 1 )
+  {
+    if ( num & mask )
+    {
+      return counter;
+    }
+  }
+  return 0;
+#else
+  return ffs( num );
+#endif
+}
+
 std::vector<uint32_t> compute_flips( uint32_t n )
 {
   auto const size = ( 1u << n );
@@ -50,7 +67,7 @@ std::vector<uint32_t> compute_flips( uint32_t n )
   for ( auto i = 1u; i <= total_flips; ++i )
   {
     gray_number = i ^ ( i >> 1 );
-    flip_vec[total_flips-i] = ffs( temp ^ gray_number ) - 1u;
+    flip_vec[total_flips-i] = get_lowest_set_bit( temp ^ gray_number ) - 1u;
     temp = gray_number;
   }
 
@@ -88,7 +105,6 @@ std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_
 
   return impls;
 }
-#endif
 
 struct helliwell_decision_variables
 {
@@ -154,7 +170,6 @@ protected:
 template<typename TT>
 void derive_xor_clauses( std::vector<std::vector<int>>& xor_clauses, helliwell_decision_variables& g, TT const& bits, TT const& care )
 {
-#if 0
   assert( bits.num_vars() == care.num_vars() );
 
   kitty::cube minterm;
@@ -182,7 +197,6 @@ void derive_xor_clauses( std::vector<std::vector<int>>& xor_clauses, helliwell_d
 
     ++minterm._bits;
   } while ( minterm._bits < ( 1u << bits.num_vars() ) );
-#endif
 }
 
 esop_t esop_from_model( sat2::model const& m, helliwell_decision_variables const& g )
