@@ -44,7 +44,7 @@ public:
   {
   }
 
-  void on_number_of_inputs( std::size_t i ) const override
+  void on_number_of_inputs( uint64_t i ) const override
   {
     _num_vars = i;
   }

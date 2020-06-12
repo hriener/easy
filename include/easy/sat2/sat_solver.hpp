@@ -32,23 +32,10 @@
 
 #pragma once
 
-#ifdef __clang__ // CLANG compiler
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#pragma clang diagnostic ignored "-Wsign-compare"
-#include <glucose/glucose.hpp>
-#pragma clang diagnostic pop
-#elif __GNUC__ // GCC compiler
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#include <glucose/glucose.hpp>
-#pragma GCC diagnostic pop
-#else // other compilers
-#include <glucose/glucose.hpp>
-#endif
-
 #include <easy/utils/dynamic_bitset.hpp>
+
+#include <bill/bill.hpp>
+
 #include <algorithm>
 #include <iostream>
 #include <memory>
@@ -347,17 +334,17 @@ public:
     }
 
     auto const result = _glucose->solveLimited( ass );
-    if ( result == l_Undef || int32_t(_glucose->conflicts) >= _ps.budget )
+    if ( result == Glucose::l_Undef || int32_t(_glucose->conflicts) >= _ps.budget )
     {
       return ( _state = state::dirty );
     }
-    else if ( result == l_True )
+    else if ( result == Glucose::l_True )
     {
       return ( _state = state::sat );
     }
     else
     {
-      assert( result == l_False );
+      assert( result == Glucose::l_False );
       return ( _state = state::unsat );
     }
   }
@@ -391,7 +378,7 @@ public:
     utils::dynamic_bitset<> m;
     for ( auto i = 0u; i < size; ++i )
     {
-      m.push_back( _glucose->model[i] == l_True );
+      m.push_back( _glucose->model[i] == Glucose::l_True );
     }
     return model( m );
   }

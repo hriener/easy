@@ -1,9 +1,0 @@
-[submodule "ext/glucose-syrup-4.1"]
-	path = lib/glucose-syrup-4.1
-	url = https://github.com/hriener/glucose-syrup-4.1.git
-[submodule "ext/breakid-2.3"]
-	path = lib/breakid-2.3
-	url = https://github.com/hriener/breakid-2.3
-[submodule "ext/args/args"]
-	path = lib/args/args
-	url = https://github.com/Taywee/args.git
