@@ -4,8 +4,9 @@ project(easy LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # Options
-option(EASY_EXAMPLES "Build examples"   ON)
-option(EASY_TEST     "Build tests"      OFF)
+option(EASY_EXAMPLES    "Build examples"    ON)
+option(EASY_TEST        "Build tests"       OFF)
+option(EASY_EXPERIMENTS "Build experiments" OFF)
 
 if(UNIX)
   # show quite some warnings (but remove some intentionally)
@@ -53,4 +54,8 @@ endif()
 
 if(EASY_TEST)
   add_subdirectory(test)
+endif()
+
+if(EASY_EXPERIMENTS)
+  add_subdirectory(experiments)
 endif()
