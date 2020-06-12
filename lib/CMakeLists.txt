@@ -4,14 +4,14 @@ if (NOT TARGET fmt)
   target_compile_definitions(fmt INTERFACE FMT_HEADER_ONLY)
 endif()
 
-if (NOT TARGET args)
-  add_library(args INTERFACE)
-  target_include_directories(args INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/args)
-endif()
-
 if (NOT TARGET json)
   add_library(json INTERFACE)
   target_include_directories(json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/json/include)
+endif()
+
+if (NOT TARGET bill)
+  add_library(bill INTERFACE)
+  target_include_directories(bill INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/bill/include)
 endif()
 
 if (NOT TARGET kitty)

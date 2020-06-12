@@ -14,6 +14,7 @@ if((CMAKE_CXX_COMPILER_ID MATCHES GNU) OR (CMAKE_CXX_COMPILER_ID MATCHES Clang))
 endif()
 
 add_subdirectory(lib)
+add_subdirectory(include)
 
 # external libraries
 if (EXISTS ${CMAKE_SOURCE_DIR}/lib/cryptominisat)
@@ -33,9 +34,6 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/lib/breakid-2.3)
   include_directories(lib/breakid-2.3/breakid/src/)
   list(APPEND EXTERNAL_LIBRARIES breakid-lib-static)
 endif()
-
-add_library(easy INTERFACE)
-target_include_directories(easy INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 if(EASY_EXAMPLES)
   add_subdirectory(examples)
