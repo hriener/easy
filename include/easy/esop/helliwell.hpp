@@ -38,6 +38,7 @@ namespace easy::esop
 namespace detail
 {
 
+#if 0
 std::vector<uint32_t> compute_flips( uint32_t n )
 {
   auto const size = ( 1u << n );
@@ -87,6 +88,7 @@ std::vector<kitty::cube> compute_implicants( const kitty::cube& c, uint32_t num_
 
   return impls;
 }
+#endif
 
 struct helliwell_decision_variables
 {
@@ -152,6 +154,7 @@ protected:
 template<typename TT>
 void derive_xor_clauses( std::vector<std::vector<int>>& xor_clauses, helliwell_decision_variables& g, TT const& bits, TT const& care )
 {
+#if 0
   assert( bits.num_vars() == care.num_vars() );
 
   kitty::cube minterm;
@@ -179,6 +182,7 @@ void derive_xor_clauses( std::vector<std::vector<int>>& xor_clauses, helliwell_d
 
     ++minterm._bits;
   } while ( minterm._bits < ( 1u << bits.num_vars() ) );
+#endif
 }
 
 esop_t esop_from_model( sat2::model const& m, helliwell_decision_variables const& g )
