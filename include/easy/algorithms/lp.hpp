@@ -247,12 +247,12 @@ inline std::vector<uint8_t> create_extended_weight_table( extended_truth_table c
    \return LP characteristic vector
  */
 template<typename TT>
-std::<uint8_t> lp_characteristic_vector( TT const& tt )
+std::vector<uint8_t> lp_characteristic_vector( TT const& tt )
 {
   // static_assert( is_complete_truth_table<TT>::value, "Can only be applied on complete truth tables." );
 
   auto const ett = detail::create_extended_truth_table( tt );
   auto ewt = detail::create_extended_weight_table( ett );
   std::sort( std::begin( ewt ), std::end( ewt ) );
-  return etw;
+  return ewt;
 }
