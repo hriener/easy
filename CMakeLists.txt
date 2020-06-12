@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.5.1)
 project(easy LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Options
 option(EASY_EXAMPLES    "Build examples"    ON)
 option(EASY_TEST        "Build tests"       OFF)
 option(EASY_EXPERIMENTS "Build experiments" OFF)
+option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" OFF)
 
 if(UNIX)
   # show quite some warnings (but remove some intentionally)
@@ -26,8 +28,8 @@ if(MSVC)
   add_compile_options(/EHsc /bigobj)
 endif()
 
-add_subdirectory(lib)
 add_subdirectory(include)
+add_subdirectory(lib)
 
 # external libraries
 if (EXISTS ${CMAKE_SOURCE_DIR}/lib/cryptominisat)
