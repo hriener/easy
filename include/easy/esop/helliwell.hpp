@@ -41,7 +41,7 @@ namespace detail
 
 inline int32_t get_lowest_set_bit( int32_t num )
 {
-#if WIN32
+#if defined(WIN32)
   uint32_t mask = 1;
   for ( int32_t counter = 1; counter <= 32; counter++, mask <<= 1 )
   {

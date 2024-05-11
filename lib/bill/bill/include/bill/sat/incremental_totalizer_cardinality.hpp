@@ -34,20 +34,20 @@ inline void create_totalizer_internal(Solver& solver, std::vector<std::vector<li
 	/* i = 0 */
 	uint32_t kmin = std::min(rhs, uint32_t(bv.size()));
 	for (auto j = 0u; j < kmin; ++j) {
-		dest.emplace_back(std::vector{~bv[j], ov[j]});
+		dest.emplace_back(std::vector<lit_type>{~bv[j], ov[j]});
 	}
 
 	/* j = 0 */
 	kmin = std::min(rhs, uint32_t(av.size()));
 	for (auto i = 0u; i < kmin; ++i) {
-		dest.emplace_back(std::vector{~av[i], ov[i]});
+		dest.emplace_back(std::vector<lit_type>{~av[i], ov[i]});
 	}
 
 	/* i, j > 0 */
 	for (auto i = 1u; i <= kmin; ++i) {
 		auto const min_j = std::min(rhs - i, uint32_t(bv.size()));
 		for (auto j = 1u; j <= min_j; ++j) {
-			dest.emplace_back(std::vector{~av[i - 1], ~bv[j - 1], ov[i + j - 1]});
+			dest.emplace_back(std::vector<lit_type>{~av[i - 1], ~bv[j - 1], ov[i + j - 1]});
 		}
 	}
 }
@@ -66,13 +66,13 @@ inline void increase_totalizer_internal(Solver& solver, std::vector<std::vector<
 	/* i = 0 */
 	uint32_t const max_j = std::min(rhs, uint32_t(bv.size()));
 	for (auto j = last; j < max_j; ++j) {
-		dest.emplace_back(std::vector{~bv[j], ov[j]});
+		dest.emplace_back(std::vector<lit_type>{~bv[j], ov[j]});
 	}
 
 	/* j = 0 */
 	uint32_t const max_i = std::min(rhs, uint32_t(av.size()));
 	for (auto i = last; i < max_i; ++i) {
-		dest.emplace_back(std::vector{~av[i], ov[i]});
+		dest.emplace_back(std::vector<lit_type>{~av[i], ov[i]});
 	}
 
 	/* i, j > 0 */
@@ -80,7 +80,7 @@ inline void increase_totalizer_internal(Solver& solver, std::vector<std::vector<
 		auto const max_j = std::min(rhs - i, uint32_t(bv.size()));
 		auto const min_j = uint32_t(std::max(int(last) - int(i) + 1, 1));
 		for (auto j = min_j; j <= max_j; ++j) {
-			dest.emplace_back(std::vector{~av[i - 1], ~bv[j - 1], ov[i + j - 1]});
+			dest.emplace_back(std::vector<lit_type>{~av[i - 1], ~bv[j - 1], ov[i + j - 1]});
 		}
 	}
 }
