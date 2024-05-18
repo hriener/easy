@@ -9,42 +9,6 @@ on:
     - master
 
 jobs:
-  build-gcc7:
-    runs-on: ubuntu-latest
-    name: GNU GCC 7
-    
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        submodules: true
-    - name: Build easy
-      run: |
-        mkdir build
-        cd build
-        cmake -DCMAKE_CXX_COMPILER=g++-7 -DEASY_TEST=ON ..
-        make run_tests
-    - name: Run tests
-      run: |
-        cd build
-        ./test/run_tests "~[quality]"
-  build-gcc8:
-    runs-on: ubuntu-latest
-    name: GNU GCC 8
-    
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        submodules: true
-    - name: Build easy
-      run: |
-        mkdir build
-        cd build
-        cmake -DCMAKE_CXX_COMPILER=g++-8 -DEASY_TEST=ON ..
-        make run_tests
-    - name: Run tests
-      run: |
-        cd build
-        ./test/run_tests "~[quality]"
   build-gcc9:
     runs-on: ubuntu-latest
     name: GNU GCC 9
@@ -53,7 +17,7 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Build easy
+    - name: Build mockturtle
       run: |
         mkdir build
         cd build
@@ -63,37 +27,73 @@ jobs:
       run: |
         cd build
         ./test/run_tests "~[quality]"
-  build-clang8:
+  build-gcc10:
     runs-on: ubuntu-latest
-    name: Clang 8
+    name: GNU GCC 10
     
     steps:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Build easy
+    - name: Build mockturtle
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_CXX_COMPILER=clang++-8 -DEASY_TEST=ON ..
+        cmake -DCMAKE_CXX_COMPILER=g++-10 -DEASY_TEST=ON ..
         make run_tests
     - name: Run tests
       run: |
         cd build
         ./test/run_tests "~[quality]"
-  build-clang9:
+  build-gcc12:
     runs-on: ubuntu-latest
-    name: Clang 9
+    name: GNU GCC 12
     
     steps:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Build easy
+    - name: Build mockturtle
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_CXX_COMPILER=clang++-9 -DEASY_TEST=ON ..
+        cmake -DCMAKE_CXX_COMPILER=g++-12 -DEASY_TEST=ON ..
+        make run_tests
+    - name: Run tests
+      run: |
+        cd build
+        ./test/run_tests "~[quality]"
+  build-clang11:
+    runs-on: ubuntu-20.04
+    name: Clang 11
+    
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: Build mockturtle
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_CXX_COMPILER=clang++-11 -DEASY_TEST=ON ..
+        make run_tests
+    - name: Run tests
+      run: |
+        cd build
+        ./test/run_tests "~[quality]"
+  build-clang13:
+    runs-on: ubuntu-latest
+    name: Clang 13
+    
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: Build mockturtle
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_CXX_COMPILER=clang++-13 -DEASY_TEST=ON ..
         make run_tests
     - name: Run tests
       run: |
